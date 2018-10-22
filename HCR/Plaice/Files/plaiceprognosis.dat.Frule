@@ -1,0 +1,17 @@
+# Data for prognosis
+10      # 10=HCR
+0.13    # WeightCV
+0.5     # WeightCorr
+0.25    # AssessmentCV
+0.45    # AssessmentCorr
+0.4     # RecrCorr not active when estimated
+5      # Btrigger
+10     # MaxChange no limit on interannual changes with this high value. 
+10     # Est Assyear ssb
+3       # Selection in prognosis mean of last 3 years.
+3       # Meanwtyears
+0	# IceFishYear
+0	# LastYearsTacRatio
+2        # Number of years with catch/F given
+7.200    # Catch 2017
+0.22     # FishingMortality

@@ -1,0 +1,43 @@
+output  some ideas
+
+
+
+likelihood_mcmc Likelihood seldom used.
+recruitment_mcmc  not needed n1 used instead.
+initialpopulation_mcmc  Seldom used.
+estimatedselction_mcmc  not used
+parameter_mcmc
+survey_power not used
+survey_q seldom used.
+catch_mcmc
+refbio_mcmc (refbio2)
+n3_mcmc
+assessmenterror_mcmc
+n1_mcmc
+f_mcmc
+ssb_mcmc
+ssbwerr.mcmc
+relssb_mcmc
+
+In  long we do also some
+
+
+Fyrir breytu
+
+Number of variables
+10
+N age1 age2 Name 1
+F age1 age2 Name
+WF age1 age2 Name
+SWBio age1 age2 
+CWBio age1 age2
+Mat   age1  age1 # 1 column
+SW    age1 age1  
+SSB   3	   14 
+Refbio1 0  0
+Refbio2 0  0
+Fbar	0  0
+HCRRefbio  0	0
+FishYearcatch	0   0
+Surveybiomass	1   0  #
+Assessmenterr

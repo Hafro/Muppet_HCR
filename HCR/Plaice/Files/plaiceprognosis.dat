@@ -1,0 +1,15 @@
+# Data for prognosis
+9      # 9=HCR
+0.13    # CV in weights
+0.5     # weightcorr
+0.25    # Assessmentcv
+0.45    # Assessmentcorr
+0.1     # Recrcorr
+5      # Btrigger
+10     # Est Assyear ssb
+3       # Selection in prognosis mean of last 3 years.
+1       # Mean weight in prognosis mean of last 1 years.
+
+2        # Number of years
+7.200    # Catch 2017
+0.22     # F After 2017

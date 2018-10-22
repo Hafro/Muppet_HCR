@@ -1,0 +1,24 @@
+The program is under the directory ../Model and is called mackerel.tpl compile it by
+
+admb mackerel or
+admb -s mackerel 
+mv ../Model/mackerel iceplaice #in this case
+export PATH=$PATH:This directory
+
+The runs in in the directory HockeyEstAcf
+There optimisation is run with
+iceplaice -nox
+iceplaice -nox -ind iceplaice.dat.opt -mcmc 2e6 -mcscale -mcsave 1000 # 2000 random samples in the file iceplaice.psv
+iceplaice -mceval -ind iceplaice.dat.prog   # To get stochastic runs
+
+Most of the Files for the plaice example are stored in the Files directory.
+
+There we have 3 files
+
+
+plaiceprognosis.dat.opt
+plaiceprognosis.dat.biorule
+plaiceprognosis.dat.Frule
+
+And a R script ReadPlaice.r to do a number of stocastic runs and collect the results in 2 dataframes alldata and sumdata stored in HCRrun.rdata and HCRrunsum.rdata
+
