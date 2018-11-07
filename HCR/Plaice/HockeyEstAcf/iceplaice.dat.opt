@@ -4,14 +4,14 @@
 
 ../Files/catchandstockdata.dat  # Data on the stock mean weight, maturity etc.
 ../Files/totcatch.dat # Total catch
-catchresiduals.dat # For bootstrap, not used.
-#phases.dat  # Phases of optimization not used
+catchresiduals.dat # Thought  for bootstrap, not used.
+
 0  # Initial condition from file (1) or not.  program run with -ainp filename
-0  # Backwards
+0  # 0 Forward, 1 Backward vpa 
 
 
 1991 # First year
-2017 # Last opt year i.e last year with catch at age data
+2017 # Last opt year i.e last year before assyear.   <=lastdatayear
 8 # Number of simulations years
 2017 # Last data year, last year with catch at age data
 1 # First age
@@ -21,14 +21,14 @@ catchresiduals.dat # For bootstrap, not used.
 3 # First ssb age
 0 # Plus group (> 0) or not 0
 0 # Delay from year born until first year observed.
-3 # Number of oldest age groups with same F
--1 # Phase to estimate M oldest.
+3 # Number of oldest age groups with same F (not w parametric sel) 
+-1 # Phase to estimate M oldest. -1 not estimated
 
 
 ../Files/stockparameters.dat # natm and more
 ../Files/catchparameters.dat # sep period and something more.
 ../Files/likelihoodparameters.dat # Weight of likelihood components etc.
-../Files/outputparameters.dat # Fbar range etc.
+../Files/outputparameters.dat # Fbar range output biomasses etc.
 # nsurveys
 1
 # Survey 1 March survey
@@ -42,20 +42,21 @@ catchresiduals.dat # For bootstrap, not used.
 1 # Type of tuning (1 normal) (2 biomass+proportion)
 -1 # Phase of correlation (5 or -1) where -1 means not estimated
 -1 # Logit phase (not use logit)
-../Files/surveypar.dat # Parameter file
-../Files/surveydata.dat # Data file
-surveyresid.dat # not used, thought for bootstrap
+../Files/surveypar.dat # Parameter file for survey
+../Files/surveydata.dat # Data file for survey 
+surveyresid.dat # not used, thought for bootstrap Does not have to exist 
 # SSBRectype etc.
 
 
-# Stock - recruit parameters
-5  # Type of relationship (6 geometric mean)
-20000 # Rmax
-15 # SSB break, ssbmax or other parameter of relationship (not used with geom mean)
-0.2  # CV
-0.3 # Autocorrelation 0 can not be used
-0.01 # Power in a curve linking CV to ssb (0.02 means none) but 0 fails
-0  # Trend or level shift in recruitment (icod 85).  Change code if needed
+
+# Stock - recruit parameters initial values are on ordinary scale even thouth logs are estimated.
+5  # Type of relationship (1 BH, 2 Ricker 5 Hockey stick 6 geometric mean)
+20000 # Rmax (log Rmax is estimated) 
+15 # SSB break, ssbmax or other parameter of relationship (not used with geom mean, log estimated)
+0.2  # CV log estimated
+0.3 # 1st order AR coeff (log estimated). 0 can not be used  
+0.01 # Power in realationship between SSB and CV.  (Can not be 0 but low value means no relationship)
+0  # Productivity change (icod 85), 0 means no productivity changee (e^0)
 # Phases of estimatin negative not estimated, phases can often be changed
 # if problems occurr in optimization.  If SSB break is estimated, start with sensible
 # values and delay the estimation.
@@ -66,11 +67,10 @@ surveyresid.dat # not used, thought for bootstrap
 -1 # Phase of estimating change of Recr CV with spawning stock
 -1 # Phase of estimating productivity
 # Migrations
-0 # number of migrations.  Read in the file stock parameters.dat
+0 # number of migrations.  Read migrations in the the file stock parameters.dat
 ../Files/plaiceprognosis.dat.opt #Prognosis file
 ProgWts.dat # Weight in prognosis, if the file does not exist average is used as specified in plaiceprognosis.dat
 1  #Number of separable periods.
 2000 # prodchangeyear
--1   # misreportingphase 
-../Files/optim.dat.hockey  # Optimising file (bounds) 
+../Files/optim.dat.hockey  # bounds and phases on some parameters.   
 

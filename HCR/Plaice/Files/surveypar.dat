@@ -1,6 +1,6 @@
 0.4 # surveycorr
 0.2 #propM
-0.2  #propM
+0.2  #propF
 0 # Survey weights given
 3 13 #Age range
 0.5 0.3 0.224 0.189 0.158 0.191 0.235 0.35 0.45 0.55 0.65 #pattern in CV with age. Common multiplier estimated

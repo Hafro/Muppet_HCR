@@ -27,8 +27,8 @@ Replace <- function(txt,parameter,pattern){
   }
   
   
-OnePlaiceRun <- function(FishingMortality,HarvestRate,WeightCorr,WeightCV,RecrCorr,AssessmentCV,AssessmentCorr,AssessmentBias,Btrigger,MaxChange,Meanwtyears,LastYearsTacRatio,file='plaiceprognosis.dat',inputfile="iceplaice.dat.prog",path=".",progoutfile="plaiceprognosis.dat"){
-  txt <- readLines(file)
+OneRun <- function(FishingMortality,HarvestRate,WeightCorr,WeightCV,RecrCorr,AssessmentCV,AssessmentCorr,AssessmentBias,Btrigger,MaxChange,Meanwtyears,LastYearsTacRatio,HCRreflength,inputprogfile='',inputfile="icehad.dat.prog",path=".",progoutfile="hadprognosis.dat",model="icehad"){
+  txt <- readLines(inputprogfile)
   txt <- Replace(txt,FishingMortality,'# FishingMortality')
   txt <- Replace(txt,HarvestRate,'# HarvestRate')
   txt <- Replace(txt,WeightCorr,'# WeightCorr')
@@ -41,9 +41,10 @@ OnePlaiceRun <- function(FishingMortality,HarvestRate,WeightCorr,WeightCV,RecrCo
   txt <- Replace(txt,MaxChange,"# MaxChange")
   txt <- Replace(txt,Meanwtyears,"# Meanwtyears")
   txt <- Replace(txt,LastYearsTacRatio,"# LastYearsTacRatio")
-
+  txt <- Replace(txt,HCRreflength,"# HCRreflength")
   write.table(txt,file=progoutfile,row.names=F,col.names=F,quote=F)
-  system(paste("iceplaice"," -ind ",inputfile," -mceval",sep=""))
+
+  system(paste(model," -ind ",inputfile," -mceval",sep=""))
   catch <- readmcmcfile("catch.mcmc",cn="catch")
   catch <- join(catch,readmcmcfile("ssb.mcmc",cn="ssb"))
   catch <- join(catch,readmcmcfile("n1st.mcmc",cn="n1st"))
@@ -51,8 +52,8 @@ OnePlaiceRun <- function(FishingMortality,HarvestRate,WeightCorr,WeightCV,RecrCo
   catch <- join(catch,readmcmcfile("refbio1.mcmc",cn="refbio1"))
 #  catch <- join(catch,readmcmcfile("refbiowerr.mcmc",cn="refbiowerr"))
 #  catch <- join(catch,readmcmcfile("ssbwerr.mcmc",cn="ssbwerr"))
-  if(file.exists("m7.mcmc"))
-    catch <- join(catch,readmcmcfile("m7.mcmc",cn="m7"))
+  if(file.exists("assesmenterror.mcmc"))
+    catch <- join(catch,readmcmcfile("assessmenterror.cc",cn="asserr"))
 
   
 

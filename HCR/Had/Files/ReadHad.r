@@ -1,17 +1,17 @@
-basedir <- "//home/hoski/Tac2018/HCR/Plaice"
+basedir <- "//home/hoski/Tac2018/HCR/Had"
 basedir1 <- "/home/hoski/Tac2018/HCR/"
 source(paste(basedir1,"Model/Read.r",sep="/"))
-inputprogfile  <- paste(basedir,"Files/plaiceprognosis.dat.biorule",sep="/")
-progoutfile <- "plaiceprognosis.dat"
+inputprogfile  <- paste(basedir,"Files/hadprognosis.dat.biorule",sep="/")
+progoutfile <- "hadprognosis.dat"
 savefile <- "HCRrun.rdata"
 sumfile <- "HCRrunsum.rdata"
-inputfile <- "iceplaice.dat.prog"
-model <- "iceplaice"
+inputfile <- "icehad.dat.prog"
+model <- "icehad"
                                         # Runs set up to avoid rbinds.
-parameters <- expand.grid(list(HarvestRate=c(0.1,0.15,0.2),Btrigger=c(1,20,30),RecrCorr=c(0.35),Meanwtyears=c(10),WeightCV=0.08,AssessmentCV=0.2,AssessmentCorr=0.7)) 
+parameters <- expand.grid(list(HarvestRate=seq(0.2,0.65,by=0.05),Btrigger=c(45),RecrCorr=c(0.35),Meanwtyears=c(10),WeightCV=0.08,AssessmentCV=0.2,AssessmentCorr=0.7,HCRreflength=c(37,45))) 
   cn <- names(parameters)
   i <- 1
-  tmpresult <- OneRun(HarvestRate=parameters$HarvestRate[i],AssessmentCorr=parameters$AssessmentCorr[i],AssessmentCV=parameters$AssessmentCV[i],Btrigger=parameters$Btrigger[i],RecrCorr=parameters$RecrCorr[i],Meanwtyears=parameters$Meanwtyears[i],WeightCV=parameters$WeightCV[i],inputprogfile=inputprogfile,inputfile=inputfile,progoutfile=progoutfile,path="",model=model)
+  tmpresult <- OneRun(HarvestRate=parameters$HarvestRate[i],AssessmentCorr=parameters$AssessmentCorr[i],AssessmentCV=parameters$AssessmentCV[i],Btrigger=parameters$Btrigger[i],RecrCorr=parameters$RecrCorr[i],Meanwtyears=parameters$Meanwtyears[i],WeightCV=parameters$WeightCV[i],inputprogfile=inputprogfile,inputfile=inputfile,HCRreflength=parameters$HCRreflength[i],progoutfile=progoutfile,path="",model=model)
   sumdata <- tmpresult$summary
   result <- tmpresult$data
   for(j in 1:length(cn))sumdata[,cn[j]] <- parameters[i,cn[j]]
@@ -24,7 +24,7 @@ parameters <- expand.grid(list(HarvestRate=c(0.1,0.15,0.2),Btrigger=c(1,20,30),R
   index <- n+1
   for(i in 2:nrow(parameters)) {
     print(i)
-    tmpresult <- OneRun(HarvestRate=parameters$HarvestRate[i],AssessmentCorr=parameters$AssessmentCorr[i],AssessmentCV=parameters$AssessmentCV[i],Btrigger=parameters$Btrigger[i],RecrCorr=parameters$RecrCorr[i],Meanwtyears=parameters$Meanwtyears[i],WeightCV=parameters$WeightCV[i],inputprogfile=inputprogfile,inputfile=inputfile,progoutfile=progoutfile,path="",model=model)
+    tmpresult <- OneRun(HarvestRate=parameters$HarvestRate[i],AssessmentCorr=parameters$AssessmentCorr[i],AssessmentCV=parameters$AssessmentCV[i],Btrigger=parameters$Btrigger[i],RecrCorr=parameters$RecrCorr[i],Meanwtyears=parameters$Meanwtyears[i],WeightCV=parameters$WeightCV[i],HCRreflength=parameters$HCRreflength[i],inputprogfile=inputprogfile,inputfile=inputfile,progoutfile=progoutfile,path="",model=model)
     tmpsumdata <- tmpresult$summary
     tmpresult <- tmpresult$data
     for(j in 1:length(cn))tmpsumdata[,cn[j]] <- parameters[i,cn[j]]

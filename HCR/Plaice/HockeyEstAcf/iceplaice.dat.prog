@@ -71,6 +71,5 @@ plaiceprognosis.dat #Prognosis file
 ProgWts.dat # Weight in prognosis, if the file does not exist average is used as specified in plaiceprognosis.dat
 1  #Number of separable periods.
 2000 # prodchangeyear
--1   # misreportingphase 
 ../Files/optim.dat.hockey  # Optimising file (bounds) 
 

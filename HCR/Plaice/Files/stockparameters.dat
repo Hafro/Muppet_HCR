@@ -4,7 +4,7 @@
 # PropofM and PropofF before spawning
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 0 0 0 0 0 0 0 0 0 0 0 0 0 0
-10 # Basis for ssb 
-20  # Min ssb used when cv in recruitment depends on ssb
-5 # Max ssb used when cv in recruitment depends on ssb3
+10 # Basis for rel ssb 
+20  # Max ssb used when cv in recruitment depends on ssb
+5 # Min ssb used when cv in recruitment depends on ssb
 

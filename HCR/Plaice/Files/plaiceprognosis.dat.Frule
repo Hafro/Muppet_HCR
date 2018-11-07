@@ -12,6 +12,7 @@
 3       # Meanwtyears
 0	# IceFishYear
 0	# LastYearsTacRatio
+0	# DensDep  0 no densdep.  
 2        # Number of years with catch/F given
 7.200    # Catch 2017
 0.22     # FishingMortality
