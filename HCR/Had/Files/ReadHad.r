@@ -6,7 +6,7 @@ progoutfile <- "hadprognosis.dat"
 savefile <- "HCRrun.rdata"
 sumfile <- "HCRrunsum.rdata"
 inputfile <- "icehad.dat.prog"
-model <- "icehad"
+model <- "muppet"
                                         # Runs set up to avoid rbinds.
 parameters <- expand.grid(list(HarvestRate=seq(0.2,0.65,by=0.05),Btrigger=c(45),RecrCorr=c(0.35),Meanwtyears=c(10),WeightCV=0.08,AssessmentCV=0.2,AssessmentCorr=0.7,HCRreflength=c(37,45))) 
   cn <- names(parameters)
