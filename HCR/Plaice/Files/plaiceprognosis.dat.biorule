@@ -13,7 +13,7 @@
 0	# IceFishYear
 0	# LastYearsTacRatio
 0	# DensDep
-0	# AgeModel 
+1	# AgeModel 
 4	# HCRrefage
 0	# ProxyAge 0 means use SSB
 0.22	# HarvestRate 
