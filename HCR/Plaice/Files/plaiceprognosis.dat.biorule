@@ -1,21 +1,23 @@
 # Data for prognosis
-3      # 3=HCR
-0.13    # WeightCV
-0.5     # WeightCorr
-0.25    # AssessmentCV
-0.45    # AssessmentCorr
-0.4     # RecrCorr not active when estimaded
-5      # Btrigger
-10     # MaxChange no limit on interannual changes with this high value.  
-10     # Est Assyear ssb
-3       # Selection in prognosis mean of last 3 years.
-3       # Meanwtyears 
-0	# IceFishYear
-0	# LastYearsTacRatio
-0	# DensDep
-1	# AgeModel 
-4	# HCRrefage
-0	# ProxyAge 0 means use SSB
-0.22	# HarvestRate 
-7.200   # Last TAC
-2.5     # Tac left Icelandic fishing years
+3     # 3: Reference biomass in the start of the assessment year
+      # 4: Reference biomass in the start of the advisory year
+0.13  # WeightCV
+0.5   # WeightCorr
+0.25  # AssessmentCV
+0.45  # AssessmentCorr
+0.4   # RecrCorr not active when estimaded
+1     # Btrigger
+10    # MaxChange no limit on interannual changes with this high value.
+33    # Est Assyear ssb
+3     # Selection in prognosis mean of last 3 years.
+3     # Meanwtyears
+1     # IceFishYear
+0     # LastYearsTacRatio
+0     # DensDep
+1     # AgeModel
+4     # HCRrefage
+0     # ProxyAge 0 means use SSB
+0.22  # HarvestRate
+0.9   # MaxHarvestRate - catch never larger then 0.9 of refbio
+7.132 # Last TAC
+4.565 # Tac left Icelandic fishing years

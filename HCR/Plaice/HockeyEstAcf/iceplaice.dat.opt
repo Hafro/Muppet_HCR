@@ -1,13 +1,13 @@
 # run with
-#./iceplaice -ind  iceplaice.dat.opt  -nox
-#./iceplaice -ind iceplaice.dat.opt -nox -mcmc 100000 -mcsave 200 -mcscale
+#./muppet -ind iceplaice.dat.opt -nox
+#./muppet -ind iceplaice.dat.opt -nox -mcmc 100000 -mcsave 200 -mcscale
 
 ../Files/catchandstockdata.dat  # Data on the stock mean weight, maturity etc.
 ../Files/totcatch.dat # Total catch
 catchresiduals.dat # Thought  for bootstrap, not used.
 
 0  # Initial condition from file (1) or not.  program run with -ainp filename
-0  # 0 Forward, 1 Backward vpa 
+0  # 0 Forward, 1 Backward vpa
 
 
 1991 # First year
@@ -21,7 +21,7 @@ catchresiduals.dat # Thought  for bootstrap, not used.
 3 # First ssb age
 0 # Plus group (> 0) or not 0
 0 # Delay from year born until first year observed.
-3 # Number of oldest age groups with same F (not w parametric sel) 
+3 # Number of oldest age groups with same F (not w parametric sel)
 -1 # Phase to estimate M oldest. -1 not estimated
 
 
@@ -40,29 +40,29 @@ catchresiduals.dat # Thought  for bootstrap, not used.
 3 # First age of linear relationship
 1 # Delay from when a cohort is born until it is observed
 1 # Type of tuning (1 normal) (2 biomass+proportion)
--1 # Phase of correlation (5 or -1) where -1 means not estimated
+5 # Phase of correlation (5 or -1) where -1 means not estimated
 -1 # Logit phase (not use logit)
 ../Files/surveypar.dat # Parameter file for survey
-../Files/surveydata.dat # Data file for survey 
-surveyresid.dat # not used, thought for bootstrap Does not have to exist 
+../Files/surveydata.dat # Data file for survey
+surveyresid.dat # not used, thought for bootstrap Does not have to exist
 # SSBRectype etc.
 
 
 
 # Stock - recruit parameters initial values are on ordinary scale even thouth logs are estimated.
 5  # Type of relationship (1 BH, 2 Ricker 5 Hockey stick 6 geometric mean)
-20000 # Rmax (log Rmax is estimated) 
+20000 # Rmax (log Rmax is estimated)
 15 # SSB break, ssbmax or other parameter of relationship (not used with geom mean, log estimated)
 0.2  # CV log estimated
-0.3 # 1st order AR coeff (log estimated). 0 can not be used  
+0.3 # 1st order AR coeff (log estimated). 0 can not be used
 0.01 # Power in realationship between SSB and CV.  (Can not be 0 but low value means no relationship)
 0  # Productivity change (icod 85), 0 means no productivity changee (e^0)
 # Phases of estimatin negative not estimated, phases can often be changed
 # if problems occurr in optimization.  If SSB break is estimated, start with sensible
 # values and delay the estimation.
- 4 # Phase of estimating Rmax
+ 3 # Phase of estimating Rmax
  5  # Phase of estimating SSBmax
- 4   # Phase of estimating CV
+ 3   # Phase of estimating CV
  5 # Phase of estimating correlation
 -1 # Phase of estimating change of Recr CV with spawning stock
 -1 # Phase of estimating productivity
@@ -72,5 +72,5 @@ surveyresid.dat # not used, thought for bootstrap Does not have to exist
 ProgWts.dat # Weight in prognosis, if the file does not exist average is used as specified in plaiceprognosis.dat
 1  #Number of separable periods.
 2000 # prodchangeyear
-../Files/optim.dat.hockey  # bounds and phases on some parameters.   
+../Files/optim.dat.hockey  # bounds and phases on some parameters.
 

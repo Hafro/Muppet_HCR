@@ -1,6 +1,6 @@
 # run with
-#./iceplaice -ind  iceplaice.dat.opt  -nox
-#./iceplaice -ind iceplaice.dat.opt -nox -mcmc 100000 -mcsave 200 -mcscale
+#./muppet -ind iceplaice.dat.opt  -nox
+#./muppet -ind iceplaice.dat.opt -nox -mcmc 100000 -mcsave 200 -mcscale
 
 ../Files/catchandstockdata.dat  # Data on the stock mean weight, maturity etc.
 ../Files/totcatch.dat # Total catch
@@ -40,7 +40,7 @@ catchresiduals.dat # For bootstrap, not used.
 3 # First age of linear relationship
 1 # Delay from when a cohort is born until it is observed
 1 # Type of tuning (1 normal) (2 biomass+proportion)
--1 # Phase of correlation (5 or -1) where -1 means not estimated
+5 # Phase of correlation (5 or -1) where -1 means not estimated
 -1 # Logit phase (not use logit)
 ../Files/surveypar.dat # Parameter file
 ../Files/surveydata.dat # Data file
@@ -59,9 +59,9 @@ surveyresid.dat # not used, thought for bootstrap
 # Phases of estimatin negative not estimated, phases can often be changed
 # if problems occurr in optimization.  If SSB break is estimated, start with sensible
 # values and delay the estimation.
- 4 # Phase of estimating Rmax
+ 3 # Phase of estimating Rmax
  5  # Phase of estimating SSBmax
- 4   # Phase of estimating CV
+ 3   # Phase of estimating CV
  5 # Phase of estimating correlation
 -1 # Phase of estimating change of Recr CV with spawning stock
 -1 # Phase of estimating productivity
@@ -71,5 +71,5 @@ plaiceprognosis.dat #Prognosis file
 ProgWts.dat # Weight in prognosis, if the file does not exist average is used as specified in plaiceprognosis.dat
 1  #Number of separable periods.
 2000 # prodchangeyear
-../Files/optim.dat.hockey  # Optimising file (bounds) 
+../Files/optim.dat.hockey  # Optimising file (bounds)
 

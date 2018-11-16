@@ -309,9 +309,9 @@ PARAMETER_SECTION
  init_bounded_number logFoldestmult(-1,1,-2); // Not estimate but option available in VPA runs
  init_bounded_number logMoldest(-3,-0.5,estMlastagephase);
  init_bounded_vector lnMigrationAbundance(1,MigrationNumbers,1,13,catagephase1);
- init_bounded_number lnMeanRecr(10,20,catagephase1);
+ init_bounded_number lnMeanRecr(4,20,catagephase1);
  init_bounded_dev_vector lnRecr(firstyear,lastoptyear+firstage-recrdatadelay,-6,6,catagephase2) ;// log of recruitment
- init_bounded_number lnMeanInitialpop(7,17,catagephase1);
+ init_bounded_number lnMeanInitialpop(4,17,catagephase1);
  init_bounded_dev_vector lnInitialpop(firstage+1,lastage,-7,7,catagephase2);
  init_bounded_matrix EstimatedSelection(firstcatchage,lastage-nfixedselages,1,number_of_seperable_periods,-5,0.2,estselphase); // Same selection of last 4 age groups
  init_bounded_number Catchlogitslope(0.05,5,catchlogitphase);
@@ -332,7 +332,7 @@ PARAMETER_SECTION
  init_bounded_number AbundanceMultiplier(-10,10,-6); 
  init_bounded_number lnMeanEffort(-3,3,catagephase1);
  init_bounded_dev_vector lnEffort(firstyear,lastoptyear,-4,4,catagephase2);  // log of Fishing mortality of oldest fish i.e effort
- init_bounded_number meanlogSurvivors(4,15,vpaphase1);
+ init_bounded_number meanlogSurvivors(4,17,vpaphase1);
  init_bounded_dev_vector logSurvivors(firstestage,lastage-1,-6,6,vpaphase2);
 
   
@@ -556,8 +556,8 @@ PRELIMINARY_CALCS_SECTION
   FishingYearCatch = -1; 
   Nhat = 0;
   RefSSB = 1000; 
-  Maxrelssb = 1000; 
-  Minrelssb = 0; 
+  Maxrelssb = 2; 
+  Minrelssb = 0.2; 
   ObsCatchInNumbers = 0;
   AssessmentErr = 0;  // Set in sd_phase
   int i;
@@ -578,10 +578,10 @@ PRELIMINARY_CALCS_SECTION
     surveylogitage50 = 1;
     Catchlogitage50 = 5;
     SigmaSurveypar = log(0.25);
-    lnMeanRecr = 17;
-    lnMeanInitialpop = 17;
+    lnMeanRecr =  15;
+    lnMeanInitialpop = 15;
     lnMeanEffort = -0;
-    meanlogSurvivors = 15;
+    meanlogSurvivors = 13;
    }
    for( i = 1; i <= 4; i++) 
        if(SSBRecSwitches(i) < 0 || INITCOND==0)  estSSBRecParameters(i) = log(SSBRecParameters(i));
@@ -624,7 +624,6 @@ PRELIMINARY_CALCS_SECTION
        ReadSurveyInfo(parameterfilename,datafilename,residualfilename,i,surveylogfile);
    }
 //   WriteInputDataInMatrixForm();  // For user to look at.  
-
   for(i = firstyear; i <= lastdatayear ; i++) {
       CatchIn1000tons(i) = sum(elem_prod(CatchWeights(i),ObsCatchInNumbers(i)))/1.0e6;
       if(CatchIn1000tons(i) < 0) CatchIn1000tons(i) = TotCatchIn1000tons(i);
@@ -655,7 +654,6 @@ PRELIMINARY_CALCS_SECTION
 
   mcmc_iteration = 1;
 
-
 PROCEDURE_SECTION
   ScaleCatches();  
   if(BackWards == 0){
@@ -666,12 +664,10 @@ PROCEDURE_SECTION
      if(printPhase) cout << "current " << current_phase() << endl;
   }
   COUNTER = COUNTER + 1;
-  //cout << "StartPrognosis " << endl;
   // SetPredValues();  // Set various sdreport objects from bw.tpl NPEL2007
   Prognosis();
-  //cout << "FinishedProg " << endl;
   evaluate_the_objective_function();
-  //cout  << "LnLikelicomp" <<  LnLikelicomp << endl;
+//  cout  << "LnLikelicomp" <<  LnLikelicomp << endl;
 //   cout << "Finished eval " << LnLikely << endl;
   if(mceval_phase()){
      write_mcmc();
@@ -826,7 +822,6 @@ FUNCTION void BackwardHistoricalSimulation()
     if(firstage > 1)
        for(year = lastoptyear -firstage+2; year <= lastoptyear; year++) 
          Recruitment(year) = PredictedRecruitment(year);
- 
 //**********************************************************
 
 
@@ -905,7 +900,45 @@ FUNCTION void HistoricalSimulation()
     
 // *****************************************************
 
+// Calculate referenct biomass. nhat = 0 means calculated for real stock,
+// nhat = 1 calculated based on perturbed stock (Nhat)
+// Look at what uncertainty we have in weight prediction, W(yr-1) instead of W(yr) might be too rough for dens dep cases.  
 
+FUNCTION dvariable  CalcHCRrefbio(int yr,int refage,int proxy,int nhat)
+   dvariable refbio = 0;
+   if(nhat == 0) {
+     if(AgeModel==0 && proxy == 0)  // Length model haddock
+        refbio =  sum(elem_prod(N(yr),elem_prod(StockWeights(yr),wtsel(StockWeights(yr),HCRreflebreak))))/1e6;
+     if(AgeModel == 1 ) {
+        if(refage > 0)
+          refbio = sum(elem_prod(N(yr)(refage,lastage),StockWeights(yr)(refage,lastage)))/1e6;
+       if(refage < 0) 
+          refbio= sum(elem_prod(N(yr)(-refage,lastage),CatchWeights(yr)(-refage,lastage)))/1e6;
+     }
+     //SSB both for length and age based might use lengthbased Bproxy for length model
+     if((AgeModel == 0 && proxy == 1) ||(AgeModel==1 && HCRBproxyAge == 0 && proxy ==1))
+       for(int age = minssbage; age <= lastage; age++)
+          refbio  += N(yr,age)*SSBWeights(yr,age)*StockMaturity(yr,age)*
+          mfexp(-(natM(yr-1,age)*PropofMbeforeSpawning(age)+F(yr-1,age)*PropofFbeforeSpawning(age)))/1e6;
+   }
+
+   if(nhat == 1) {  // Here we might need StockWeightshad or something like that.  
+     if(AgeModel==0 && proxy == 0)  // Length model haddock
+        refbio =  sum(elem_prod(Nhat(yr),elem_prod(StockWeights(yr),wtsel(StockWeights(yr),HCRreflebreak))))/1e6;
+     if(AgeModel == 1) {
+        if(refage > 0)
+          refbio = sum(elem_prod(Nhat(yr)(refage,lastage),StockWeights(yr)(refage,lastage)))/1e6;
+       if(refage < 0) 
+          refbio= sum(elem_prod(Nhat(yr)(-refage,lastage),CatchWeights(yr)(-refage,lastage)))/1e6;
+     }
+     //SSB both for length and age based might use lengthbased Bproxy for length model
+     if((AgeModel == 0 && proxy == 1) ||(AgeModel==0 && HCRBproxyAge == 0 && proxy ==1))
+       for(int age = minssbage; age <= lastage; age++)
+          refbio  += Nhat(yr,age)*SSBWeights(yr,age)*StockMaturity(yr,age)*
+          mfexp(-(natM(yr-1,age)*PropofMbeforeSpawning(age)+F(yr-1,age)*PropofFbeforeSpawning(age)))/1e6;
+   }
+   
+   return(refbio);
 
 //Biorule always based on biomass in the beginning of the Ass year
 //If ProxyAge == 0 use SSB as proxy
@@ -917,31 +950,14 @@ FUNCTION void BioRatioHockeystick(int yr)
    int age;
 // Need refage and proxyage
 // if SSB might also use Bproxy.  Currently only SSB is allowed as trigger in
-// size based models.  
-   if(HCRBproxyAge == 0  || AgeModel== 0) {
-      HCRBproxy(yr) = 0;
-      for(age = minssbage; age <= lastage; age++)
-      HCRBproxy(yr) += N(yr,age)*SSBWeights(yr,age)*StockMaturity(yr,age)*
-     mfexp(-(natM(yr-1,age)*PropofMbeforeSpawning(age)+F(yr-1,age)*PropofFbeforeSpawning(age)))/1e6; 
-   }
-   if(HCRBproxyAge > 0)
-      HCRBproxy(yr) = sum(elem_prod(N(yr)(HCRBproxyAge,lastage),StockWeights(yr)(HCRBproxyAge,lastage)))/1e6;
-   if(HCRBproxyAge < 0)
-      HCRBproxy(yr) = sum(elem_prod(N(yr)(-HCRBproxyAge,lastage),CatchWeights(yr)(-HCRBproxyAge,lastage)))/1e6;
-    if(AgeModel == 1) {
-      if(HCRrefAge > 0)
-        HCRrefbio(yr) = sum(elem_prod(N(yr)(HCRrefAge,lastage),StockWeights(yr)(HCRrefAge,lastage)))/1e6;
-     if(HCRrefAge < 0)
-        HCRrefbio(yr) = sum(elem_prod(N(yr)(-HCRrefAge,lastage),CatchWeights(yr)(-HCRrefAge,lastage)))/1e6;     
-   }
-   if(AgeModel==0)  // Length model haddock
-      HCRrefbio(yr) =  sum(elem_prod(N(yr),elem_prod(StockWeights(yr),wtsel(StockWeights(yr),HCRreflebreak))))/1e6;
-      
+// size based models.
+   HCRBproxy(yr) = CalcHCRrefbio(yr,HCRBproxyAge,1,0);
+   HCRrefbio(yr) = CalcHCRrefbio(yr,HCRrefAge,0,0);
+   
    dvariable ratio = mfexp(log(HCRBproxy(yr))+AssessmentErr(yr))/Btrigger;
    ratio = SmoothDamper(ratio,1.0,0.0);  // ratio max 1  do not need the smooth version.  
    dvariable Hratio = ratio*HarvestRatio; 
    dvariable LastYTacRat = LastYearsTacRatio*ratio; // Gradual  like saithe
-
 
    dvariable AnnualCatch;  
    dvariable mincatch = 0.0;
@@ -960,7 +976,6 @@ FUNCTION void BioRatioHockeystick(int yr)
    CurrentTac = Catch;  
    AnnualCatch = SmoothDamper(AnnualCatch,MaxHarvestRatio*HCRrefbio(yr),mincatch);
    ProgF(yr) = FishmortFromCatch(AnnualCatch*1e6,N(yr),CatchWeights(yr),progsel,natM(yr));
-
 
 FUNCTION void SetWeightErrorsHad() // For the haddock model.  
 // Could est the starting point based on current value i.e negative
@@ -1083,10 +1098,10 @@ FUNCTION void Prognosis()
 
   dvariable Catch;
   for(i = lastoptyear+1; i <= lastprogyear; i++) {
-    if(mceval_phase() && DensDep == 1) UpdateWeightandMaturityHad(i); // not done in optimization.  
+    if(mceval_phase() && DensDep == 1) UpdateWeightandMaturityHad(i); // not done in optimization.
     CalcNaturalMortality1(i); 
     //CalcRefValues(i,i,0);  // can not be called here for some reason
-    if(firstcatchage == 0){ // Have to do it here if 0group is caught.  
+    if(firstcatchage == 0){ // Have to do it here if 0group is caught.
        PredictSSB(i);  // Then SSB must be at the start of the year.
        PredictedRecruitment(i) = mfexp(log(PredictRecruitment(i))+recrerr(i)*SigmaSSBRec(i));
        N(i,firstage) = PredictedRecruitment(i-firstage);
@@ -1127,40 +1142,24 @@ FUNCTION void Prognosis()
 // End of catchrule 2  
 //  Fishing mortality for all years.  Problems with tac constraint in estimation.  
  
-    if(CatchRule == 4){
+    if(CatchRule == 6){
         ProgF(i) = mfexp(log(FutureForCatch(i))+AssessmentErr(i));
     }
-
-//  Fishing mortality multplier.  F reduces below Btrigger defined from the assessment year.
-//  Not a very useful rule.  
-    if(CatchRule == 5 & i > lastdatayear){
-      if(i == lastdatayear+1) {// Tac in assessment year. 
-         if(current_phase() <= 3) // have to start with F for convergence
-           ProgF(i) = 0.3;
-	 if(current_phase() > 3) 
-	      ProgF(i) = FishmortFromCatch(FutureForCatch(i)*1e6,N(i),CatchWeights(i),progsel,natM(i));
-      }
-      else {
-        SpawningstockWithErr(i-1) =  mfexp(log(Spawningstock(i-1))+AssessmentErr(i)*AssessmentErrorRat);
-        ratio = mfexp(log(Spawningstock(i-1))+AssessmentErr(i)*AssessmentErrorRat)/Btrigger; //changed october 19th.  
-	ratio = SmoothDamper(ratio,1.0,0.0);  
-        ProgF(i) = mfexp(log(FutureForCatch(i)*ratio)+AssessmentErr(i));
-      }
-    }
-//  End of catchrule 5.
 
 //  Biomass rules.
     if(CatchRule == 3 & i > lastdatayear)
       BioRatioHockeystick(i);
+      
+    if(CatchRule == 4 & i > lastdatayear)
+      BioRatioHockeystickAdviceYear(i);
+
 
 // Frule done the proper way i.e TAC prediction through the assessment year.  
-    if(CatchRule == 10 & i > lastdatayear) {
+    if(CatchRule == 5 & i > lastdatayear) {
       if(i < lastyear) SingleTriggerHCR(i) ;
       if(i == lastyear) ProgF(i) = FishmortFromCatch(CalcCatchIn1000tons(i)*1e6,N(i),CatchWeights(i),progsel,natM(i));
     }
-
-
-    F(i) = ProgF(i)*progsel; 
+    F(i) = ProgF(i)*progsel;
     Z(i) = F(i) + natM(i);
     if(firstcatchage > 0 & i > (lastoptyear+firstage-recrdatadelay) ) {
 	 PredictSSB(i);
@@ -1176,10 +1175,9 @@ FUNCTION void Prognosis()
     CalcCatchInNumbers(i)=elem_prod(elem_div(F(i),Z(i)),elem_prod((1.-mfexp(-Z(i))),N(i)));
     CalcCatchIn1000tons(i) = sum(elem_prod(CalcCatchInNumbers(i),CatchWeights(i)))/1.0e6;
     CalcNextYearsN(i);
-    CalcRefValues(i,i,0); // called again as some values change with catch 
+    CalcRefValues(i,i,0); // called again as some values change with catch
   } 
- 
-// End of rule 10 
+  
 
 // ******************************************************************
 // Objective function; 
@@ -1196,10 +1194,9 @@ FUNCTION void evaluate_the_objective_function()
    int i,j;
    if(!BackWards) {
      LnLikelicomp(1) = Catch_loglikeliNocorr(); // No meaning for 
-
 // Variations in Total catch  sigmatotalcatch is typically low to 
 // follow catch well. 
-   if(!BackWards) 
+   if(!BackWards)
      LnLikelicomp(2) = sum(square(log(CatchIn1000tons(firstyear,lastoptyear))
 	-log(CalcCatchIn1000tons(firstyear,lastoptyear))))/
 	 (2.*square(sigmatotalcatch))+ noptyears*log(sigmatotalcatch);
@@ -1270,7 +1267,7 @@ FUNCTION dvariable Catch_loglikeliNocorr()
      for( j = firstcatchage; j <= lastage; j++)
        totalnumber+=ObsCatchInNumbers(i,j);
      for( j = firstcatchage; j <= lastage; j++) {
-         if(ObsCatchInNumbers(i,j) >= -1) {
+         if(ObsCatchInNumbers(i,j) >= 0) {
            CatchDiff(i,j) = log( (ObsCatchInNumbers(i,j)+CatchResolution*totalnumber)/
            (CalcCatchInNumbers(i,j)+CatchResolution*totalnumber) );
            value += 0.5*square(CatchDiff(i,j)/SigmaC(j)) + log(SigmaC(j));
@@ -1658,6 +1655,24 @@ FUNCTION dvariable FishmortFromCatch(const dvariable C,const dvar_vector& Number
 // Might want residual file as with the surveys.  
 FUNCTION void ReadCatchandStockData()
 
+
+// Totalcatchfilename is used for the years where catch in numbers does not exist but info on total
+// catch exist.  
+  cifstream totinfile(totalcatchfilename);  // this file is not needed
+  if(totinfile.fail()) {
+//        cout << "File " <<  totalcatchfilename << 
+//	"does not exist or something is wrong with it" << endl;
+  }
+  else {
+    int yr;
+    while( !totinfile.eof()){
+      totinfile >> yr;
+      if(yr >= firstyear && yr <= lastoptyear)
+        totinfile >> TotCatchIn1000tons(yr);
+    }
+  }
+  totinfile.close();
+
   cifstream infile(catchfilename);
   if(infile.fail()) {
         cout << "File " << catchfilename << 
@@ -1708,22 +1723,6 @@ FUNCTION void ReadCatchandStockData()
   StockWeights = StockWeightsData;
   StockMaturity = StockMaturityData;
   SSBWeights = SSBWeightsData;
-
-// Totalcatchfilename is used for the years where catch in numbers does not exist but info on total
-// catch exist.  
-  cifstream totinfile(totalcatchfilename);  // this file is not needed
-  if(totinfile.fail()) {
-//        cout << "File " <<  totalcatchfilename << 
-//	"does not exist or something is wrong with it" << endl;
-  }
-  else {
-    int yr;
-    while( !totinfile.eof()){
-      totinfile >> yr;
-      if(yr >= firstyear && year <= lastoptyear)
-        infile >> TotCatchIn1000tons(yr);
-    }
-  }
 
 FUNCTION void ReadCatchParameters()
     cifstream infile(catchparametersfilename);
@@ -2013,7 +2012,7 @@ FUNCTION void ReadPrognosis()
     infile >> DensDep;  // 0 for no density dependence, 1 for Icehad and more values available for other stocks.  
     outfile << "DensDep " << DensDep << endl;  
     
-    if(CatchRule == 1  || CatchRule == 2 || CatchRule == 4 || CatchRule == 5 || CatchRule == 10 ) { // F or Catch read next ncatch years, fill the rest with last value
+    if(CatchRule == 1  || CatchRule == 2 || CatchRule == 5 || CatchRule == 6 ) { // F or Catch read next ncatch years, fill the rest with last value
         infile >> nCatchorFyrs;
         outfile << "nCatchorFyrs" << nCatchorFyrs << endl;
         if( nCatchorFyrs >  nsimuyears) cerr << "warning  nCathchorFyrs > nsimuyears)"; // Has to be the other way
@@ -2027,7 +2026,7 @@ FUNCTION void ReadPrognosis()
             FutureForCatch(i)=FutureForCatch(lastoptyear+nCatchorFyrs);  // Fill the rest) 
         }
     } 
-    if(CatchRule == 3 ) {  // Biomass in assessment year
+    if(CatchRule == 3 || CatchRule==4 ) {  // Biomass in assessment or advicory year
       infile >> AgeModel; // If 1 then we use age else size;
       outfile << "AgeModel " << AgeModel << endl;
       if(AgeModel == 1) {
@@ -2081,24 +2080,24 @@ FUNCTION void ReadPrognosis()
    dvector tmpvec(1,6);
    for(i = 1; i <= largenumber ; i++) {
       Progwtandmatinfile >> tmpvec;
-     if(infile.eof()) break;
+      if(Progwtandmatinfile.eof()) break;
       year = int(tmpvec(1));
       age = int(tmpvec(2));
       if(year >= lastdatayear & year <= lastyear & age >= firstage & age <= lastage) {
-          CatchWeights(year,age) = tmpvec(3);
-          StockWeights(year,age) = tmpvec(4);
-          StockMaturity(year,age) = tmpvec(5);
-          SSBWeights(year,age) = tmpvec(6);
+          CatchWeights(year,age) = CatchWeightsData(year,age) = tmpvec(3);
+          StockWeights(year,age) = StockWeightsData(year,age) = tmpvec(4);
+          StockMaturity(year,age) = StockMaturityData(year,age) = tmpvec(5);
+          SSBWeights(year,age) = SSBWeightsData(year,age) = tmpvec(6);
      }
      outfile << tmpvec << endl;  
    }
    if( year < lastyear) {
-      i = year;  
+      i = year;
       for(year = i ; year <= lastyear ; year++) {
-          CatchWeights(year) = CatchWeights(i);
-          StockWeights(year) = StockWeights(i);
-          StockMaturity(year) = StockMaturity(i);
-          SSBWeights(year) = SSBWeights(i); 
+          CatchWeights(year) = CatchWeightsData(year) = CatchWeightsData(i);
+          StockWeights(year) = StockWeightsData(year) = StockWeightsData(i);
+          StockMaturity(year) = StockMaturityData(year) = StockMaturityData(i);
+          SSBWeights(year) = SSBWeightsData(year) = SSBWeightsData(i); 
       }
    }
    Progwtandmatinfile.close();
@@ -2212,13 +2211,14 @@ FUNCTION void UpdateWeightsAndMaturity()
   weighterr(lastoptyear+1)*=0.35;  // less weigth in first and second prediction
   weighterr(lastoptyear+2)*=0.7;
   for(i = lastoptyear+1; i <= lastyear; i++)
-      CatchWeights(i) = mfexp(log(CatchWeightsData(i))+weighterr(i));
+      CatchWeights(i)(firstcatchage,lastage) = mfexp(log(CatchWeightsData(i)(firstcatchage,lastage))+weighterr(i));
   for(i = lastoptyear+2; i <= lastyear; i++){ //SSB and Stock weights available in Assessyear
       StockWeights(i) = mfexp(log(StockWeightsData(i))+weighterr(i));
-      SSBWeights(i) = mfexp(log(SSBWeightsData(i))+weighterr(i));
+      SSBWeights(i)(minssbage,lastage) = mfexp(log(SSBWeightsData(i)(minssbage,lastage))+weighterr(i));
   }
 // Function to set stochasticity on weights and possibly maturity .
 // Sets white noise on each age and year.  
+
 
 FUNCTION void UpdateWeightsAndMaturityWhiteNoise() 
 // Could est the starting point based on current value i.e negative
@@ -2330,7 +2330,7 @@ FUNCTION void PredictSSB(int year)
    }
    Totbio(year) = sum(elem_prod(SSBWeights(year),N(year)))/1e6;
    Spawningstock(year)/= 1e6; 
-   EggProduction(year)/= 1e6;  
+   EggProduction(year)/= 1e6;
    SigmaSSBRec(year) = SSBRecCV/pow(SmoothDamper(Spawningstock(year)/
    RefSSB,Maxrelssb,Minrelssb),SSBRecpow); 
  
@@ -2460,6 +2460,9 @@ FUNCTION void write_mcmc()
    
     // 9 HCRrefbio
   if(mcwriteswitch(9) == 1){
+    // Calculate HCRrefbio for historic values.  
+    for(int yr=firstyear; yr <= lastyear; yr++)
+       HCRrefbio(yr) = CalcHCRrefbio(yr,HCRrefAge,0,0);
     if(hcrrefbio_mcmc_lines == 0)
     {
       hcrrefbio_mcmc.open("hcrrefbio.mcmc");
@@ -2802,60 +2805,75 @@ FUNCTION void BioRatioHockeystickAdviceYear(int year)
 // Can be adapted to all kinds of HCR.  
   dvariable mincatch = 0.0;
   dvariable Catch;
-  dvariable tmpTac;
+  dvariable tmpTac = CurrentTac;
   int age;
-  for(age = firstage+1; age <= lastage ; age++) Nhat(year,age)=mfexp(log(N(year,age))+AssessmentErr(year));
-  CalcNaturalMortality1(year); 
-  tmpTac = CurrentTac;  // Current Tac is only until September 1st but still used as first proxy.  
-  ProgF(year) = FishmortFromCatch(tmpTac*1e6,Nhat(year),CatchWeights(year),progsel,natM(year));
-  F(year) = ProgF(year)*progsel; 
-  Z(year) = F(year) + natM(year);
-  for(age = firstage ; age < lastage ; age++) 
-    Nhat(year+1,age+1)  = Nhat(year,age)*mfexp(-Z(year,age));
-  Nhat(year+1,lastage) += Nhat(year,lastage)*mfexp(-Z(year,lastage));
-  PredictShorttermSSB(year+1,year);   
-  // Use length model // Last years weights used
-  HCRrefbio(year+1) =  sum(elem_prod(Nhat(year+1),elem_prod(StockWeights(year),wtsel(StockWeights(year),HCRreflebreak))))/1e6;
-  dvariable ratio = Spawningstock(year+1)/Btrigger;
-  ratio = SmoothDamper(ratio,1.0,0.0);  // ratio max 1  do not need the smooth version.  
-  dvariable Hratio = ratio*HarvestRatio; 
-  dvariable LastYTacRat = LastYearsTacRatio*ratio; // Gradual  like saithe
-  dvariable refcatch = Hratio*HCRrefbio(year+1);
-  Catch = LastYTacRat*CurrentTac +  (1-LastYTacRat)*refcatch;
-  Catch = SmoothDamper(Catch,MaxHarvestRatio*HCRrefbio(year+1),mincatch);
-    
-// Second iteration
-  tmpTac = CurrentTac*2/3 + Catch*1/3;
-  ProgF(year) = FishmortFromCatch(tmpTac*1e6,Nhat(year),CatchWeights(year),progsel,natM(year));
-  F(year) = ProgF(year)*progsel; 
-  Z(year) = F(year) + natM(year);
-  for(age = firstage ; age < lastage ; age++) 
-    Nhat(year+1,age+1)  = Nhat(year,age)*mfexp(-Z(year,age));
-  Nhat(year+1,lastage) += Nhat(year,lastage)*mfexp(-Z(year,lastage));
-  PredictShorttermSSB(year+1,year);   
-  // Use length model // Last years weights used
-  HCRrefbio(year+1) =  sum(elem_prod(Nhat(year+1),elem_prod(StockWeights(year),wtsel(StockWeights(year),HCRreflebreak))))/1e6;
-  ratio = Spawningstock(year+1)/Btrigger;
-  ratio = SmoothDamper(ratio,1.0,0.0);  // ratio max 1  do not need the smooth version.  
-  Hratio = ratio*HarvestRatio; 
-  LastYTacRat = LastYearsTacRatio*ratio; // Gradual  like saithe
-  refcatch = Hratio*HCRrefbio(year+1);    
-  Catch = LastYTacRat*CurrentTac +  (1-LastYTacRat)*refcatch;
-  Catch = SmoothDamper(Catch,MaxHarvestRatio*HCRrefbio(year+1),mincatch);
+  dvariable Hratio;
+  dvariable LastYTacRat;
+  dvariable refcatch;
+  dvariable ratio;
+  dvariable AnnualCatch;  // This is the catch for current calendar year.  
+  if(year == lastyear){   // Special do not use prediction beyond last year.
+     // Use Current Tac for the last year as we do not project to the year after.  
+     ProgF(year) = FishmortFromCatch(CurrentTac*1e6,N(year),CatchWeights(year),progsel,natM(year));
+     return;
+  }
+  if(IceFishYear == 1) {  // Have to iterate as the advice affects the result use 3 iterations 
+    tmpTac = TacLeft + CurrentTac*1/3;  // Current Tac is only until September 1st but still used as first proxy.  
+    for(int i = 1; i <= 3; i++){
+      for(age = firstage+1; age <= lastage ; age++) Nhat(year,age)=mfexp(log(N(year,age))+AssessmentErr(year));
+      CalcNaturalMortality1(year);
+      ProgF(year) = FishmortFromCatch(tmpTac*1e6,Nhat(year),CatchWeights(year),progsel,natM(year));
+      F(year) = ProgF(year)*progsel; 
+      Z(year) = F(year) + natM(year);
+      for(age = firstage ; age < lastage ; age++) 
+        Nhat(year+1,age+1)  = Nhat(year,age)*mfexp(-Z(year,age));
+      Nhat(year+1,lastage) += Nhat(year,lastage)*mfexp(-Z(year,lastage));
+      HCRrefbio(year+1) = CalcHCRrefbio(year+1,HCRrefAge,0,1);    
 
-//  Might add 3rd iteration.  
+      PredictShorttermSSB(year+1,year);   
+    // Use length model // Last years weights used
+      ratio = Spawningstock(year+1)/Btrigger;
+      ratio = SmoothDamper(ratio,1.0,0.0);  // ratio max 1  do not need the smooth version.  
+      Hratio = ratio*HarvestRatio; 
+      LastYTacRat = LastYearsTacRatio*ratio; // Gradual  like saithe
+      refcatch = Hratio*HCRrefbio(year+1);
+      Catch = LastYTacRat*CurrentTac +  (1-LastYTacRat)*refcatch;
+      // SmoothDamper is a differentiable if, this function will only be used in the mceval mode so this is perhaps not needed.  
+      Catch = SmoothDamper(Catch,MaxHarvestRatio*HCRrefbio(year+1),mincatch);
+      tmpTac = TacLeft + Catch/3;
+    }
+    AnnualCatch =  TacLeft + Catch/3; 
+    AnnualCatch = SmoothDamper(AnnualCatch,MaxHarvestRatio*HCRrefbio(year),mincatch); // to avoid too much depletion in stochastic runs.  
+    TacLeft = Catch*2/3;
+    FishingYearCatch(year) = CurrentTac = Catch;  // FishingYearCatch(2018) is 2018/2018
+  }
+  if(IceFishYear == 0) { // Calendar year;
+    for(age = firstage+1; age <= lastage ; age++) Nhat(year,age)=mfexp(log(N(year,age))+AssessmentErr(year));
+    CalcNaturalMortality1(year); 
+    tmpTac = CurrentTac;  // Current Tac is only until September 1st but still used as first proxy.  
+    ProgF(year) = FishmortFromCatch(tmpTac*1e6,Nhat(year),CatchWeights(year),progsel,natM(year));
+    F(year) = ProgF(year)*progsel; 
+    Z(year) = F(year) + natM(year);
+    for(age = firstage ; age < lastage ; age++) 
+      Nhat(year+1,age+1)  = Nhat(year,age)*mfexp(-Z(year,age));
+    Nhat(year+1,lastage) += Nhat(year,lastage)*mfexp(-Z(year,lastage));
+    HCRrefbio(year+1) = CalcHCRrefbio(year+1,HCRrefAge,0,1);    
 
-  dvariable AnnualCatch;  
-  if(IceFishYear) {
-     AnnualCatch =  TacLeft + Catch/3; 
-     AnnualCatch = SmoothDamper(AnnualCatch,MaxHarvestRatio*HCRrefbio(year),mincatch); 
-     TacLeft = Catch*2/3;
-     FishingYearCatch(year) = Catch;  // FishingYearCatch(2018) is 2018/2018
+    PredictShorttermSSB(year+1,year);   
+    // Use length model // Last years weights used
+    ratio = Spawningstock(year+1)/Btrigger;
+    ratio = SmoothDamper(ratio,1.0,0.0);  // ratio max 1  do not need the smooth version.  
+    Hratio = ratio*HarvestRatio; 
+    LastYTacRat = LastYearsTacRatio*ratio; // Gradual  like saithe
+    refcatch = Hratio*HCRrefbio(year+1);
+    Catch = LastYTacRat*CurrentTac +  (1-LastYTacRat)*refcatch;
+    Catch = SmoothDamper(Catch,MaxHarvestRatio*HCRrefbio(year+1),mincatch);
+    AnnualCatch =  CurrentTac;
+    AnnualCatch = SmoothDamper(AnnualCatch,MaxHarvestRatio*HCRrefbio(year),mincatch); // to avoid too much depletion in stochastic runs.  
+    TacLeft = Catch;
   }
   CurrentTac = Catch;  
-  AnnualCatch = SmoothDamper(AnnualCatch,MaxHarvestRatio*HCRrefbio(year),mincatch);
   ProgF(year) = FishmortFromCatch(AnnualCatch*1e6,N(year),CatchWeights(year),progsel,natM(year));
-
 
 
 

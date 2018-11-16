@@ -1,0 +1,18 @@
+# Data for prognosis
+2      # 2 F multiplier
+0.15    # WeightCV
+0.7     # WeightCorr
+0.25    # AssessmentCV
+0.6    # AssessmentCorr
+0.7     # RecrCorr
+40       # Btrigger
+3        # MaxChange practicially noconstrained with this high value  
+2500     # Est Assyear ssb
+3       # Selection in prognosis mean of last 3 years.
+5       # Meanwtyears 
+0	# IceFishYear
+0	# LastYearTacRatio (0.5 in icecod HCR)
+0	# DensDep  0 no densdep.  
+2        # Number of years
+1000    # Catch 2018
+0.21     # FishingMortality after 2018

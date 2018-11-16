@@ -1,6 +1,6 @@
 # run with
-#./icehad -ind  icehad.dat.opt  -nox
-#./icehad -ind icehad.dat.opt -nox -mcmc 100000 -mcsave 200 -mcscale
+#muppet -ind  icehad.dat.opt  -nox
+#muppet -ind icehad.dat.opt -nox -mcmc 100000 -mcsave 200 -mcscale
 
 ../Files/catchandstockdata.dat # Data on the stock mean weight, maturity etc.
 ../Files/totcatch.dat  #  Total catch where cno=-1 does not have to exist

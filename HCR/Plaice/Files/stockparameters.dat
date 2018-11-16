@@ -1,10 +1,10 @@
-# Natural mortality
-#Natural mortality
-0.15 0.15 0.15 0.15 0.15 0.15 0.15 0.15 0.15 0.15 0.15 0.15 0.15 0.15 0.15  0.15
-# PropofM and PropofF before spawning
-0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+# Natural mortality - one for each age group
+0.15 0.15 0.15 0.15 0.15 0.15 0.15 0.15 0.15 0.15 0.15 0.15 0.15 0.15 0.15 0.15
+# PropofM before spawning - one for each age group
 0 0 0 0 0 0 0 0 0 0 0 0 0 0
-10 # Basis for rel ssb 
-20  # Max ssb used when cv in recruitment depends on ssb
-5 # Min ssb used when cv in recruitment depends on ssb
+# PropofF before spawning - one for each age group
+0 0 0 0 0 0 0 0 0 0 0 0 0 0
+20  # Basis for rel ssb
+0.2  # Min rel ssb used when cv in recruitment depends on ssb
+2   # Max rel ssb used when cv in recruitment depends on ssb
 

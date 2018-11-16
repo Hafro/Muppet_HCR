@@ -1,14 +1,14 @@
-basedir <- "//home/hoski/Tac2018/HCR/Plaice"
+basedir <- "//home/hoski/Tac2018/HCR/Saithe"
 basedir1 <- "/home/hoski/Tac2018/HCR/"
 source(paste(basedir1,"Model/Read.r",sep="/"))
-inputprogfile  <- paste(basedir,"Files/plaiceprognosis.dat.biorule",sep="/")
-progoutfile <- "plaiceprognosis.dat"
+inputprogfile  <- paste(basedir,"Files/saiprognosis.dat.biorule",sep="/")
+progoutfile <- "saiprognosis.dat"
 savefile <- "HCRrun.rdata"
 sumfile <- "HCRrunsum.rdata"
-inputfile <- "iceplaice.dat.prog"
+inputfile <- "icesaithe.dat.prog"
 model <- "muppet"
                                         # Runs set up to avoid rbinds.
-parameters <- expand.grid(list(HarvestRate=seq(0.1,0.33,by=0.01),Btrigger=c(1,20),RecrCorr=c(0.35),Meanwtyears=c(10),WeightCV=0.08,AssessmentCV=0.2,AssessmentCorr=0.7)) 
+parameters <- expand.grid(list(HarvestRate=seq(0.1,0.34,by=0.01),Btrigger=c(1,65),RecrCorr=c(0.35),Meanwtyears=c(10),WeightCV=0.08,AssessmentCV=0.22,AssessmentCorr=0.7)) 
   cn <- names(parameters)
   i <- 1
   tmpresult <- OneRun(HarvestRate=parameters$HarvestRate[i],AssessmentCorr=parameters$AssessmentCorr[i],AssessmentCV=parameters$AssessmentCV[i],Btrigger=parameters$Btrigger[i],RecrCorr=parameters$RecrCorr[i],Meanwtyears=parameters$Meanwtyears[i],WeightCV=parameters$WeightCV[i],inputprogfile=inputprogfile,inputfile=inputfile,progoutfile=progoutfile,path="",model=model)

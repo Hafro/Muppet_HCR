@@ -1,6 +1,6 @@
 # run with
-#./icehad -ind  icehad.dat.opt  -nox
-#./icehad -ind icehad.dat.opt -nox -mcmc 100000 -mcsave 200 -mcscale
+#muppet -ind  icehad.dat.prog -mceval
+
 
 ../Files/catchandstockdata.dat # Data on the stock mean weight, maturity etc.
 ../Files/totcatch.dat  #  Total catch where cno=-1 does not have to exist
@@ -79,7 +79,7 @@ surveyresid.dat # not used, thought for bootstrap Does not have to exist
 # Migrations
 0 # number of migrations.  Read in the file stock parameters.dat
 hadprognosis.dat #Prognosis file
-../Files/ProgWts1.dat # Weight in prognosis, if the file does not exist average is used as specified in plaiceprognosis.dat
+../Files/ProgWts.dat # Weight in prognosis, if the file does not exist average is used as specified in plaiceprognosis.dat
 1 #Number of separable periods. Not used in the logit options.  
 2000 # productivity change year links to parameter #6 in ssbparameters.  
 ../Files/optim.dat.hockey  # bounds and phases on some parameters.   

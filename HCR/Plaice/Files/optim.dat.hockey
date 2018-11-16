@@ -1,14 +1,19 @@
-#Upper value of SSBbre adjusted in Hockey from 10 to 8.7
-# Default values
-#logRmax  logSSBbr    logCV  logAcf   power   logprodchange
-8            1.4         -2.5   -3      -1      -1.0 #lower bounds
-12	      5           0   -0.35    1        1.0 #upper bound changed on acf
--1.6  # SSB survey
--3 	     #default  min CV on normal surveys scaled by multipier
-2	     # surveylnqphase
--1	     # surveypowphase
--1 	     # surveybiopowphase
-2	     # estselphase
--1  	     # catchlogitphase
--2 	     # catchlogitsize phase
--1 	     # misreporting phase
+# Lower and upper boundary values of SSB-recruitment parameters
+# logRmax logSSBbr logCV logAcf power logprodchange
+        8      1.4  -2.5     -3    -1          -1.0  # lower bounds
+       12        5     0  -0.35     1           1.0  # upper bounds
+-1.6   # minimum logCV for SSB survey - specific case for mackerel
+       #  i.e. if estimated logCV becomes lower than the value specified
+       #  will act as the lower bound and hence used in the assessment
+-3     # default min logCV on survey-at-age multiplier - idea stolen from XSA :-)
+# Phase number for parameter estimation, negative values means never estimated
+#  despite what may be set in
+2      # surveylnqphase
+-1     # surveypowphase
+-1     # surveybiopowphase - if one tunes with a biomass survey
+# Selection phase estimation - note only one of the three values can be positive
+2      # estselphase - empirical selection pattern
+-1     # catchlogitphase - logit function for selection pattern
+-1     # catchlogitsize phase - logit as a function of stock weights
+# Some mackerel shit
+-1     # misreporting phase

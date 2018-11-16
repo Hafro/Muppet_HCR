@@ -5,7 +5,7 @@
 0 0 0 0 0 0 0 0 0 0 0 0
 0 0 0 0 0 0 0 0 0 0 0 0
 90 # Basis for rel ssb 
-140  # Max ssb used when cv in recruitment depends on ssb
-25 # Min ssb used when cv in recruitment depends on ssb
+0.3  # Min rel ssb used when cv in recruitment depends on ssb
+1.7 # Max rel ssb used when cv in recruitment depends on ssb
 
 
