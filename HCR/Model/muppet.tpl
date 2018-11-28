@@ -296,7 +296,9 @@ DATA_SECTION
   !! if(BackWards == 1) {catagephase1 = -1; catagephase2 = -1;catagephase3 = -1;catagephase4 = -1; vpaphase1 = 1; vpaphase2= 2; vpaphase3=4;}
   int firstestage  // only used in the VPA runs in the estimated years.  
   !! firstestage = firstage;
-  !! if(firstage == 0) firstestage = 1; 
+  !! if(firstage == 0) firstestage = 1;
+  int AgeCbioR;  // If biomass called CbioR is length or age based
+
 
 INITIALIZATION_SECTION
   logMoldest -1.6;  // exp(-1.6) = 0.2  only used if estMlastagephase > 0
@@ -338,6 +340,7 @@ PARAMETER_SECTION
   
 // Survey parameters  here some cleaning of values and bounds could be done.  More file control.
   vector Surveylikelihood(1,nsurveys);
+  vector SurveylikelihoodWeights(1,nsurveys); // Likely weight on each survey
   init_bounded_matrix SurveyPowerest(1,nsurveys,minsurveyfirstage,maxsurveyfirstagewithconstantcatchability,1,3,surveypowphase);
   !!dvector surveybiopowlb(1,nsurveys); //0.02
   !!dvector surveybiopowub(1,nsurveys); //0.85
@@ -435,7 +438,8 @@ PARAMETER_SECTION
   vector PredSpawningstock(lastoptyear-5,lastyear); //sd
   vector PredN(lastoptyear-5,lastyear); //sd
   vector Survivors(firstage,lastage); //sd
-
+  number CbioRreflebreak;  // when CbioR is length based
+  
   sdreport_vector RefF(firstyear,lastyear);
   sdreport_vector Spawningstock(firstyear,lastyear);
 //  vector RefF(firstyear,lastyear);
@@ -546,12 +550,15 @@ RUNTIME_SECTION
   maximum_function_evaluations 800000
  
 
-PRELIMINARY_CALCS_SECTION 
+PRELIMINARY_CALCS_SECTION
+ AgeModel = 1; // default value if refbio is output in Frules totbio is given
+ HCRrefAge = firstage; // default value 
  logSigmaSurveybio = logminssbsurveyCV+0.2;  // Matters for IC
  AssessmentErrorRat = 0.6; // Changed from 0.3
  COUNTER = 0;
 // Some dummy values 
 // Parameters that are sometimes estimated.
+  SurveylikelihoodWeights = 1;  //Default value.  Input later.  
   LastMisReportingYear = firstyear-1 ;  // Default value
   FishingYearCatch = -1; 
   Nhat = 0;
@@ -1206,17 +1213,17 @@ FUNCTION void evaluate_the_objective_function()
   for(i = 1; i <= nsurveys; i++) {
       if(surveytype(i) == 1 ) {
         Surveylikelihood(i) = Survey_loglikeli1(i); // Store by survey
-        LnLikelicomp(4) +=  Surveylikelihood(i);
+        LnLikelicomp(4) +=  Surveylikelihood(i)*SurveylikelihoodWeights(i);
       }
       if(surveytype(i) == 2 ) {
         tmpsurveylikelihood = Survey_loglikeli2(i); 
         Surveylikelihood(i)  = sum(tmpsurveylikelihood);
-	LnLikelicomp(5) +=  tmpsurveylikelihood(1);  // Biomass
-	LnLikelicomp(6) +=  tmpsurveylikelihood(2);  // Proportions 
+	LnLikelicomp(5) +=  tmpsurveylikelihood(1)*SurveylikelihoodWeights(i);  // Biomass
+	LnLikelicomp(6) +=  tmpsurveylikelihood(2)*SurveylikelihoodWeights(i);  // Proportions 
       }
       if(surveytype(i) == 4) {
          Surveylikelihood(i) = SSB_Survey_loglikeli(i);	
-	 LnLikelicomp(4) +=  Surveylikelihood(i); // Breyta?
+	 LnLikelicomp(4) +=  Surveylikelihood(i)*SurveylikelihoodWeights(i); // Breyta?
       }
   }
 
@@ -1773,10 +1780,11 @@ FUNCTION void ReadLikelihoodParameters()
    infile >> SurveyRobust; // Robust log-likeli in survey
    outfile  << " CatchRobust " << CatchRobust << " SurveyRobust " << SurveyRobust << endl;
    infile >> Likeliweights(1,10); // Weights on likelhood comp, usually 1
-   outfile << "Likeliweights " << Likeliweights << endl ;
-
-
-
+   outfile << "Likeliweights " << Likeliweights << endl;
+   if(!infile.eof()) {// Default value is 1
+    infile >>  SurveylikelihoodWeights;  // do not need the last line but better to use it.
+    // the inefile.eof() condition does not work but the read does nothing so default values (1) continue.  
+    outfile << "SurveylikelikelihoodWeights " << SurveylikelihoodWeights << endl ; }
 
 FUNCTION void ReadStockParameters()
    ofstream outfile("stockparameters.log");
@@ -1818,10 +1826,18 @@ FUNCTION void ReadOutputParameters()
 // Mean selection used for catchable biomass
    ofstream outfile("outputparameters.log");
    cifstream infile(outputparametersfilename);
-   dvar_vector tmpmeansel(firstage,lastdataage);
-   infile >> tmpmeansel;
-   MeanSel = tmpmeansel(firstage,lastage);
-   outfile  << "MeanSel" << endl << MeanSel << endl;
+   infile >> AgeCbioR ;
+   outfile << "AgeCbioR " << AgeCbioR << endl;
+   if(AgeCbioR == 1) {
+     dvar_vector tmpmeansel(firstage,lastdataage);
+     infile >> tmpmeansel;
+     MeanSel = tmpmeansel(firstage,lastage);
+     outfile  << "MeanSel" << endl << MeanSel << endl;
+   }
+   if(AgeCbioR == 0) {
+     infile >> CbioRreflebreak ;
+     outfile <<  "CbioRreflebreak" << CbioRreflebreak << endl;
+   }
    infile >> Frefage1 >> Frefage2 >> WeightedF ; 
    outfile << "Frefage1 " << Frefage1 << "Frefage2 " << Frefage2 << "WeightedF" << WeightedF << endl;
    Frefage2 = min(Frefage2,lastage);
@@ -1978,6 +1994,11 @@ FUNCTION void ReadPrognosis()
     dvar_vector ProgSSBWeights(firstage,lastage);
     ProgStockMaturity =  ProgCatchWeights = ProgStockWeights = ProgSSBWeights = 0;
     cifstream infile(PrognosisFilename);
+    if(infile.fail()){
+        cout << "File " << PrognosisFilename << 
+	"does not exist or something is wrong with it" << endl;
+         exit(1);
+    }
     infile >> CatchRule; // Number of catch rule.
     outfile << "Catchrule " << CatchRule << endl ;
     infile >> weightcv; // cv of weights
@@ -2282,9 +2303,14 @@ FUNCTION  void CalcRefValues(int firstyr,int lastyr,int HistAssessment)
 	CatchWeights(i)(-RefBiominage(2),lastage)))/1.0e6;
 
 // Biomass with specified selection
-    CbioR(i) = 0; 
-    for(j = firstage; j <= lastage; j++) 
-     CbioR(i)  = CbioR(i) + N(i,j)*CatchWeights(i,j)*MeanSel(j)*(1-mfexp(-Z(i,j)))/Z(i,j);
+    if(AgeCbioR == 1) {  // Age based CbioR middle of year
+      CbioR(i) = 0; 
+      for(j = firstage; j <= lastage; j++) 
+        CbioR(i)  = CbioR(i) + N(i,j)*CatchWeights(i,j)*MeanSel(j)*(1-mfexp(-Z(i,j)))/Z(i,j);
+     }
+     if(AgeCbioR == 0) { // Length based CbioR
+      CbioR(i)  = sum(elem_prod(N(i),elem_prod(StockWeights(i),wtsel(StockWeights(i),CbioRreflebreak))));
+   }
    if(WeightedF == 0) 
        RefF(i) = CalcMeanF(F(i));
     if(WeightedF == 1) 
@@ -2976,7 +3002,6 @@ FUNCTION dvariable  SmoothDamper(dvariable x, dvariable Roof,dvariable Floor)
 // Proportion of biomass above lebreak
 FUNCTION dvar_vector wtsel(dvar_vector StockWts,dvariable lebreak)
   return(1.0/(1.0+mfexp(-25.224-5.307*log(StockWts/pow(lebreak,3.0)))));  
-
 // = minage therefore set to minssbage + 1 for blue whiting.  
 FUNCTION dvariable AssYearSSB() 
    dvariable tmpssb= 0;

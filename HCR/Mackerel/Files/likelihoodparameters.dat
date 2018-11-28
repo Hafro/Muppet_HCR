@@ -10,3 +10,4 @@
 # Likelihood weights.  SSB_recruitment likelihood downweighted (#3)
 # as is typical in assessment.  
 1 1 0.05 1 1 1 1 0 1 1
+1 1 1  # Weight of the surveys.  SSB, Pel, Recindex

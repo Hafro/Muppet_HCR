@@ -1,5 +1,5 @@
-#MeanSel to compile biomass called CbioR in the beginning of the year 
-0 0 0 1  1 1 1 1 1 1 1 1 1
+0 # Length model for biomass called CbioR
+44.5  #RefLe
 # To compile F
 #Refage1 Refage2 WeightedF
 4 7 0
