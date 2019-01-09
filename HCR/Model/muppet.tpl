@@ -66,7 +66,6 @@ DATA_SECTION
   init_adstring outputparametersfilename;  //Age range on fbar etc.  
   !! ofs << "outputparametersfilename " << outputparametersfilename << endl;  
 
-  
 
 
   init_int nsurveys; // Number of surveys
@@ -265,6 +264,7 @@ DATA_SECTION
   int surveyq_mcmc_lines;
   int effort_mcmc_lines;
   int catch_mcmc_lines;
+  int fishyearcatch_mcmc_lines;
   int assessmenterror_mcmc_lines;
 
   int refbio2_mcmc_lines;
@@ -331,7 +331,7 @@ PARAMETER_SECTION
 
 
  init_bounded_number logSigmaCmultiplier(-1,1,catagephase4); 
- init_bounded_number AbundanceMultiplier(-10,10,-6); 
+ init_bounded_number AbundanceMultiplier(-10,10,-6); // When targeting of common cohorts.
  init_bounded_number lnMeanEffort(-3,3,catagephase1);
  init_bounded_dev_vector lnEffort(firstyear,lastoptyear,-4,4,catagephase2);  // log of Fishing mortality of oldest fish i.e effort
  init_bounded_number meanlogSurvivors(4,17,vpaphase1);
@@ -409,8 +409,6 @@ PARAMETER_SECTION
   vector ProgF(lastoptyear+1,lastyear);
   vector SigmaC(firstage,lastage);
   vector SigmaCinp(firstage,lastage);
-
-
 
 
   vector Mdata(firstage,lastage); // input M as function of age;
@@ -509,6 +507,8 @@ GLOBALS_SECTION
 //Catchrule 1 TAC, 2 Tac in advisory year F there after, 3 IcodHCr
 //4 F all years, 5 F with reduction below Btrigger, 6 IcodHCR with 
 // reduction below Btrigger, 7 IcodHcr without stabilizer.
+  adstring outputprefix;
+  adstring outputpostfix;
   ofstream all_mcmc;
   ofstream likelihood_mcmc;
   ofstream migration_mcmc;
@@ -521,6 +521,7 @@ GLOBALS_SECTION
   ofstream surveyq_mcmc;
   ofstream effort_mcmc;
   ofstream catch_mcmc;
+  ofstream fishyearcatch_mcmc; 
   ofstream refbio1_mcmc;
   ofstream refbio2_mcmc;
   ofstream hcrrefbio_mcmc;
@@ -535,7 +536,7 @@ GLOBALS_SECTION
 
 
 
-// this list of files could be rduced somehow.  
+// this list of files could be reduced somehow.  
 
 TOP_OF_MAIN_SECTION
   gradient_structure::set_CMPDIF_BUFFER_SIZE(10000000);
@@ -595,7 +596,8 @@ PRELIMINARY_CALCS_SECTION
     for( i = 5; i <= 6; i++) 
        if(SSBRecSwitches(i) < 0 || INITCOND==0)  estSSBRecParameters(i) = SSBRecParameters(i);
 
-   MaxFishMort = 1.2; // Maximum modelled fishing mortality ?
+   if(!mceval_phase()) MaxFishMort = 1.2;
+   if(mceval_phase()) MaxFishMort = 5; // Maximum modelled fishing mortality ?
    largenumber = 10000;
    TimeDrift = 0;
    CatchWeights = SSBWeights = StockWeights = StockMaturity = 0;
@@ -618,7 +620,7 @@ PRELIMINARY_CALCS_SECTION
     ReadPrognosis();
    cout << " ReadSurveyInfo " << endl;
     for(i = 1; i <= nsurveys; i++) 
-     SurveyWeights(i) = StockWeights;  // Changed if weights are read from file.
+   SurveyWeights(i) = StockWeights;  // Changed if weights are read from file.
    adstring parameterfilename;
    adstring datafilename; 
    adstring residualfilename;
@@ -648,6 +650,7 @@ PRELIMINARY_CALCS_SECTION
   surveyq_mcmc_lines = 0;
   effort_mcmc_lines = 0;
   catch_mcmc_lines = 0;
+  fishyearcatch_mcmc_lines = 0;
   assessmenterror_mcmc_lines = 0;
   refbio1_mcmc_lines = 0;
   refbio2_mcmc_lines = 0;
@@ -685,7 +688,7 @@ REPORT_SECTION
    report << "Surveylikelihood " << Surveylikelihood << endl;
    report << endl << "SigmaSurvey " << endl << SigmaSurvey << endl;
    int i,j;
-   ofstream outfile("resultsbyyearandage");
+   ofstream outfile(outputprefix+"resultsbyyearandage"+outputpostfix);
    outfile << "year\tage\tN\tZ\tStockWeights\tM\tF\tCalcCno\tCatchWeights\tSSBWeights\tStockMaturity\tObsCno\tCatchDiff";
    for(i = 1; i <= nsurveys; i++) 
       outfile << "\tCalcSurveyNr" << i <<"\tObsSurveyNr" << i <<"\tSurveyResiduals" << i;
@@ -706,7 +709,7 @@ REPORT_SECTION
    outfile.close() ;
 
 
-   outfile.open("resultsbyyear"); 
+   outfile.open(outputprefix+"resultsbyyear"+outputpostfix); 
 
 
 // Recruitment is same value as first age but put on the year that the fish is born.  
@@ -725,7 +728,7 @@ REPORT_SECTION
 
    outfile.close(); 
 
-   outfile.open("resultsbyage");
+   outfile.open(outputprefix+"resultsbyage"+outputpostfix);
  
   outfile << "age\tmeansel\tprogsel\tSigmaC";
   for(i = 1; i <= nsurveys; i++) 
@@ -982,7 +985,11 @@ FUNCTION void BioRatioHockeystick(int yr)
 
    CurrentTac = Catch;  
    AnnualCatch = SmoothDamper(AnnualCatch,MaxHarvestRatio*HCRrefbio(yr),mincatch);
-   ProgF(yr) = FishmortFromCatch(AnnualCatch*1e6,N(yr),CatchWeights(yr),progsel,natM(yr));
+
+// Differentiable version of this function for optimization.  The other is more
+// robust.  This HCR should though not be used for optimization. 
+   if(mceval_phase()) ProgF(yr) = FishmortFromCatchMCMC(AnnualCatch*1e6,N(yr),CatchWeights(yr),progsel,natM(yr));
+   if(!mceval_phase()) ProgF(yr) = FishmortFromCatchOpt(AnnualCatch*1e6,N(yr),CatchWeights(yr),progsel,natM(yr));
 
 FUNCTION void SetWeightErrorsHad() // For the haddock model.  
 // Could est the starting point based on current value i.e negative
@@ -1123,7 +1130,9 @@ FUNCTION void Prognosis()
             Catch = FutureForCatch(i)*1e6; // right units for the program (kgs)
           else 
             Catch = CatchIn1000tons(i)*1e6;
-	  ProgF(i) = FishmortFromCatch(Catch,N(i),CatchWeights(i),progsel,natM(i));
+// Differentiable version of the function needed for optimization.  
+	  if(mceval_phase()) ProgF(i) = FishmortFromCatchMCMC(Catch,N(i),CatchWeights(i),progsel,natM(i));
+	   if(!mceval_phase()) ProgF(i) = FishmortFromCatchOpt(Catch,N(i),CatchWeights(i),progsel,natM(i));
         }
     }
 
@@ -1133,7 +1142,8 @@ FUNCTION void Prognosis()
          if(current_phase() <= 3) // have to start with F for convergence
            ProgF(i) = 0.3;
 	 if(current_phase() > 3) {
-	      ProgF(i) = FishmortFromCatch(FutureForCatch(i)*1e6,N(i),CatchWeights(i),progsel,natM(i));
+	      if(!mceval_phase()) ProgF(i) = FishmortFromCatchOpt(FutureForCatch(i)*1e6,N(i),CatchWeights(i),progsel,natM(i));
+	      if(mceval_phase()) ProgF(i) = FishmortFromCatchMCMC(FutureForCatch(i)*1e6,N(i),CatchWeights(i),progsel,natM(i));
 	 }	   
 	      
       }
@@ -1164,7 +1174,7 @@ FUNCTION void Prognosis()
 // Frule done the proper way i.e TAC prediction through the assessment year.  
     if(CatchRule == 5 & i > lastdatayear) {
       if(i < lastyear) SingleTriggerHCR(i) ;
-      if(i == lastyear) ProgF(i) = FishmortFromCatch(CalcCatchIn1000tons(i)*1e6,N(i),CatchWeights(i),progsel,natM(i));
+      if(i == lastyear) ProgF(i) = FishmortFromCatchMCMC(CalcCatchIn1000tons(i)*1e6,N(i),CatchWeights(i),progsel,natM(i));
     }
     F(i) = ProgF(i)*progsel;
     Z(i) = F(i) + natM(i);
@@ -1618,10 +1628,87 @@ FUNCTION dvariable PredictRecruitment(int year)
    }
    return value;   
 
-// Calculate fishing mortality from catch.  More complicated version needed for catch of 0 group.  
-// except SSB is close to the beginning of the year.  
+// FUnction calculating Fishmort from catch with bysectional algorithm
+// Not functioning perfectly now and therefore not used.  
 
-FUNCTION dvariable FishmortFromCatch(const dvariable C,const dvar_vector& Number,const dvar_vector& Wt,const dvar_vector& sel,const dvar_vector& M)
+FUNCTION dvariable FishmortFromCatchMCMC1(const dvariable C,const dvar_vector& Number,const dvar_vector& Wt,const dvar_vector& sel,const dvar_vector& M)
+   int i;
+   dvar_vector Biomass(firstage,lastage);
+   dvariable Fishmort;
+   Biomass = elem_prod(Number,Wt);
+//   cout << C << " " << sum(Biomass) << " ";
+   dvariable Cbio;
+   dvariable epsilon=0.0001;
+   dvariable Catch,Catch1,dCatch;
+   int age1 =  Number.indexmin();
+   int age2 = Number.indexmax();
+   dvar_vector tmpF(age1,age2);
+   dvar_vector tmpZ(age1,age2);
+   dvariable deltaF;
+   Fishmort = MaxFishMort;
+   tmpF = Fishmort*sel;
+   tmpZ = tmpF + M;
+   Catch = sum(elem_prod(elem_prod(elem_div(tmpF,tmpZ),(1.-mfexp(-tmpZ))),Biomass));
+   if(Catch < C) return(Fishmort);
+   if(Catch > C) Fishmort = 0.005; 
+   tmpF = Fishmort*sel;
+   tmpZ = tmpF + M;
+   Catch = sum(elem_prod(elem_prod(elem_div(tmpF,tmpZ),(1.-mfexp(-tmpZ))),Biomass));
+   deltaF = MaxFishMort/1.8;
+   for(i = 1; i < 30; i++){
+      if(Catch > C) Fishmort = Fishmort - deltaF;
+      if(Catch < C) Fishmort = Fishmort + deltaF;
+      if(Fishmort < 0.005) Fishmort = 0.005;
+      deltaF = deltaF/2;
+      tmpF = Fishmort*sel;
+      tmpZ = tmpF + M;
+      Catch = sum(elem_prod(elem_prod(elem_div(tmpF,tmpZ),(1.-mfexp(-tmpZ))),Biomass));
+   }
+   if(Catch > C) Fishmort = Fishmort - deltaF;
+   if(Catch < C) Fishmort = Fishmort + deltaF;
+//li   if(Fishmort < 0.005) Fishmort = 0.005;
+//   cout << Fishmort << endl;
+   return(Fishmort);
+
+// copy of the function FishmortFromCatchOpt when that function is used
+// in MCMC evaluations.  The function that is not used is
+// called FishmortFromCatchMCMC1.  Currently the BYSEC algorithm is not
+// functioning perfectly but the goal is to let it take over in the mcmc
+// evaluations.
+
+FUNCTION dvariable FishmortFromCatchMCMC(const dvariable C,const dvar_vector& Number,const dvar_vector& Wt,const dvar_vector& sel,const dvar_vector& M)
+   int i;
+   dvar_vector Biomass(firstage,lastage);
+   dvariable Fishmort;
+   Biomass = elem_prod(Number,Wt);
+   dvariable Cbio;
+   dvariable epsilon=0.0001;
+   dvariable Catch,Catch1,dCatch;
+   int age1 =  Number.indexmin();
+   int age2 = Number.indexmax();
+   dvar_vector tmpF(age1,age2);
+   dvar_vector tmpZ(age1,age2);
+   Cbio = sum(elem_prod(sel,elem_prod(Biomass,(mfexp(-M)))));
+   Fishmort = C/Cbio+0.05; 
+   Cbio = sum(elem_prod(sel,elem_prod(Biomass,(mfexp(-(M+Fishmort))))));
+   Fishmort = C/Cbio+0.01; 
+   Fishmort = SmoothDamper(Fishmort,MaxFishMort,0.01);
+
+// Newtons method numeric differentiation 5 runs. 
+   for(i = 1; i < 10; i++) {
+      tmpF = Fishmort*sel;
+      tmpZ = tmpF + M;
+      Catch = sum(elem_prod(elem_prod(elem_div(tmpF,tmpZ),(1.-mfexp(-tmpZ))),Biomass));
+      tmpF = (Fishmort+epsilon)*sel;
+      tmpZ = tmpF + M;
+      Catch1  = sum(elem_prod(elem_prod(elem_div(tmpF,tmpZ),(1.-mfexp(-tmpZ))),Biomass));
+      dCatch = (Catch1-Catch)/epsilon;
+      Fishmort = Fishmort - (Catch1-C)/dCatch;
+  }
+  Fishmort = SmoothDamper(Fishmort,MaxFishMort,0.01);
+  return(Fishmort);
+
+FUNCTION dvariable FishmortFromCatchOpt(const dvariable C,const dvar_vector& Number,const dvar_vector& Wt,const dvar_vector& sel,const dvar_vector& M)
    int i;
    dvar_vector Biomass(firstage,lastage);
    dvariable Fishmort;
@@ -1826,6 +1913,12 @@ FUNCTION void ReadOutputParameters()
 // Mean selection used for catchable biomass
    ofstream outfile("outputparameters.log");
    cifstream infile(outputparametersfilename);
+   infile >> outputprefix;
+   outfile << "outputprefix " << outputprefix << endl;
+   infile >> outputpostfix;
+   outfile << "outputpostfix " << outputpostfix << endl;
+   if(outputpostfix=="***") outputpostfix = "";
+   if(outputprefix=="***") outputprefix = "";
    infile >> AgeCbioR ;
    outfile << "AgeCbioR " << AgeCbioR << endl;
    if(AgeCbioR == 1) {
@@ -2002,22 +2095,22 @@ FUNCTION void ReadPrognosis()
     infile >> CatchRule; // Number of catch rule.
     outfile << "Catchrule " << CatchRule << endl ;
     infile >> weightcv; // cv of weights
-    outfile << "weightcv" << weightcv << endl;
+    outfile << "weightcv " << weightcv << endl;
     infile >> weightcorr; // autocorrelations of weights
-    outfile << "weightcorr" << weightcorr << endl;
+    outfile << "weightcorr " << weightcorr << endl;
     infile >> Assessmentcv; // cv of Assessments
-    outfile << "Assessmentcv" << Assessmentcv << endl;
+    outfile << "Assessmentcv " << Assessmentcv << endl;
     infile >> Assessmentcorr; // autocorrelations of Assessments
-    outfile << "Assessmentcorr" << Assessmentcorr << endl;
+    outfile << "Assessmentcorr " << Assessmentcorr << endl;
     infile >> Recrcorr; // autocorrelations of Recruitment cv estimated
-    outfile << "Recrcorr" << Recrcorr << endl;
+    outfile << "Recrcorr " << Recrcorr << endl;
     infile >> Btrigger; // SSB trigger in the assessment yar
-    outfile << "Btrigger" << Btrigger << endl;
+    outfile << "Btrigger " << Btrigger << endl;
     infile >> Maxchange; // Maxchange 
     outfile << "Maxchange " << Maxchange << endl;
     Maxchange += 1 ;
     infile >> EstimatedAssYrSSB;  // To get starting value for AssErr
-    outfile << "EstimatedAssYrSSB" <<  EstimatedAssYrSSB << endl;
+    outfile << "EstimatedAssYrSSB " <<  EstimatedAssYrSSB << endl;
     infile >> nprogselyears;  // number of years to use for compiling selection in prognosis
     outfile  << "nprogselyears "<< nprogselyears << endl;
     infile >> nweightandmaturityselyears; // number of years to use for compiling weight and maturty in selection.  
@@ -2376,10 +2469,12 @@ FUNCTION void write_mcmc()
   // Strict format: no space before first column, one space between columns, and no space after last column
 
   // 1 Spawning stock biomass
+  adstring ss = "./run1/";
+  adstring ss1 = "aa";
   if(mcwriteswitch(1) == 1) {
     if(ssb_mcmc_lines == 0)
-    {
-      ssb_mcmc.open("ssb.mcmc");
+    {      
+      ssb_mcmc.open(outputprefix+"ssb.mcmc"+outputpostfix);
       ssb_mcmc<<"Spawningstock."<<Spawningstock.indexmin();
       for(int t=Spawningstock.indexmin()+1; t<=Spawningstock.indexmax(); t++)
       ssb_mcmc<<" Spawningstock."<<t;
@@ -2395,7 +2490,7 @@ FUNCTION void write_mcmc()
   if(mcwriteswitch(2) == 1){
     if(n1st_mcmc_lines == 0)
     {
-      n1st_mcmc.open("n1st.mcmc");
+      n1st_mcmc.open(outputprefix+"n1st.mcmc"+outputpostfix);
       n1st_mcmc<<"N1st."<<N1st.indexmin();
       for(int t=N1st.indexmin()+1; t<=N1st.indexmax(); t++)
         n1st_mcmc<<" N1st."<<t;
@@ -2409,7 +2504,7 @@ FUNCTION void write_mcmc()
   if(mcwriteswitch(3) == 1){
     if(f_mcmc_lines == 0)
     {
-      f_mcmc.open("f.mcmc");    
+      f_mcmc.open(outputprefix+"f.mcmc"+outputpostfix);    
       f_mcmc<<"RefF."<<RefF.indexmin();
       for(int t=RefF.indexmin()+1; t<=RefF.indexmax(); t++)
         f_mcmc<<" RefF."<<t;
@@ -2420,13 +2515,25 @@ FUNCTION void write_mcmc()
     f_mcmc_lines++;
   }
 
-// 4 unused.  
-
+// 4 FishingYearCatch.  
+  if(mcwriteswitch(4) == 1){
+    if(fishyearcatch_mcmc_lines == 0)
+    {
+      fishyearcatch_mcmc.open(outputprefix+"fishyearcatch.mcmc"+outputpostfix);
+      fishyearcatch_mcmc<<"FishingYearCatch."<<FishingYearCatch.indexmin();
+      for(int t=FishingYearCatch.indexmin()+1; t<=FishingYearCatch.indexmax(); t++)
+        fishyearcatch_mcmc<<" FishingYearCatch."<<t;
+      fishyearcatch_mcmc<<endl;
+    }
+    fishyearcatch_mcmc<<FishingYearCatch(FishingYearCatch.indexmin());
+    fishyearcatch_mcmc<<FishingYearCatch.sub(FishingYearCatch.indexmin()+1,FishingYearCatch.indexmax())<<endl;
+    fishyearcatch_mcmc_lines++;
+  }
 // 5 Catch
   if(mcwriteswitch(5) == 1){
     if(catch_mcmc_lines == 0)
     {
-      catch_mcmc.open("catch.mcmc");
+      catch_mcmc.open(outputprefix+"catch.mcmc"+outputpostfix);
       catch_mcmc<<"CalcCatchIn1000tons."<<CalcCatchIn1000tons.indexmin();
       for(int t=CalcCatchIn1000tons.indexmin()+1; t<=CalcCatchIn1000tons.indexmax(); t++)
         catch_mcmc<<" CalcCatchIn1000tons."<<t;
@@ -2436,19 +2543,28 @@ FUNCTION void write_mcmc()
     catch_mcmc<<CalcCatchIn1000tons.sub(CalcCatchIn1000tons.indexmin()+1,CalcCatchIn1000tons.indexmax())<<endl;
     catch_mcmc_lines++;
   }
-//  6  Some parameters 
+//  6  Some parameters
   if(mcwriteswitch(6) == 1){
     if(parameter_mcmc_lines == 0)
     {
-      parameter_mcmc.open("parameter.mcmc");
-  
-      parameter_mcmc<<"MeanRecr MeanInitialpop Catchlogitslope Catchlogitage50 SigmaCmultiplier AbundanceMultiplier MeanEffort";
+      adstring cn = "MeanRecr MeanInitialpop SigmaCmultiplier  MeanEffort ";
+      if(catchlogitsizephase > 0)  cn = cn + "selslope fullselwt ";
+      if(catchlogitphase > 0) cn = cn + "Catchlogitslope Catchlogitage50 ";
+      if(misreportingphase > 0) cn = cn + "logMisreportingRatio ";
+
+      parameter_mcmc.open(outputprefix+"parameter.mcmc"+outputpostfix);
+
+      
+      parameter_mcmc<< cn;
       for(int i=1; i<=size_count(estSSBRecParameters); i++)
         parameter_mcmc<<" estSSBRecParameters."<<i;
       parameter_mcmc<<endl;
     }
-    parameter_mcmc<<mfexp(lnMeanRecr)<<" "<<mfexp(lnMeanInitialpop)<<" "<<Catchlogitslope<<" "<<Catchlogitage50<<" "
-     <<mfexp(logSigmaCmultiplier)<<" "<<AbundanceMultiplier<<" "<<mfexp(lnMeanEffort)<<estSSBRecParameters<<endl;
+    parameter_mcmc<<mfexp(lnMeanRecr)<< " " <<mfexp(lnMeanInitialpop) <<  " " << mfexp(logSigmaCmultiplier)<< " " <<  mfexp(lnMeanEffort) << " ";
+    if(catchlogitsizephase > 0) parameter_mcmc << selslope << " "<< fullselwt << " "; 
+    if(catchlogitphase > 0) parameter_mcmc <<Catchlogitslope<<" "<<Catchlogitage50<<" ";
+    if(misreportingphase > 0)parameter_mcmc << logMisreportingRatio << " ";
+    parameter_mcmc <<estSSBRecParameters<<endl;
     parameter_mcmc_lines++;
   }
 
@@ -2457,7 +2573,7 @@ FUNCTION void write_mcmc()
   if(mcwriteswitch(7) == 1){
     if(refbio1_mcmc_lines == 0)
     {
-      refbio1_mcmc.open("refbio1.mcmc");
+      refbio1_mcmc.open(outputprefix+"refbio1.mcmc"+outputpostfix);
       refbio1_mcmc<<"RefBio1."<<RefBio1.indexmin();
       for(int t=RefBio1.indexmin()+1; t<=RefBio1.indexmax(); t++)
         refbio1_mcmc<<" RefBio1."<<t;
@@ -2473,7 +2589,7 @@ FUNCTION void write_mcmc()
   if(mcwriteswitch(8) == 1){
     if(refbio2_mcmc_lines == 0)
     {
-      refbio2_mcmc.open("refbio2.mcmc");
+      refbio2_mcmc.open(outputprefix+"refbio2.mcmc"+outputpostfix);
       refbio2_mcmc<<"RefBio2."<<RefBio2.indexmin();
       for(int t=RefBio2.indexmin()+1; t<=RefBio2.indexmax(); t++)
         refbio2_mcmc<<" RefBio2."<<t;
@@ -2491,7 +2607,7 @@ FUNCTION void write_mcmc()
        HCRrefbio(yr) = CalcHCRrefbio(yr,HCRrefAge,0,0);
     if(hcrrefbio_mcmc_lines == 0)
     {
-      hcrrefbio_mcmc.open("hcrrefbio.mcmc");
+      hcrrefbio_mcmc.open(outputprefix+"hcrrefbio.mcmc"+outputpostfix);
       hcrrefbio_mcmc<<"HCRrefbio."<<HCRrefbio.indexmin();
       for(int t=HCRrefbio.indexmin()+1; t<=HCRrefbio.indexmax(); t++)
         hcrrefbio_mcmc<<" HCRrefbio."<<t;
@@ -2508,7 +2624,7 @@ FUNCTION void write_mcmc()
   if(mcwriteswitch(10) == 1){
     if(assessmenterror_mcmc_lines == 0)
     {
-      assessmenterror_mcmc.open("assessmenterror.mcmc");
+      assessmenterror_mcmc.open(outputprefix+"assessmenterror.mcmc"+outputpostfix);
       assessmenterror_mcmc<<"AssessmentErr."<<AssessmentErr.indexmin();
       for(int t=AssessmentErr.indexmin()+1; t<=AssessmentErr.indexmax(); t++)
         assessmenterror_mcmc<<" AssessmentErr."<<t;
@@ -2523,7 +2639,7 @@ FUNCTION void write_mcmc()
   if(mcwriteswitch(11) == 1){
     if(surveyq_mcmc_lines == 0)
     {
-      surveyq_mcmc.open("surveyq.mcmc");
+      surveyq_mcmc.open(outputprefix+"surveyq.mcmc"+outputpostfix);
       surveyq_mcmc<<"SurveylnQest.1."<<SurveylnQest.colmin();
       for(int a=SurveylnQest.colmin()+1; a<=SurveylnQest.colmax(); a++)
         surveyq_mcmc<<" SurveylnQest.1."<<a;
@@ -2545,7 +2661,7 @@ FUNCTION void write_mcmc()
   if(mcwriteswitch(12) == 1){   
      if(surveypower_mcmc_lines == 0)
      {
-        surveypower_mcmc.open("surveypower.mcmc");
+        surveypower_mcmc.open(outputprefix+"surveypower.mcmc"+outputpostfix);
         surveypower_mcmc<<"SurveyPowerest.1."<<SurveyPowerest.colmin();
         for(int a=SurveyPowerest.colmin()+1; a<=SurveyPowerest.colmax(); a++)
           surveypower_mcmc<<" SurveyPowerest.1."<<a;
@@ -2568,7 +2684,7 @@ FUNCTION void write_mcmc()
     {
       if(migration_mcmc_lines == 0)
       {
-        migration_mcmc.open("migration.mcmc");
+        migration_mcmc.open(outputprefix+"migration.mcmc");
         migration_mcmc<<"MigrationAbundance."<<MigrationYears(1);
         for(int i=2; i<=size_count(lnMigrationAbundance); i++)
           migration_mcmc<<" MigrationAbundance."<<MigrationYears(i);
@@ -2584,7 +2700,7 @@ FUNCTION void write_mcmc()
   if(mcwriteswitch(14) == 1){   
     if(likelihood_mcmc_lines == 0)
     {
-      likelihood_mcmc.open("likelihood.mcmc");
+      likelihood_mcmc.open(outputprefix+"likelihood.mcmc"+outputpostfix);
       likelihood_mcmc<<"LnLikely";
       for(int i=1; i<=5; i++)
         likelihood_mcmc<<" LnLikelicomp."<<i;
@@ -2627,7 +2743,7 @@ FUNCTION void write_mcmc()
   if(mcwriteswitch(17) == 1){
     if(estimatedselection_mcmc_lines == 0)
     {
-      estimatedselection_mcmc.open("estimatedselection.mcmc");
+      estimatedselection_mcmc.open(outputprefix+"estimatedselection.mcmc"+outputpostfix);
       estimatedselection_mcmc<<"EstimatedSelection."<<EstimatedSelection.colmin();
       for(int a=EstimatedSelection.colmin()+1; a<=EstimatedSelection.colmax(); a++)
         estimatedselection_mcmc<<" EstimatedSelection.1."<<a;
@@ -2648,7 +2764,7 @@ FUNCTION void write_mcmc()
   if(mcwriteswitch(18) == 1){
     if(effort_mcmc_lines == 0)
     {
-      effort_mcmc.open("effort.mcmc");
+      effort_mcmc.open(outputprefix+"effort.mcmc"+outputpostfix);
       effort_mcmc<<"Effort."<<lnEffort.indexmin();
       for(int t=lnEffort.indexmin()+1; t<=lnEffort.indexmax(); t++)
         effort_mcmc<<" Effort."<<t;
@@ -2663,7 +2779,7 @@ FUNCTION void write_mcmc()
   if(mcwriteswitch(19) == 1){
     if(hcrbproxy_mcmc_lines == 0)
     {
-      hcrbproxy_mcmc.open("hcrbproxy.mcmc");
+      hcrbproxy_mcmc.open(outputprefix+"hcrbproxy.mcmc"+outputpostfix);
       hcrbproxy_mcmc<<"HCRBproxy."<<HCRBproxy.indexmin();
       for(int t=HCRBproxy.indexmin()+1; t<=HCRBproxy.indexmax(); t++)
         hcrbproxy_mcmc<<" HCRBproxy."<<t;
@@ -2677,7 +2793,7 @@ FUNCTION void write_mcmc()
   if(mcwriteswitch(20) == 1){
     if(n3_mcmc_lines == 0)
     {
-      n3_mcmc.open("n3.mcmc");
+      n3_mcmc.open(outputprefix+"n3.mcmc"+outputpostfix);
       n3_mcmc<<"N3."<<N3.indexmin();
       for(int t=N3.indexmin()+1; t<=N3.indexmax(); t++)
         n3_mcmc<<" N3."<<t;
@@ -2692,7 +2808,7 @@ FUNCTION void write_mcmc()
   if(mcwriteswitch(21) == 1){
     if(ssbwerr_mcmc_lines == 0)
     {
-      ssbwerr_mcmc.open("ssbwerr.mcmc");
+      ssbwerr_mcmc.open(outputprefix+"ssbwerr.mcmc"+outputpostfix);
       ssbwerr_mcmc<<"SpawningstockWithErr."<<SpawningstockWithErr.indexmin();
       for(int t=SpawningstockWithErr.indexmin()+1; t<=SpawningstockWithErr.indexmax(); t++)
       ssbwerr_mcmc<<" SpawningstockWithErr."<<t;
@@ -2707,7 +2823,7 @@ FUNCTION void write_mcmc()
   if(mcwriteswitch(22) == 1){
     if(relssb_mcmc_lines == 0)
     {
-      relssb_mcmc.open("relssb.mcmc");
+      relssb_mcmc.open(outputprefix+"relssb.mcmc"+outputpostfix);
       relssb_mcmc<<"RelSpawningstock."<<RelSpawningstock.indexmin();
       for(int t=RelSpawningstock.indexmin()+1; t<=RelSpawningstock.indexmax(); t++)
         relssb_mcmc<<" RelSpawningstock."<<t;
@@ -2779,7 +2895,7 @@ FUNCTION void SingleTriggerHCR(int year)
     // Simulate the assessment year.  
   for(int age = firstage+1; age <= lastage ; age++) Nhat(year,age)=mfexp(log(N(year,age))+AssessmentErr(year));
   CalcNaturalMortality1(year); 
-  ProgF(year) = FishmortFromCatch(CalcCatchIn1000tons(year)*1e6,Nhat(year),CatchWeights(year),progsel,natM(year));
+  ProgF(year) = FishmortFromCatchMCMC(CalcCatchIn1000tons(year)*1e6,Nhat(year),CatchWeights(year),progsel,natM(year));
 
   F(year) = ProgF(year)*progsel; 
   Z(year) = F(year) + natM(year);
@@ -2820,7 +2936,7 @@ FUNCTION void SingleTriggerHCR(int year)
     CurrentTac = CalcCatchIn1000tons(year+1);
     FishingYearCatch(year) =  CalcCatchIn1000tons(year+1)*2/3+CalcCatchIn1000tons(year)*1/3; // FishingYearCatch(2018) is 2018/2018
  }
- ProgF(year) = FishmortFromCatch(CalcCatchIn1000tons(year)*1e6,N(year),CatchWeights(year),progsel,natM(year));
+ ProgF(year) = FishmortFromCatchMCMC(CalcCatchIn1000tons(year)*1e6,N(year),CatchWeights(year),progsel,natM(year));
 
 
 
@@ -2828,7 +2944,7 @@ FUNCTION void BioRatioHockeystickAdviceYear(int year)
 // Bases advice on stock biomass in the beginning of the year following assessment year.
 // Only set up for length based HCR and ICEfish year.  Can be changed but basing on
 // calendar years is much simpler.  
-// Can be adapted to all kinds of HCR.  
+// Can be adapted to all kinds of HCR.
   dvariable mincatch = 0.0;
   dvariable Catch;
   dvariable tmpTac = CurrentTac;
@@ -2840,15 +2956,15 @@ FUNCTION void BioRatioHockeystickAdviceYear(int year)
   dvariable AnnualCatch;  // This is the catch for current calendar year.  
   if(year == lastyear){   // Special do not use prediction beyond last year.
      // Use Current Tac for the last year as we do not project to the year after.  
-     ProgF(year) = FishmortFromCatch(CurrentTac*1e6,N(year),CatchWeights(year),progsel,natM(year));
+     ProgF(year) = FishmortFromCatchMCMC(CurrentTac*1e6,N(year),CatchWeights(year),progsel,natM(year));
      return;
   }
   if(IceFishYear == 1) {  // Have to iterate as the advice affects the result use 3 iterations 
-    tmpTac = TacLeft + CurrentTac*1/3;  // Current Tac is only until September 1st but still used as first proxy.  
+    tmpTac = TacLeft + CurrentTac*1/3;  // Current Tac is only until September 1st but still used as first proxy.
+    for(age = firstage+1; age <= lastage ; age++) Nhat(year,age)=mfexp(log(N(year,age))+AssessmentErr(year));
     for(int i = 1; i <= 3; i++){
-      for(age = firstage+1; age <= lastage ; age++) Nhat(year,age)=mfexp(log(N(year,age))+AssessmentErr(year));
       CalcNaturalMortality1(year);
-      ProgF(year) = FishmortFromCatch(tmpTac*1e6,Nhat(year),CatchWeights(year),progsel,natM(year));
+      ProgF(year) = FishmortFromCatchMCMC(tmpTac*1e6,Nhat(year),CatchWeights(year),progsel,natM(year));
       F(year) = ProgF(year)*progsel; 
       Z(year) = F(year) + natM(year);
       for(age = firstage ; age < lastage ; age++) 
@@ -2871,13 +2987,13 @@ FUNCTION void BioRatioHockeystickAdviceYear(int year)
     AnnualCatch =  TacLeft + Catch/3; 
     AnnualCatch = SmoothDamper(AnnualCatch,MaxHarvestRatio*HCRrefbio(year),mincatch); // to avoid too much depletion in stochastic runs.  
     TacLeft = Catch*2/3;
-    FishingYearCatch(year) = CurrentTac = Catch;  // FishingYearCatch(2018) is 2018/2018
+    FishingYearCatch(year) = CurrentTac = Catch;  // FishingYearCatch(2018) is 2018/2019
   }
   if(IceFishYear == 0) { // Calendar year;
     for(age = firstage+1; age <= lastage ; age++) Nhat(year,age)=mfexp(log(N(year,age))+AssessmentErr(year));
     CalcNaturalMortality1(year); 
-    tmpTac = CurrentTac;  // Current Tac is only until September 1st but still used as first proxy.  
-    ProgF(year) = FishmortFromCatch(tmpTac*1e6,Nhat(year),CatchWeights(year),progsel,natM(year));
+    tmpTac = CurrentTac;  // Current Tac is for assessment year as calendar year.  
+    ProgF(year) = FishmortFromCatchMCMC(tmpTac*1e6,Nhat(year),CatchWeights(year),progsel,natM(year));
     F(year) = ProgF(year)*progsel; 
     Z(year) = F(year) + natM(year);
     for(age = firstage ; age < lastage ; age++) 
@@ -2899,7 +3015,7 @@ FUNCTION void BioRatioHockeystickAdviceYear(int year)
     TacLeft = Catch;
   }
   CurrentTac = Catch;  
-  ProgF(year) = FishmortFromCatch(AnnualCatch*1e6,N(year),CatchWeights(year),progsel,natM(year));
+  ProgF(year) = FishmortFromCatchMCMC(AnnualCatch*1e6,N(year),CatchWeights(year),progsel,natM(year));
 
 
 

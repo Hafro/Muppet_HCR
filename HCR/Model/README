@@ -1,0 +1,1 @@
+The parameters selpars selcorr selcv and maxgrowthmult were read from file in earlier program but the same values were always used so they are fixed for the moment.  The parameters selpar were not used at that time.

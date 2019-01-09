@@ -1,0 +1,5 @@
+git add HCR/*
+git add HCR/Model/*
+git add HCR/Plaice/*
+git commit -am 'Initial commit'
+git push

@@ -1,3 +1,5 @@
+***  # Prefix none
+***  # Postfix none
 0 # Length model for biomass called CbioR
 44.5  #RefLe
 # To compile F
@@ -10,9 +12,9 @@
 1  # 1. SSB
 1  # 2. Number in first age group
 1  # 3. Fbar
-0  # 4. Unused
+1  # 4. Fishyearcatch
 1  # 5. Catch
-0  # 6. Some estimated parametes for example ssb-rec
+1  # 6. Some estimated parametes for example ssb-rec
 1  # 7.  Refbio1
 0  # 8.  Refbio2
 1  # 9.  HCRrefbio
