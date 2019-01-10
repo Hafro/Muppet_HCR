@@ -212,6 +212,9 @@ DATA_SECTION
   init_int misreportingphase; // Misreporting estimate -1 misreporting not estimated. Misreporting year fixed as 1999 see scaleCatches.  
   !!ofs <<  "misreportingphase " <<  misreportingphase << endl;
 
+  init_int Mmultphase; // Should a multiplier on M be estimated.  
+  !!ofs <<  "Mmultphase " <<  Mmultphase << endl;
+
   int LastMisReportingYear;
   number CatchRule;
   number weightcv;
@@ -310,6 +313,7 @@ PARAMETER_SECTION
  init_bounded_number logMisreportingRatio(-1,1,misreportingphase);
  init_bounded_number logFoldestmult(-1,1,-2); // Not estimate but option available in VPA runs
  init_bounded_number logMoldest(-3,-0.5,estMlastagephase);
+ init_bounded_number logMmultiplier(-2,2,Mmultphase);
  init_bounded_vector lnMigrationAbundance(1,MigrationNumbers,1,13,catagephase1);
  init_bounded_number lnMeanRecr(4,20,catagephase1);
  init_bounded_dev_vector lnRecr(firstyear,lastoptyear+firstage-recrdatadelay,-6,6,catagephase2) ;// log of recruitment
@@ -418,7 +422,8 @@ PARAMETER_SECTION
   
   vector Misreporting(firstyear,lastoptyear);
 
-  vector Foldestinp(firstyear,lastdatayear); // For VPA runs 
+  matrix Foldestinp(firstyear,lastdatayear+1,lastage-1,lastage); // For VPA runs
+  matrix Noldestinp(firstyear,lastdatayear+1,lastage-1,lastage) // For VPA replaces Foldestinp
 
 // Some reference values that later could be set as sdreport_vector
 
@@ -483,7 +488,8 @@ PARAMETER_SECTION
 
 // Numbers related to HCR and stochasticity.  
   number CurrentTac;
-  number TacLeft; 
+  number TacLeft;
+  number Mmultiplier;
   vector AssessmentErr(lastoptyear+1,lastyear);
   vector MeanSel(firstage,lastage);
  
@@ -575,8 +581,6 @@ PRELIMINARY_CALCS_SECTION
   for(i = 1; i <= nsurveys; i++) surveybiopow(i) = 1; 
 
   if(INITCOND == 0) { // No pin file
-//  logMoldest = log(Mdata(lastage));  // Start value.  Have to read Mdata first.   
-//    Surveycorr = 0.6 01; 
     SigmaSurveypar = log(0.25);
     logMisreportingRatio = 0;
 
@@ -610,6 +614,8 @@ PRELIMINARY_CALCS_SECTION
    ReadCatchandStockData();
    cout << "ReadStockParameters " << endl;
    ReadStockParameters();
+   logMmultiplier = log(Mmultiplier);  // 1;
+
    cout << "ReadCatchParameters " << endl;
    ReadCatchParameters();
    cout << "ReadLikelihoodParameters " << endl;
@@ -671,7 +677,7 @@ PROCEDURE_SECTION
   }
   if(BackWards == 1) {
      BackwardHistoricalSimulation();
-     if(printPhase) cout << "current " << current_phase() << endl;
+//     if(printPhase) cout << "current " << current_phase() << endl;
   }
   COUNTER = COUNTER + 1;
   // SetPredValues();  // Set various sdreport objects from bw.tpl NPEL2007
@@ -750,11 +756,16 @@ REPORT_SECTION
 
   
   if(BackWards == 0) { // Print out F of oldest.  
+     ofstream Nfile("Noldest.dat");
+     dvar_matrix Noldest(firstyear,lastdatayear+1,lastage-1,lastage);
+     for(i = firstyear; i <=lastdatayear+1 ; i++) Noldest(i) = N(i)(lastage-1,lastage);
+     Nfile << Noldest ;
+     Nfile.close();
      ofstream Ffile("Foldest.dat");
-     dvar_vector Foldest(firstyear,lastdatayear);
-     for(i = firstyear; i <=lastdatayear ; i++) Foldest(i) = F(i,lastage);
-     Ffile << Foldest ;
-     Ffile.close();
+      dvar_matrix Foldest(firstyear,lastdatayear+1);
+      for(i = firstyear; i <=lastdatayear+1 ; i++) Foldest(i) = F(i)(lastage-1,lastage);
+      Ffile << Foldest ;
+      Ffile.close();
    }
 
 
@@ -782,33 +793,27 @@ FUNCTION void BackwardHistoricalSimulation()
  dvariable Nnew,Nold;
 // Question about using N from the separable model.  This code is only for plus group.  
   int HistoricalAssessment = 1;
-  dvariable FixNold = 100;  // Min left .  
+  dvariable FixNold = 0.1;  // Min left was 100 .  
   N = 0;
-  dvar_vector Foldest(firstyear,lastdatayear);
-  Foldest  = Foldestinp*mfexp(logFoldestmult);
   for(age = firstestage; age < lastage; age++) 
     N(lastoptyear+1,age) = mfexp(meanlogSurvivors+logSurvivors(age));
   CalcNaturalMortality1(lastoptyear);
-  N(lastoptyear+1,lastage) =  (ObsCatchInNumbers(lastoptyear,lastage)/(1-exp(-Foldest(lastoptyear)-natM(lastoptyear,lastage)))*(Foldest(lastoptyear)+natM(lastoptyear,lastage))/Foldest(lastoptyear)+FixNold)*exp(-Foldest(lastoptyear)-natM(lastoptyear,lastage));
+  N(lastoptyear+1,lastage) = Noldestinp(lastoptyear+1,lastage);
   for(year = lastoptyear; year >=  firstyear; year-- ) {
     CalcNaturalMortality1(year);
-    N(year,lastage) = ObsCatchInNumbers(year,lastage)/(1-exp(-Foldest(year)-natM(year,lastage)))*(Foldest(year)+natM(year,lastage))/Foldest(year)+FixNold;
-    N(year,lastage-1) = ObsCatchInNumbers(year,lastage-1)/(1-exp(-Foldest(year)-natM(year,lastage-1)))*(Foldest(year)+natM(year,lastage-1))/Foldest(year)+FixNold;  
-  //New, 1 might have to be fixed.  
-    for(age = firstcatchage; age <= lastage - 2; age++) 
+    N(year,lastage) = Noldestinp(year,lastage);
+    for(age = firstcatchage; age <= lastage - 1; age++) 
       N(year,age) =  (N(year+1,age+1)*exp(natM(year,age)/2)+ObsCatchInNumbers(year,age))*exp(natM(year,age)/2);
     for(age = firstage; age < firstcatchage; age++) 
       N(year,age) = N(year+1,age+1)*exp(natM(year,age));
-    // mean of last 4 ages
   }
   for(year = firstyear; year <= lastoptyear; year++) {
-     for(age = firstage; age < lastage-1; age++) {
+     for(age = firstage; age < lastage; age++) {
        Z(year,age) = -log(N(year+1,age+1)/N(year,age));  
        F(year,age) = Z(year,age) - natM(year,age);
      }
-     F(year,lastage) = F(year,lastage-1) = Foldest(year);
-     Z(year,lastage) = Foldest(year) + natM(year,lastage);
-     Z(year,lastage-1) = Foldest(year) + natM(year,lastage-1);
+     F(year,lastage) = Foldestinp(year,lastage);
+     Z(year,lastage) = F(year,lastage) + natM(year,lastage);
      CalcCatchInNumbers(year)=elem_prod(elem_div(F(year),Z(year)),elem_prod((1.-mfexp(-Z(year))),N(year)));
      CalcCatchIn1000tons(year) = sum(elem_prod(CalcCatchInNumbers(year),CatchWeights(year)))/1.0e6;
 //     CalcPredationNumbers(year)=elem_prod(elem_div(natM(year),Z(year)),elem_prod((1.-mfexp(-Z(year))),N(year)));
@@ -1080,7 +1085,7 @@ FUNCTION void Prognosis()
   CurrentTac= CurrentTacInput; // For catch rule start value.  
   TacLeft = TacLeftInput;  // For catch rule start value.  
   int i;
-//  UpdateWeightsAndMaturity() has to be called every year if 
+//  UpdateWeightsAndMaturity has to be called every year if 
 //  Weights are linked to stocksize.
    if(mceval_phase()){
      if(DensDep==0) UpdateWeightsAndMaturity(); // Have to do this every year with density dependence
@@ -1112,7 +1117,7 @@ FUNCTION void Prognosis()
 
   dvariable Catch;
   for(i = lastoptyear+1; i <= lastprogyear; i++) {
-    if(mceval_phase() && DensDep == 1) UpdateWeightandMaturityHad(i); // not done in optimization.
+    if(mceval_phase() && DensDep == 1) UpdateWeightandMaturityHad(i); // not done in optimization
     CalcNaturalMortality1(i); 
     //CalcRefValues(i,i,0);  // can not be called here for some reason
     if(firstcatchage == 0){ // Have to do it here if 0group is caught.
@@ -1631,7 +1636,7 @@ FUNCTION dvariable PredictRecruitment(int year)
 // FUnction calculating Fishmort from catch with bysectional algorithm
 // Not functioning perfectly now and therefore not used.  
 
-FUNCTION dvariable FishmortFromCatchMCMC1(const dvariable C,const dvar_vector& Number,const dvar_vector& Wt,const dvar_vector& sel,const dvar_vector& M)
+FUNCTION dvariable FishmortFromCatchMCMC(const dvariable C,const dvar_vector& Number,const dvar_vector& Wt,const dvar_vector& sel,const dvar_vector& M)
    int i;
    dvar_vector Biomass(firstage,lastage);
    dvariable Fishmort;
@@ -1676,7 +1681,7 @@ FUNCTION dvariable FishmortFromCatchMCMC1(const dvariable C,const dvar_vector& N
 // functioning perfectly but the goal is to let it take over in the mcmc
 // evaluations.
 
-FUNCTION dvariable FishmortFromCatchMCMC(const dvariable C,const dvar_vector& Number,const dvar_vector& Wt,const dvar_vector& sel,const dvar_vector& M)
+FUNCTION dvariable FishmortFromCatchMCMC1(const dvariable C,const dvar_vector& Number,const dvar_vector& Wt,const dvar_vector& sel,const dvar_vector& M)
    int i;
    dvar_vector Biomass(firstage,lastage);
    dvariable Fishmort;
@@ -1846,8 +1851,15 @@ FUNCTION void ReadCatchParameters()
    }
      
    if(BackWards ){
+      int yr;
+      cifstream Nfile("Noldest.dat");
+      for(yr = firstyear; yr <= lastoptyear+1; yr++)
+        Nfile  >> Noldestinp(yr);
+      outfile << "Noldestinp " << endl << Noldestinp;
+      Nfile.close();
       cifstream Ffile("Foldest.dat");
-      Ffile  >> Foldestinp(firstyear,lastdatayear);
+      for(yr = firstyear; yr <= lastoptyear+1; yr++)
+        Ffile  >> Foldestinp(yr);
       outfile << "Foldestinp " << endl << Foldestinp;
       Ffile.close();
    } 
@@ -1880,7 +1892,8 @@ FUNCTION void ReadStockParameters()
    infile >> tmpM;
    Mdata = tmpM(firstage,lastage);
    outfile  << "Mdata " << Mdata << endl;
-
+   infile >> Mmultiplier ;
+   outfile  << "Mmultiplier  " << Mmultiplier << endl;
    dvar_vector tmpssb(minssbage,lastdataage);
    infile >> tmpssb;
    PropofFbeforeSpawning = tmpssb(minssbage,lastage); 
@@ -2264,13 +2277,14 @@ FUNCTION void UpdateWeightandMaturityHad(int year)
    if(year > lastoptyear+1) {// survey in assessment year data on wt.  
       StockWeights(year,1) = 35; // does not matter
       StockWeights(year,2) = 198-0.115*(N(year,2) + N(year,3))/1000.*mfexp(recrweighterr(year));
+      if(StockWeights(year,2) < 120) StockWeights(year,2) = 120;  //change 2019
     }
 //   CatchWeights(year) = 9.169988*pow((StockWeights(year)),0.7438964)*mfexp(catchweighterr(year)); //More above 5720g 
     CatchWeights(year) = 8.65813*pow((StockWeights(year)),0.7388)*mfexp(catchweighterr(year)) ;// 1985-2011
 
    SSBWeights(year) = StockWeights(year);  // Used in haddock
 //   StockMaturity(year) = 1.0/(1.0+mfexp(17.314-2.644*log(StockWeights(year)))); // Added fef 2013
-   StockMaturity(year) = 1.0/(1.0+mfexp(12.642-1.933*log(StockWeights(year)))); // Added fef 2013
+   if(year > lastoptyear + 1) StockMaturity(year) = 1.0/(1.0+mfexp(12.642-1.933*log(StockWeights(year)))); // Added fef 2013
 
 
    if(year < lastyear) { // Add one more year
@@ -2551,6 +2565,7 @@ FUNCTION void write_mcmc()
       if(catchlogitsizephase > 0)  cn = cn + "selslope fullselwt ";
       if(catchlogitphase > 0) cn = cn + "Catchlogitslope Catchlogitage50 ";
       if(misreportingphase > 0) cn = cn + "logMisreportingRatio ";
+      if(Mmultphase > 0) cn = cn + "Mmultiplier ";
 
       parameter_mcmc.open(outputprefix+"parameter.mcmc"+outputpostfix);
 
@@ -2564,6 +2579,7 @@ FUNCTION void write_mcmc()
     if(catchlogitsizephase > 0) parameter_mcmc << selslope << " "<< fullselwt << " "; 
     if(catchlogitphase > 0) parameter_mcmc <<Catchlogitslope<<" "<<Catchlogitage50<<" ";
     if(misreportingphase > 0)parameter_mcmc << logMisreportingRatio << " ";
+    if(Mmultphase > 0) parameter_mcmc << mfexp(logMmultiplier) << " ";
     parameter_mcmc <<estSSBRecParameters<<endl;
     parameter_mcmc_lines++;
   }
@@ -3093,7 +3109,7 @@ FUNCTION void CalcNaturalMortality1(int year)
    int j;
    dvariable age;
    for(j = firstage; j <= lastage; j++)
-	natM(year,j) = Mdata(j);
+	natM(year,j) = Mdata(j)*mfexp(logMmultiplier);
    if(estMlastagephase > 0) natM(year,lastage) = mfexp(logMoldest); 
 
 

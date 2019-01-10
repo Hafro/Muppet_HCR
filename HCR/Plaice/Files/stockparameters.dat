@@ -1,5 +1,6 @@
 # Natural mortality - one for each age group
 0.15 0.15 0.15 0.15 0.15 0.15 0.15 0.15 0.15 0.15 0.15 0.15 0.15 0.15 0.15 0.15
+1  # Mmultiplier
 # PropofM before spawning - one for each age group
 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 # PropofF before spawning - one for each age group

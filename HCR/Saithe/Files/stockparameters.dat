@@ -1,5 +1,6 @@
 #Natural mortality ages 1-14
 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2  0.2
+1  # Mmultiplier
 # PropofM and PropofF before spawning list only age groups in  SSB
 0 0 0 0 0 0 0 0 0 0 0 0
 0 0 0 0 0 0 0 0 0 0 0 0

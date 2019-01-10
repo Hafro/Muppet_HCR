@@ -1,7 +1,7 @@
 ../Files/catchandstockdata.dat  # Data on the stock mean weight, maturity etc.
 totcatch.dat # Total catch per year does not have to exist
 catchresiduals.dat  # For bootstrap, not used.  
-1  # Initial condition from file (1) or not.  program run with -ainp filename
+0  # Initial condition from file (1) or not.  program run with -ainp filename
 0  # Backwards   
 
 1980 # First year  
