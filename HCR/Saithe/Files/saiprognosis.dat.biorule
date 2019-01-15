@@ -4,6 +4,8 @@
 0.5     # WeightCorr
 0.25    # AssessmentCV
 0.45    # AssessmentCorr
+0.2    # CurrentAssessmentErrmultiplier
+1      # CurrentStockScaler
 0.4     # RecrCorr not active when estimaded
 5      # Btrigger
 10     # MaxChange no limit on interannual changes with this high value.  
@@ -17,6 +19,7 @@
 4	# HCRrefage
 0	# ProxyAge 0 means use SSB
 0.22	# HarvestRate
-0.9     # MaxHarvestRate
+0.75      # MaxHarvestRate # Changed from 0.9 nov 21st
 60.237   # Last TAC
 45     # Tac left Icelandic fishing years 4.7 + something more
+0      # Next years Tac  0 means calculated.  

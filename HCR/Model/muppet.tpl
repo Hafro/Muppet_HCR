@@ -221,6 +221,8 @@ DATA_SECTION
   number weightcorr;
   number Assessmentcv;
   number Assessmentcorr;
+  number CurrentAssessmentErrmultiplier; // increase uncertainty in terminal yeaer
+  number CurrentStockScaler;
   number Recrcorr; 
   number Btrigger;
   number EstimatedAssYrSSB;
@@ -239,6 +241,7 @@ DATA_SECTION
   number HarvestRatio;
   number CurrentTacInput;
   number TacLeftInput;  // Tac left in the beginning of the assessment year
+  number NextYearsTacInput;  // If 0 Tac next year is not calculated.  
   number LastYearsTacRatio // Ratio of last years TAC IC stabiliser
 
   vector FutureForCatch(lastoptyear+1,lastyear); // Catch or F for the future.  
@@ -977,7 +980,8 @@ FUNCTION void BioRatioHockeystick(int yr)
    dvariable AnnualCatch;  
    dvariable mincatch = 0.0;
    dvariable refcatch = Hratio*mfexp(log(HCRrefbio(yr))+AssessmentErr(yr));
-   dvariable Catch = LastYTacRat*CurrentTac +  (1-LastYTacRat)*refcatch;  
+   dvariable Catch = LastYTacRat*CurrentTac +  (1-LastYTacRat)*refcatch;
+   if(yr == (lastoptyear+1) && NextYearsTacInput > 0) Catch = NextYearsTacInput; // Added January 15th. 
    Catch = SmoothDamper(Catch,MaxHarvestRatio*HCRrefbio(yr),mincatch);
    if(IceFishYear) {
       AnnualCatch =  TacLeft + Catch/3; 
@@ -1057,7 +1061,7 @@ FUNCTION void SetAssessmentErr()
   int i;
   for(i = lastoptyear+1; i <= lastyear; i++)
       AssessmentErr(i) = randn(r);
-  AssessmentErr(lastoptyear+1) = log(EstimatedAssYrSSB/AssYearSSB())/ratio/Assessmentcv*0.45; //AssessmentErrorRat ; Highest value that the model works on. 
+  AssessmentErr(lastoptyear+1) = log(EstimatedAssYrSSB/AssYearSSB())/ratio/Assessmentcv;//2019*0.45; //AssessmentErrorRat ; Highest value that the model works on. 
 //  AssessmentErr(lastoptyear+1) = log(EstimatedAssYrSSB/AssYearSSB())/ratio/Assessmentcv; //AssessmentErrorRat ; Highest value that the model works on.  
   for(i = lastoptyear+2; i <= lastyear; i++)
     AssessmentErr(i) = Assessmentcorr*AssessmentErr(i-1)+AssessmentErr(i);
@@ -1088,6 +1092,15 @@ FUNCTION void Prognosis()
 //  UpdateWeightsAndMaturity has to be called every year if 
 //  Weights are linked to stocksize.
    if(mceval_phase()){
+     // scaling for terminal year added jan 2019
+     dvariable CurrentStockError;
+     random_number_generator r(COUNTER+20000111);  // To avoid correlation with other errors
+      CurrentStockError = randn(r)*CurrentAssessmentErrmultiplier*Assessmentcv; 
+     // scale the stock error is stock/presumed stock     
+     N(lastoptyear+1)= N(lastoptyear+1)*CurrentStockScaler; // Scale down the stock in the assessment year.
+     
+     N(lastoptyear+1)=mfexp(log(N(lastoptyear+1))-CurrentStockError); //
+     // Finished scaling the stock.  
      if(DensDep==0) UpdateWeightsAndMaturity(); // Have to do this every year with density dependence
      SetAssessmentErr();
 //   N(lastoptyear+1)=mfexp(log(N(lastoptyear+1))-AssessmentErr(lastoptyear+1));
@@ -2115,6 +2128,11 @@ FUNCTION void ReadPrognosis()
     outfile << "Assessmentcv " << Assessmentcv << endl;
     infile >> Assessmentcorr; // autocorrelations of Assessments
     outfile << "Assessmentcorr " << Assessmentcorr << endl;
+    infile >> CurrentAssessmentErrmultiplier;  // Multiplier on assessment error in current year.  Part is in the Hessian
+    outfile << "CurrentAssessmentErrmultiplier " << CurrentAssessmentErrmultiplier << endl;  // Added Oct 2012 in the haddock model, 2019 in muppet
+    infile >> CurrentStockScaler; // Multiplier on the stock in the assyear 
+    outfile << "CurrentStockScaler " << CurrentStockScaler << endl ; // to see if the stock can recover
+    
     infile >> Recrcorr; // autocorrelations of Recruitment cv estimated
     outfile << "Recrcorr " << Recrcorr << endl;
     infile >> Btrigger; // SSB trigger in the assessment yar
@@ -2174,7 +2192,10 @@ FUNCTION void ReadPrognosis()
       outfile << "CurrentTacInput " << CurrentTacInput << endl;
       infile >> TacLeftInput ;  // Only for ICEFISHYEAR
       outfile << "TacLeftInput " << TacLeftInput << endl;
-   }      
+      infile >> NextYearsTacInput ;  // Only for ICEFISHYEAR
+      outfile << "NextYearsTacInput " << NextYearsTacInput << endl;
+      
+    }      
    infile.close();
    cifstream  Progwtandmatinfile(WeightAndMaturityDatafilename);
    if(Progwtandmatinfile.fail()){
@@ -2975,6 +2996,9 @@ FUNCTION void BioRatioHockeystickAdviceYear(int year)
      ProgF(year) = FishmortFromCatchMCMC(CurrentTac*1e6,N(year),CatchWeights(year),progsel,natM(year));
      return;
   }
+
+
+   
   if(IceFishYear == 1) {  // Have to iterate as the advice affects the result use 3 iterations 
     tmpTac = TacLeft + CurrentTac*1/3;  // Current Tac is only until September 1st but still used as first proxy.
     for(age = firstage+1; age <= lastage ; age++) Nhat(year,age)=mfexp(log(N(year,age))+AssessmentErr(year));
@@ -2998,6 +3022,7 @@ FUNCTION void BioRatioHockeystickAdviceYear(int year)
       Catch = LastYTacRat*CurrentTac +  (1-LastYTacRat)*refcatch;
       // SmoothDamper is a differentiable if, this function will only be used in the mceval mode so this is perhaps not needed.  
       Catch = SmoothDamper(Catch,MaxHarvestRatio*HCRrefbio(year+1),mincatch);
+      if(year == (lastoptyear+1) && NextYearsTacInput > 0) Catch = NextYearsTacInput; // Added January 15th. 
       tmpTac = TacLeft + Catch/3;
     }
     AnnualCatch =  TacLeft + Catch/3; 
@@ -3026,6 +3051,7 @@ FUNCTION void BioRatioHockeystickAdviceYear(int year)
     refcatch = Hratio*HCRrefbio(year+1);
     Catch = LastYTacRat*CurrentTac +  (1-LastYTacRat)*refcatch;
     Catch = SmoothDamper(Catch,MaxHarvestRatio*HCRrefbio(year+1),mincatch);
+    if(year == (lastoptyear+1) && NextYearsTacInput > 0) Catch = NextYearsTacInput;  // Added 15th of Jan
     AnnualCatch =  CurrentTac;
     AnnualCatch = SmoothDamper(AnnualCatch,MaxHarvestRatio*HCRrefbio(year),mincatch); // to avoid too much depletion in stochastic runs.  
     TacLeft = Catch;

@@ -4,6 +4,8 @@
 0.7     # WeightCorr
 0.25    # AssessmentCV
 0.6    # AssessmentCorr
+0.8    # CurrentAssessmentErrmultiplier
+1      # CurrentStockScaler
 0.7     # RecrCorr
 40       # Btrigger
 3        # MaxChange practicially noconstrained with this high value  

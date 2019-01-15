@@ -4,6 +4,8 @@
 0.7     # weightcorr
 0.28 	 # Assessmentcv
 0.7 	 # Assessmentcorr
+0.8    # CurrentAssessmentErrmultiplier
+1      # CurrentStockScaler
 0.5 	 # Recrcorr
 40 	 # Btrigger
 3	 # Maxchange

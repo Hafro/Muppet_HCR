@@ -4,6 +4,8 @@
 0.5   # WeightCorr
 0.25  # AssessmentCV
 0.45  # AssessmentCorr
+0.8    # CurrentAssessmentErrmultiplier
+1      # CurrentStockScaler
 0.4   # RecrCorr not active when estimated
 1     # Btrigger
 10    # MaxChange no limit on interannual changes with this high value.
