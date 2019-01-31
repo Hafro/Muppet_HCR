@@ -638,148 +638,41 @@ TAC_{y+1}=\sum_{a}\frac{\widetilde{F}_{a,y+1}}{\widetilde{F}_{a,y+1}+M_{a,y+1}}
 \widetilde{N}_{a,y+1}\widetilde{cW}_{a,y+1}\left(1-e^{-(\widetilde{F}_{a,y+1}+M_{a,y+1})}\right) \label{eq:caltactmp}
 \end{equation}
 
+# General setup considerations
 
-# Setting up assessment and simulations
+## Sensible inputs for observation errors
 
+Ordinarily three parameters are required as in input into the observation model:
 
+* Standard deviation (input as here as cv)
+* 1st order auto-correlation
+* The long term bias
 
-# Older text, possibly to be recycled
+Four methods are available to estimate/emulate the value of the observation errors, ...
 
-Three parameters are required for the AR model, bias, 1st order auto-correlation
-and standard deviation. If a bias is suspected it is treated separately
-by increasing the harvest ratio/fishing mortality by the bias. Even 
-relatively small bias or 5-10\%
-can have considerable effect on the performance of the HCR. Large
-auto-correlation can also lead to increased risk of spawning stock going
-below $B_{lim}$ except harvest ratio is very low. What is large auto-correlation
-depends on the longevity of the species, for long lived species with
-low mortality number of years with poor recruitment will not cause
-major problem. 
+The last framework, often referred to a "best science"/"full model" does not require specifying the above parameters as input^[It though moves the error framework specification to another place]. In the "short cut" method, which some fecal guys have termed the "fool's model" one does however need to provide the above paramters as input into the simulation framework.
 
-Harvest Control Rule is here a set of equation converting estimated
-of reference biomass, spawning stock and earlier advice into advised
-catches for the text fishing year starting September 1 in the assessment
-year, ending August 31st in the year following the assessment year
-(referred to as advisory year in this text). 
+### Errors from assessment model
 
-Characteristics of a stock that affect choice of HCR tested are. 
-\begin{enumerate}
-\item Variability in year-class size.
-\item Variability in stock size
-\item Quality of assessment of the adult part of the stock. 
-\item Quality of recruitment estimates
-\item Noise in survey data
-\item Availability of maturity data.
-\item Coocurrence of recruits and adult part of the stock in the fisheries. 
-\item Mixed fisheries issues. 
-\end{enumerate}
-How these characteristics affect the type Of HCR is. 
-\begin{itemize}
-\item With large variability in year-class size care must be taken to increase
-TAC when large year-class is entering the fishery, except the fisheries
-are really targeting this year-class as much as older year-classes. 
-\item Large/rapid variations in stock size make catch stabilizers questionable.
-\item Large ``high frequency'' assessment error makes use of catch stabilizers
-suitable as too much unnecessary inter-annual variability in advice
-undermines the HCR. 
-\item Poor recruitment estimates favour rules based on the part of the biomass
-that recruitment estimates do not affect too much. 
-\item With good recruitment estimates, rule looking few years ahead is a
-possibility.
-\item For stock with large variations in mean weight at age the reference
-biomass or reference fishing mortality should in many cases be based
-on size rather than age. This applies specially to stocks where selection
-is more size than age based. 
-\item With good survey data weights at age in the survey are more appropriate
-values than for calculations of reference biomass than values from
-landings. One problem with values from landings is that they overestimate
-the contributions of the youngest age groups where the fisheries only
-target the largest individuals. 
-\item Same applies to maturity at age data that survey data are more appropriate
-values than catch values if survey is conducted in a season where
-maturity stage is easily identified. Here the problem of getting representative
-values for the stock is even larger than with weights at age as fisheries
-are often targeting the mature part of the stock in the season when
-maturity at age is easiest to detect. Getting ungutted fish from landings,
-required for registration of maturity stage is also a problem in many
-fisheries. How maturity is defined can affect trends in spawning stock
-but maturity from catches tend to be overestimate the contribution
-from young fish and therefore overestimate spawning potential when
-mortality has been high. 
-\end{itemize}
-The types of harvest control rules that were tested are 
-\begin{enumerate}
-\item Proportion of biomass above certain age. 
-\item Proportion of biomass above certain length. 
-\item Specified fishing mortality in the advisory year. 
-\end{enumerate}
-Biomass was either in the beginning of the assessment year or the
-advisory year. 
+This method only provides estimates of "white noise" (cv) but not does provide a basis to estimate auto-correlation nor bias.
 
-All type of Harvest control rules are tested with and without a trigger.
-A final approved HCR must have trigger action but during testing behaviour
-of the HCR was investigated without a trigger. Two types of possible
-trigger action were tested, the first one the traditional one where
-the harvest ratio is reduced by the fraction $\frac{SSB}{SSB_{trigger}}$
-where SSB refers either to spawning stock either in the advisory year,
-or the assessment year. This type of trigger is referred to as as
-$Trigger_{1}$ in what follows. 
+In general the "white noise" estimated in assessment models are considered unrealistically low.
 
-The second type of trigger rule is based on the fact that year-class
-size of haddock is reasonably well known at age 1 so the spawning
-stock can be predicted 4 years ahead and action taken if poor recruitment
-has been seen. The rule is set up in $ $the following way. Predict
-spawning stock 4 years ahead and if the spawning stock is predicted
-to be below $B_{lim}$ with more than 5\% probability the Harvest
-ratio is reduced as required but not more than to 2/3 of the base
-harvest ratio. If the SSB is below $SSB_{trigger}$ the base harvest
-ratio is multiplied by the ratio $\frac{SSB}{B_{trigger}}$ and the
-minimum harvest ratio is still 2/3 of the base harvest ratio. This
-type of trigger is referred to as $Trigger_{2}$ in what follows. 
+### Errors derived from analytic retrospective analysis
 
-Catch stabilizers tested were to let current fishing years advice
-have 50\% weight in the advice for the next fishing year. 
+For the purpose of estimating the assessment errors based on analytic retrospectives, they should preferably be run for 15-20 years for species reaching 10-15 years age. To do this requires at least 30 years of tuning data. For shorter lived species, an equivalently shorter peel could be used but only if the data input series dictates that. If the decision rule is based on population metrics in the beginning of the assessment year a conventional analysis can be used to derive an estimated value of cv, $\rho$ and bias. If the decision rule is based on future stock dynamics (advisory year and beyond), be they the ICES default F-rule or some HR-rule the analytically retrospecive analysis need include predictions into the future.
 
-## Hanging stuff
+### Errors derived from empirical retrospective analysis
 
-That $F_{target}$ is a function of $\widetilde{SSB}$ not $SSB$ is important and leads to rules with trigger action being problematic due to to much variability in catches. Case to look at Norwegian spring spawning herring at the moment
+For most stocks assessed by ICES, empirical (historical) retrospecive stock summary data up to the start of the assessment year are readily available [REFERENCE]. Getting comparable data over a long time for the purpose in question is though difficult because methods to estimate historical "auxillary assessment data" such as weight and maturity at age might have changed. It is though not an impossible task to reconstruct the assessed stock-in-numbers at age from archived (ICES) reports. These data series may be of value to estimate assessment errors if the decision rule is based on the estimates in the start of the assessment year (normally only used in HR-rules).
 
-Three parameters are required for the AR model, bias, 1st order auto-correlation
-and standard deviation. If a bias is suspected it is treated separately
-by increasing the harvest ratio/fishing mortality by the bias. Even 
-relatively small bias or 5-10\%
-can have considerable effect on the performance of the HCR. Large
-auto-correlation can also lead to increased risk of spawning stock going
-below $B_{lim}$ except harvest ratio is very low. What is large auto-correlation
-depends on the longevity of the species, for long lived species with
-low mortality number of years with poor recruitment will not cause
-major problem. 
+If the decision rule is base on the estimates in the start of the advisory year (like in the default ICES F-rule), the emprical reconstuction of the data need to include the historical predictions.
 
+What compounds using empirical assessment as a basis to estimate assessment errors is that surveys used in the historical assessment series may have been short in the beginning, but become more informative as over the assessment series time. So in practice for most stocks useful empirical data series to estimate assessement errors are painfully short.
 
-Four methods are available to estimate assessment error, standard
-error from assessment model, analytic retros, real time retros and
-simulation with biological model, observation model and assessment
-model. The first method does not give auto-correlation nor bias. 
+There are though known exception, one stock where emprical retrospective patterns over the time period 19XX-20XX were used to derive assessment errors is, yours truly: The cod stock in 5a.
 
-For most stocks assessed by ICES real time retros are available for
-the time period where they have been assessed there. Getting comparable
-data for a long time is though difficult, methods to estimate maturity
-at age or weight at age might have changed, surveys have been started
-and become more informative as they have been conducted more years.
-But to summarize, most data series are painfully short to estimate
-characteristics of auto-correlated time series. 
-
-For the purpose of getting the assessment error analytic retros
-should preferably be run for 15-20 years for species reaching 10-15
-years age. To do this requires at least 30 years of tuning data. If
-a F - rule or rule based on some future biomass is suggested analytically
-retros should be supplemented by prediction 1-2 years ahead. 
-
-The last method, combining biological model, observation model and
-assessment model is the best method to test how assessment error will
-change with decreased fishing mortality, effects of wrong assumed
-M etc. It does though not solve all problems, as setting up a good
-biological and observation model is not a simple task. 
+### Text to resurrect
 
 The type of HCR does affect the standard deviation of the assessment
 error and also the bias if there is any bias. Biomass in the beginning
@@ -884,6 +777,96 @@ Assessment becomes an extrapolation.
 \end{itemize}
 The evaluation of assessment error will be done separately in the
 sections for each stock based on available retrospective data. 
+
+## Sensbile candidate harvest control rules
+
+A harvest control rule (HCR) is a set of equation converting estimated (obverved) biomass ($B_{trigger}$ and in case of harvest rate rules reference biomass) and earlier advice into advised catches for the next advisory year (calendar year or fishing year).
+
+Sensible HCR depend on the characteristics of the stock in question. Among these characters are:
+
+* Variability in year-class size.
+* Variability in stock size
+* Quality of assessment of the adult part of the stock. 
+* Quality of recruitment estimates
+* Noise in survey data
+* Availability of maturity data.
+* Coocurrence of recruits and adult part of the stock in the fisheries. 
+* Mixed fisheries issues. 
+
+How these characteristics affect the type of HCR:
+
+* With large variability in year-class size care must be taken to increase TAC when large year-class is entering the fishery, except the fisheries are really targeting this year-class as much as older year-classes. 
+* Large/rapid variations in stock size make catch stabilizers questionable.
+* Large ``high frequency'' assessment error makes use of catch stabilizers suitable as too much unnecessary inter-annual variability in advice undermines the HCR. 
+* Poor recruitment estimates favour rules based on the part of the biomass that recruitment estimates do not affect too much. 
+* With good recruitment estimates, rule looking few years ahead is a possibility.
+* For stock with large variations in mean weight at age the reference biomass or reference fishing mortality should in many cases be based on size rather than age. This applies specially to stocks where selection
+is more size than age based. 
+* With good survey data weights at age in the survey are more appropriate values than for calculations of reference biomass than values from landings. One problem with values from landings is that they overestimate
+the contributions of the youngest age groups where the fisheries only target the largest individuals. 
+* Same applies to maturity at age data that survey data are more appropriate values than catch values if survey is conducted in a season where maturity stage is easily identified. Here the problem of getting representative
+values for the stock is even larger than with weights at age as fisheries are often targeting the mature part of the stock in the season when maturity at age is easiest to detect. Getting ungutted fish from landings, required for registration of maturity stage is also a problem in many fisheries. How maturity is defined can affect trends in spawning stock but maturity from catches tend to be overestimate the contribution from young fish and therefore overestimate spawning potential when mortality has been high. 
+
+# Setting up assessment and simulations
+
+
+
+# Older text, possibly to be recycled
+
+Three parameters are required for the AR model, bias, 1st order auto-correlation
+and standard deviation. If a bias is suspected it is treated separately
+by increasing the harvest ratio/fishing mortality by the bias. Even 
+relatively small bias or 5-10\%
+can have considerable effect on the performance of the HCR. Large
+auto-correlation can also lead to increased risk of spawning stock going
+below $B_{lim}$ except harvest ratio is very low. What is large auto-correlation
+depends on the longevity of the species, for long lived species with
+low mortality number of years with poor recruitment will not cause
+major problem. 
+
+
+
+All type of Harvest control rules are tested with and without a trigger.
+A final approved HCR must have trigger action but during testing behaviour
+of the HCR was investigated without a trigger. Two types of possible
+trigger action were tested, the first one the traditional one where
+the harvest ratio is reduced by the fraction $\frac{SSB}{SSB_{trigger}}$
+where SSB refers either to spawning stock either in the advisory year,
+or the assessment year. This type of trigger is referred to as as
+$Trigger_{1}$ in what follows. 
+
+The second type of trigger rule is based on the fact that year-class
+size of haddock is reasonably well known at age 1 so the spawning
+stock can be predicted 4 years ahead and action taken if poor recruitment
+has been seen. The rule is set up in $ $the following way. Predict
+spawning stock 4 years ahead and if the spawning stock is predicted
+to be below $B_{lim}$ with more than 5\% probability the Harvest
+ratio is reduced as required but not more than to 2/3 of the base
+harvest ratio. If the SSB is below $SSB_{trigger}$ the base harvest
+ratio is multiplied by the ratio $\frac{SSB}{B_{trigger}}$ and the
+minimum harvest ratio is still 2/3 of the base harvest ratio. This
+type of trigger is referred to as $Trigger_{2}$ in what follows. 
+
+Catch stabilizers tested were to let current fishing years advice
+have 50\% weight in the advice for the next fishing year. 
+
+....
+
+That $F_{target}$ is a function of $\widetilde{SSB}$ not $SSB$ is important and leads to rules with trigger action being problematic due to to much variability in catches. Case to look at Norwegian spring spawning herring at the moment
+
+Three parameters are required for the AR model, bias, 1st order auto-correlation
+and standard deviation. If a bias is suspected it is treated separately
+by increasing the harvest ratio/fishing mortality by the bias. Even 
+relatively small bias or 5-10\%
+can have considerable effect on the performance of the HCR. Large
+auto-correlation can also lead to increased risk of spawning stock going
+below $B_{lim}$ except harvest ratio is very low. What is large auto-correlation
+depends on the longevity of the species, for long lived species with
+low mortality number of years with poor recruitment will not cause
+major problem. 
+
+
+
 
 ## More stuff
 
