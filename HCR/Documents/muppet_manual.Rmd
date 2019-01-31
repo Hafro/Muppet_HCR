@@ -525,7 +525,9 @@ NOTE: ADD WHEN BIOMASS IN THE ADVISORY YEAR IS USED
 
 ### Stock-in-numbers model (F-rules)
 
+
 The observation model is derived from the population model by applying user specified error terms on the true stock-in-numbers at age:
+
 
 \begin{equation}
 \widetilde{N}_{a,y}=N_{a,y}e^{CV_{A}\xi_{y}}\label{eq:asserr1}
@@ -537,6 +539,7 @@ where $\widetilde{N}_{a,y}$ are the observed stock-in-numbers, $N_{a,y}$ is the 
 \xi_{y}=\left(\rho_{A}\xi_{y-1}+\sqrt{1-\rho_{A}^{2}}\varepsilon\right)\label{eq:asserr2}
 \end{equation}
 
+
 The stock is projected through the assessment years by^[NOTE: Need to check if $\widetilde{cW}_{a,y+1}$ is correct, rather than $cW_y$. And then what about $sel_{y}$?]:
 
 \begin{equation}
@@ -546,6 +549,17 @@ The stock is projected through the assessment years by^[NOTE: Need to check if $
 Where $\widetilde{cW}$ is the predicted weight and the $TAC_{y}$^[NOTE: Say something on $TAC_{y/y-1}$] the catch in the assessment year, having been estimated in the Decision model one year earlier. The equation is solved numerically by Newtons method. 
 
 Target exploitation rate is often a function of the observed spawning stock calculated by^[NOTE: What if SSB not in the beginning of the year?]:
+
+The stock is projected through the assessment years by^[need to specify what $cW_y$ is used, think it is $\widetilde{cW}_{a,y+1}$]:
+
+\begin{equation}
+\widetilde{N}_{y+1}=f\left(\widetilde{N}_{a,y},cW_{y},sel_{y},TAC_{y}\right)\label{eq:asserr3}
+\end{equation}
+
+Where the catch $TAC_{y}$^[NOTE: Say something on $TAC_{y/y-1}$] was derived from the estimated stock one year earlier. This equation is solved numerically by Newtons method.
+
+Predicted spawning stock in the beginning^[NOTE: What if SSB not in the beginning of the year?] of the advisory year is then calculated as:
+
 
 \begin{equation}
 \widetilde{SSB}_{y+1}=\sum_{a}\widetilde{N}_{a,y+1}\widetilde{ssbW}_{a,y+1}\widetilde{p}_{a,y+1}\label{eq:calcssbtmp}
@@ -617,6 +631,7 @@ TAC_{y/y+1}=(1\text{-}\beta\frac{\widetilde{SSB}_{y}}{B_{trigger}})\alpha\frac{\
 \label{eq:rule4}
 \end{equation}
 
+
 where $y$ refers to the assessment year, $y/y+1$ refers to the fishing year, starting September 1 in year $y$ and ending 31 August in year $y+1$. The value of the reference and spawning biomass are based on the spring assessment in year $y$. In the proposed HCR $\beta=0.50$, $\alpha=0.20$ and $B_{trigger}=65 kt$. Rule 3 is according to the formal request but Rule 4, which implies a smoother transition of the weights of the stabilizer if the stock is below $B_{trigger}$, was studied as a variant.
 
 
@@ -638,7 +653,19 @@ TAC_{y+1}=\sum_{a}\frac{\widetilde{F}_{a,y+1}}{\widetilde{F}_{a,y+1}+M_{a,y+1}}
 # Setting up assessment and simulations
 
 
+
 # Older text, possibly to be recycled
+
+Three parameters are required for the AR model, bias, 1st order auto-correlation
+and standard deviation. If a bias is suspected it is treated separately
+by increasing the harvest ratio/fishing mortality by the bias. Even 
+relatively small bias or 5-10\%
+can have considerable effect on the performance of the HCR. Large
+auto-correlation can also lead to increased risk of spawning stock going
+below $B_{lim}$ except harvest ratio is very low. What is large auto-correlation
+depends on the longevity of the species, for long lived species with
+low mortality number of years with poor recruitment will not cause
+major problem. 
 
 Harvest Control Rule is here a set of equation converting estimated
 of reference biomass, spawning stock and earlier advice into advised
