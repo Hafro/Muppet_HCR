@@ -642,21 +642,26 @@ TAC_{y+1}=\sum_{a}\frac{\widetilde{F}_{a,y+1}}{\widetilde{F}_{a,y+1}+M_{a,y+1}}
 
 ## Sensible inputs for observation errors
 
-Ordinarily three parameters are required as in input into the observation model:
+Statistically three parameters are required as in input into the observation model:
 
-* Standard deviation (input as here as cv)
+* Standard deviation, often referred to as white noise (input as here as cv)
 * 1st order auto-correlation
 * The long term bias
 
-Four methods are available to estimate/emulate the value of the observation errors, ...
+Four methods are available to estimate/emulate the value of the observation errors:
 
-The last framework, often referred to a "best science"/"full model" does not require specifying the above parameters as input^[It though moves the error framework specification to another place]. In the "short cut" method, which some fecal guys have termed the "fool's model" one does however need to provide the above paramters as input into the simulation framework.
+* Errors derived from the assessment model.
+* Errors derived from analytical retrospective analysis.
+* Errors derived from empirical retrospective analysis.
+* An observation/assessment model included in the simulation framework.
 
-### Errors from assessment model
+The last framework, currently referred to as "best science"/"full model" does not require specifying the above parameters as input^[It though moves the error specification to another place in the simulation framework, a daunting task on its own.]. In the framework often referred to as the "short cut" method, which some fecal guys have termed the "fool's model" one does however need to provide the above parameters as input into the simulation framework.
+
+### Errors derived from assessment model
 
 This method only provides estimates of "white noise" (cv) but not does provide a basis to estimate auto-correlation nor bias.
 
-In general the "white noise" estimated in assessment models are considered unrealistically low.
+In general the "white noise" estimates from assessment models are considered unrealistically low to be used in HCR evaluations^[If true, it means that confidence intervals provided in stock assessment summaries, as currently popular in ICES advisory sheets are misleading].
 
 ### Errors derived from analytic retrospective analysis
 
