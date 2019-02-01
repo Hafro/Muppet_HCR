@@ -714,7 +714,9 @@ Four methods are available to estimate/emulate the value of the observation erro
 * Errors derived from empirical retrospective analysis.
 * An observation/assessment model included in the simulation framework.
 
+
 The last framework, popularily referred to as "best science"/"full model" does not require specifying the above parameters as input^[It though moves the problem of proper error specification to another place in the framework, a daunting task on its own.]. In the framework often referred to as the "short cut" method, which some sarcastical termed the "fool's model" one does however need to provide the above parameters as input into the simulation framework.
+
 
 ### Errors derived from assessment model
 
