@@ -103,13 +103,14 @@ The error terms are user specified (input), the same error applied to all weight
 
 Another option available in the model is density dependent growth, the main problem there is to find sensible parameters for the model.
 
-NOTE: NEED TO ADD DENSITY DEPENDENCY
+NOTE: NEED TO ADD THE HADDOCK WAY
 
 ### Maturity
 
-Maturity can be fixed or based on stochasticity based on logit transformed values [as the result is limited between 0 and 1].
+Maturity at age of can be either fixed or set as a function of of stock weights at age (this being stochastically derived, see above):
 
-NOTE: ADD EQUATION FOR DESCRIBING STOCHASTICITY / THE HADDOCK FORM where $\rho_a = f(W_a)$
+$$m_{a,y} = \frac{1}{1+e^{\alpha_m+\beta_mlog(sW{a,y}))}}$$
+where the parameters are established from historical data of maturity and stock weights.
 
 ### Natural mortality
 
@@ -213,8 +214,14 @@ NOTE: NEED TO ADD CV ~ f(SSB) AND REGIME SHIFS/TIME TREND IN PRODUCTIVITY
 
 ### Selection at age
 
-Selection can be fixed or based on stochasticity based on logit transformed values [as the result is limited between 0 and 1].
+Selection at age of the commercial fleet can be either fixed or (in the case of haddock scenario) a function of on mean stock weights at age (this being stochastically derived, see above), based on logit:
 
+$$S_{a,y} = \frac{1}{1+e^{-\alpha(log(W_{50})-log(sW{a,y}))}}$$
+
+Selection pattern of the commercial
+fleet is defined is terms of mean stock weights at age, rather than age, based on a logit 
+13
+selection function:
 NOTE: ADD EQUATION FOR DESCRIBING STOCHASTICITY / THE HADDOCK FORM where $\S_a = f(W_a)$
 
 ### Initial numbers
