@@ -3,8 +3,13 @@
       # 4: Reference biomass in the start of the advisory year
 0.13  # WeightCV
 0.5   # WeightCorr
+3 	# Number of years used in the average weights to compile refbio 0 means correct weights.
 0.25  # AssessmentCV
 0.45  # AssessmentCorr
+0.0	# Assessmentbias
+0.0    # ImplementationCV
+0.5    # ImplementationCorr
+0.0	# Implementationbias
 0.8    # CurrentAssessmentErrmultiplier
 1      # CurrentStockScaler
 0.4   # RecrCorr not active when estimaded

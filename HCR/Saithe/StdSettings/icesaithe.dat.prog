@@ -60,8 +60,8 @@ surveyresid.dat # not used, thought for bootstrap Does not have to exist
 -1 # Phase of estimating productivity
 # Migrations
 1 # number of migrations.  Read in the file stock parameters.dat
-saiprognosis.dat #Prognosis file
-../Files/ProgWts.dat # Weight in prognosis, if the file does not exist average is used as specified in saiprognosis.dat
+saiprognosis.dat   #saiprognosis.dat #Prognosis file
+../Files/ProgWts10.dat # Weight in prognosis, if the file does not exist average is used as specified in saiprognosis.dat
 3 #Number of separable periods. Not used in the logit options. Specified in catchparameters.dat
 2000 # productivity change year links to parameter #6 in ssbparameters.  
 ../Files/optim.dat.hockey  # bounds and phases on some parameters.

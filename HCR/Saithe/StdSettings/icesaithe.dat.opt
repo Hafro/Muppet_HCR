@@ -35,7 +35,7 @@ catchresiduals.dat  #  # Thought  for bootstrap, not used.
 2018 # Last year
 2 # First age
 10 # Last age
-7 # First age after q is const
+7 # First age after q is const 10 in ass that is really not needed.  
 2 # First age of linear relationship
 1 # Delay from when a cohort is born until it is observed
 1 # Type of tuning (1 normal) (2 biomass+proportion)
@@ -62,7 +62,7 @@ surveyresid.dat # not used, thought for bootstrap Does not have to exist
 # Migrations
 1 # number of migrations.  Read in the file stock parameters.dat
 ../Files/saiprognosis.dat.opt #Prognosis file
-../Files/ProgWts.dat # Weight in prognosis, if the file does not exist average is used as specified in saiprognosis.dat
+../Files/ProgWts10.dat # Weight in prognosis, if the file does not exist average is used as specified in saiprognosis.dat
 3 #Number of separable periods. Not used in the logit options. Specified in catchparameters.dat
 2000 # productivity change year links to parameter #6 in ssbparameters.  
 ../Files/optim.dat.hockey  # bounds and phases on some parameters.
