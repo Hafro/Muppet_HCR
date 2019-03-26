@@ -497,6 +497,7 @@ PARAMETER_SECTION
 
 // Numbers related to HCR and stochasticity.  
   number CurrentTac;
+  number CurrentCatch;
   number TacLeft;
   number Mmultiplier;
   vector AssessmentErr(lastoptyear+1,lastyear);
@@ -1004,9 +1005,14 @@ FUNCTION void BioRatioHockeystick(int yr)
    dvariable AnnualCatch;  
    dvariable mincatch = 0.0;
    dvariable refcatch = Hratio*mfexp(log(HCRrefbio(yr))+AssessmentErr(yr));
-   dvariable Catch = (LastYTacRat*CurrentTac +  (1-LastYTacRat)*refcatch)*mfexp(ImplementationErr(yr));
+   dvariable tmpCatch = (LastYTacRat*CurrentTac +  (1-LastYTacRat)*refcatch);
+   dvariable Catch = tmpCatch*mfexp(ImplementationErr(yr));
+   // small variations so implementation err is not included in the Tac stabiliser.
+   // Have to add this to the advice year part.  
    if(yr == (lastoptyear+1) && NextYearsTacInput > 0) Catch = NextYearsTacInput; // Added January 15th. 
    Catch = SmoothDamper(Catch,MaxHarvestRatio*HCRrefbio(yr),mincatch);
+   tmpCatch = SmoothDamper(tmpCatch,MaxHarvestRatio*HCRrefbio(yr),mincatch);
+   
    if(IceFishYear) {
       AnnualCatch =  TacLeft + Catch/3; 
       AnnualCatch = SmoothDamper(AnnualCatch,MaxHarvestRatio*HCRrefbio(yr),mincatch); 
@@ -1014,9 +1020,10 @@ FUNCTION void BioRatioHockeystick(int yr)
       FishingYearCatch(yr) = Catch;  // FishingYearCatch(2018) is 2018/2018
    }
    if(!IceFishYear)
-       AnnualCatch =  CurrentTac;
+       AnnualCatch = CurrentCatch ;
 
-   CurrentTac = Catch;  
+   CurrentTac = tmpCatch;
+   CurrentCatch = Catch; 
    AnnualCatch = SmoothDamper(AnnualCatch,MaxHarvestRatio*HCRrefbio(yr),mincatch);
 // Differentiable version of this function for optimization.  The other is more
 // robust.  This HCR should though not be used for optimization. 
@@ -1127,7 +1134,8 @@ FUNCTION void Prognosis()
     lastprogyear = lastoptyear + 2; 
   else 
     lastprogyear = lastyear;
-  CurrentTac= CurrentTacInput; // For catch rule start value.  
+  CurrentTac= CurrentTacInput; // For catch rule start value.
+  CurrentCatch = CurrentTacInput;  // Added not to get steabiliser in implementation error.  
   TacLeft = TacLeftInput;  // For catch rule start value.  
   int i;
 //  UpdateWeightsAndMaturity has to be called every year if 
@@ -1860,7 +1868,7 @@ FUNCTION void ReadCatchandStockData()
  // Add data if plus group. CNO used as proxy for stock in numbers in weighting data (( aga 
      if((year>= firstyear) & (year<= lastyear) & (age >=  lastage) & (plusgroup == 1)  & (lastdataage > lastage) ) {
         if(ObsCatchInNumbers(year,lastage) == -1) ObsCatchInNumbers(year,lastage) = 0; // -1 is missing
-	ratio = ObsCatchInNumbers(year,lastage)/(ObsCatchInNumbers(year,lastage)+tmpvec(3));
+	ratio = ObsCatchInNumbers(year,lastage)/(ObsCatchInNumbers(year,lastage)+tmpvec(3)+1e-9);
         ObsCatchInNumbers(year,lastage) += tmpvec(3);
  	CatchWeightsData(year,lastage) = CatchWeightsData(year,lastage)*ratio+tmpvec(4)*(1.0-ratio);
  	StockWeightsData(year,lastage) = StockWeightsData(year,lastage)*ratio+tmpvec(5)*(1.0-ratio);
