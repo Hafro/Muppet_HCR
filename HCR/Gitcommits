@@ -1,3 +1,6 @@
+git config --global user.email 'hoski@hafro.is'
+git config --global user.name 'hoski'
+
 git add HCR/*
 git add HCR/Model/*
 git add HCR/Plaice/*
