@@ -5,15 +5,11 @@ output:
     keep_md: yes
     number_sections: yes
     toc_depth: 4
-    highlight: haddock
-    theme: united
-    toc: yes
-    toc_float: yes
   pdf_document:
     number_sections: yes
     toc: yes
     toc_depth: 4
-date: "2019-09-05 13:52:05"
+date: "2019-09-05 13:44:44"
 subtitle: Program description and instructions for users
 ---
 
