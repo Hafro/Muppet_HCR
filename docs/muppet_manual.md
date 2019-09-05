@@ -9,13 +9,11 @@ output:
     number_sections: yes
     toc: yes
     toc_depth: 4
-date: "`r lubridate::now()`"
+date: "2019-09-05 13:44:44"
 subtitle: Program description and instructions for users
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+
 
 # Preamble
 
