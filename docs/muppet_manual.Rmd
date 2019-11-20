@@ -1,12 +1,17 @@
 ---
 title: 'Muppet: program for simulating harvest control rules'
 output:
+  html_document: 
+    keep_md: yes
+    number_sections: yes
+    toc_depth: 4
+    highlight: haddock
+    theme: united
+    toc: yes
+    toc_float: yes
   pdf_document:
     number_sections: yes
     toc: yes
-    toc_depth: 4
-  html_document:
-    number_sections: yes
     toc_depth: 4
 date: "`r lubridate::now()`"
 subtitle: Program description and instructions for users
