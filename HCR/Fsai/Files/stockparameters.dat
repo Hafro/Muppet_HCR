@@ -1,0 +1,10 @@
+#Natural mortality ages 1-10
+0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 
+1  # Mmultiplier
+# PropofM and PropofF before spawning list only age groups in  SSB
+0 0 0 0 0 0 0 0 0 0 0 0 0  
+0 0 0 0 0 0 0 0 0 0 0 0 0 
+100 # Basis for relative ssb 
+0.2  # Min ssb used when cv in recruitment depends on ssb
+1.7 # Max ssb used when cv in recruitment depends on ssb
+

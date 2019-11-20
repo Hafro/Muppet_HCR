@@ -52,6 +52,7 @@ DATA_SECTION
   !!nyears = noptyears + nsimuyears;
 
   !! ofs  << " firstage " << firstage << " lastdatage " << lastdataage << " lastage " << lastage << " firstcatchage " << firstcatchage << " plusgroup " << plusgroup;
+  !! if(plusgroup != 0 || plusgroup != 1) ofs << "Plusgroup must be 0 or 1" << endl;
   !! ofs << " recrdatadelay " << recrdatadelay <<  " nfixedselages " << nfixedselages <<  " estMlastagephase " << estMlastagephase << endl;
 
   !!nages = lastage - firstage + 1;
@@ -348,7 +349,8 @@ PARAMETER_SECTION
  init_bounded_number lnMeanEffort(-3,3,catagephase1);
  init_bounded_dev_vector lnEffort(firstyear,lastoptyear,-4,4,catagephase2);  // log of Fishing mortality of oldest fish i.e effort
  init_bounded_number meanlogSurvivors(4,17,vpaphase1);
- init_bounded_dev_vector logSurvivors(firstestage,lastage-1,-6,6,vpaphase2);
+ // one fewer estimated survivors when plus group is 1.  
+ init_bounded_dev_vector logSurvivors(firstestage,lastage-1-plusgroup,-6,6,vpaphase2);
 
   
 // Survey parameters  here some cleaning of values and bounds could be done.  More file control.
@@ -692,7 +694,6 @@ PROCEDURE_SECTION
     HistoricalSimulation();
   }
   if(BackWards == 1) {
-     cout << "HBprint";
      BackwardHistoricalSimulation();
 //     if(printPhase) cout << "current " << current_phase() << endl;
   }
@@ -821,25 +822,62 @@ FUNCTION void BackwardHistoricalSimulation()
   int HistoricalAssessment = 1;
   dvariable FixNold = 0.1;  // Min left was 100 .  
   N = 0;
-  for(age = firstestage; age < lastage; age++) 
-    N(lastoptyear+1,age) = mfexp(meanlogSurvivors+logSurvivors(age));
-  CalcNaturalMortality1(lastoptyear);
-  N(lastoptyear+1,lastage) = Noldestinp(lastoptyear+1,lastage);
-  for(year = lastoptyear; year >=  firstyear; year-- ) {
-    CalcNaturalMortality1(year);
-    N(year,lastage) = Noldestinp(year,lastage);
-    for(age = firstcatchage; age <= lastage - 1; age++) 
-      N(year,age) =  (N(year+1,age+1)*exp(natM(year,age)/2)+ObsCatchInNumbers(year,age))*exp(natM(year,age)/2);
-    for(age = firstage; age < firstcatchage; age++) 
-      N(year,age) = N(year+1,age+1)*exp(natM(year,age));
-  }
-  for(year = firstyear; year <= lastoptyear; year++) {
-     for(age = firstage; age < lastage; age++) {
-       Z(year,age) = -log(N(year+1,age+1)/N(year,age));  
-       F(year,age) = Z(year,age) - natM(year,age);
-     }
-     F(year,lastage) = Foldestinp(year,lastage);
-     Z(year,lastage) = F(year,lastage) + natM(year,lastage);
+
+  if(plusgroup == 0) {
+    for(age = firstestage; age < lastage; age++) 
+      N(lastoptyear+1,age) = mfexp(meanlogSurvivors+logSurvivors(age));
+    CalcNaturalMortality1(lastoptyear);
+    N(lastoptyear+1,lastage) = Noldestinp(lastoptyear+1,lastage);
+    for(year = lastoptyear; year >=  firstyear; year-- ) {
+      CalcNaturalMortality1(year);
+      N(year,lastage) = Noldestinp(year,lastage);
+      for(age = firstcatchage; age <= lastage - 1; age++) 
+        N(year,age) =  (N(year+1,age+1)*exp(natM(year,age)/2)+ObsCatchInNumbers(year,age))*exp(natM(year,age)/2);
+      for(age = firstage; age < firstcatchage; age++) 
+        N(year,age) = N(year+1,age+1)*exp(natM(year,age));
+    }
+  
+    for(year = firstyear; year <= lastoptyear; year++) {
+       for(age = firstage; age < lastage; age++) {
+         Z(year,age) = -log(N(year+1,age+1)/N(year,age));  
+         F(year,age) = Z(year,age) - natM(year,age);
+       }
+       F(year,lastage) = Foldestinp(year,lastage);
+       Z(year,lastage) = F(year,lastage) + natM(year,lastage);
+     }  // year loop
+   }  // if plusgroup.
+
+  if(plusgroup == 1) {  // use 2 oldest from the forward running model.  
+    for(age = firstestage; age < lastage-1; age++) 
+      N(lastoptyear+1,age) = mfexp(meanlogSurvivors+logSurvivors(age));
+    CalcNaturalMortality1(lastoptyear);
+    N(lastoptyear+1,lastage-1) = Noldestinp(lastoptyear+1,lastage-1);
+    N(lastoptyear+1,lastage) = Noldestinp(lastoptyear+1,lastage);
+    for(year = lastoptyear; year >=  firstyear; year-- ) {
+      CalcNaturalMortality1(year);
+      N(year,lastage) = Noldestinp(year,lastage);
+      N(year,lastage-1) = Noldestinp(year,lastage-1);
+      for(age = firstcatchage; age <= lastage - 2; age++) 
+        N(year,age) =  (N(year+1,age+1)*exp(natM(year,age)/2)+ObsCatchInNumbers(year,age))*exp(natM(year,age)/2);
+      for(age = firstage; age < firstcatchage; age++) 
+        N(year,age) = N(year+1,age+1)*exp(natM(year,age));
+    }
+  
+    for(year = firstyear; year <= lastoptyear; year++) {
+       for(age = firstage; age < lastage-1; age++) {
+         Z(year,age) = -log(N(year+1,age+1)/N(year,age));  
+         F(year,age) = Z(year,age) - natM(year,age);
+       }
+       F(year,lastage) = Foldestinp(year,lastage);
+       Z(year,lastage) = F(year,lastage) + natM(year,lastage);
+       F(year,lastage-1) = Foldestinp(year,lastage-1);
+       Z(year,lastage-1) = F(year,lastage-1) + natM(year,lastage-1);
+     }  // year loop
+   }  // if plusgroup.
+
+
+
+   for(year = lastoptyear; year >=  firstyear; year-- ) {
      CalcCatchInNumbers(year)=elem_prod(elem_div(F(year),Z(year)),elem_prod((1.-mfexp(-Z(year))),N(year)));
      CalcCatchIn1000tons(year) = sum(elem_prod(CalcCatchInNumbers(year),CatchWeights(year)))/1.0e6;
 //     CalcPredationNumbers(year)=elem_prod(elem_div(natM(year),Z(year)),elem_prod((1.-mfexp(-Z(year))),N(year)));
@@ -2488,8 +2526,8 @@ FUNCTION  void CalcRefValues(int firstyr,int lastyr,int HistAssessment)
   
 
   for(i = firstyr; i <= lastyr; i++) {
-     N3(i) = N(i,3);  
-     N1st(i) = N(i,1);  
+     N3(i) = N(i,firstage+2);  
+     N1st(i) = N(i,firstage);  
      PredictSSB(i);
      if(RefBiominage(1) > 0) 
        RefBio1(i) = sum(elem_prod(N(i)(RefBiominage(1),lastage),
@@ -2505,11 +2543,12 @@ FUNCTION  void CalcRefValues(int firstyr,int lastyr,int HistAssessment)
         RefBio2(i) = sum(elem_prod(N(i)(-RefBiominage(2),lastage),
 	CatchWeights(i)(-RefBiominage(2),lastage)))/1.0e6;
 
+
 // Biomass with specified selection
     if(AgeCbioR == 1) {  // Age based CbioR middle of year
       CbioR(i) = 0; 
       for(j = firstage; j <= lastage; j++) 
-        CbioR(i)  = CbioR(i) + N(i,j)*CatchWeights(i,j)*MeanSel(j)*(1-mfexp(-Z(i,j)))/Z(i,j);
+        CbioR(i)  = CbioR(i) + N(i,j)*CatchWeights(i,j)*MeanSel(j); //  removed Nov 20th 2019 *(1-mfexp(-Z(i,j)))/Z(i,j);
      }
      if(AgeCbioR == 0) { // Length based CbioR
       CbioR(i)  = sum(elem_prod(N(i),elem_prod(StockWeights(i),wtsel(StockWeights(i),CbioRreflebreak))));
