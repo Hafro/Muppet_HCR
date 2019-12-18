@@ -7,7 +7,7 @@
 catchresiduals.dat  #  # Thought  for bootstrap, not used.
 
 0  # Initial condition from file  (1) or not.  program run with -ainp filename
-0  # 0 Forward, 1 Backward vpa 
+0  # 0 Forward, 1 Backward vpa
 
 1955 # First year
 2018 # Last opt year i.e last year before assyear   <=lastdatayear
@@ -20,7 +20,7 @@ catchresiduals.dat  #  # Thought  for bootstrap, not used.
 3 # First ssb age
 0 # Plus group (> 0) or not 0
 0 # Delay from year born until first year observed.
-3 # Number of oldest age groups with same F (not w parametric sel 
+3 # Number of oldest age groups with same F (not w parametric sel
 -1 # Phase to estimate M oldest. -1 not estimated
 
 
@@ -35,10 +35,10 @@ catchresiduals.dat  #  # Thought  for bootstrap, not used.
 2019 # Last year
 1 # First age
 14 # Last age
-10 # First age after q is const 10 in ass that is really not needed.  
+10 # First age after q is const 10 in ass that is really not needed.
 5 # First age of linear relationship
 1 # If 1 survey is conducted in the assessment year,
-#    0 last survey the year before the asssessment year.    
+#    0 last survey the year before the asssessment year.
 1 # Type of tuning (1 normal) (2 biomass+proportion)
 5 # Phase of correlation (5 or -1) where -1 means not estimated
 -1 # Logit phase (not use logit)
@@ -51,9 +51,9 @@ surveyresid.dat # not used, thought for bootstrap Does not have to exist
 2018 # Last year
 1 # First age
 13 # Last age
-10 # First age after q is const 10 in ass that is really not needed.  
+10 # First age after q is const 10 in ass that is really not needed.
 4 # First age of linear relationship
-0 # Last survey in the year before the assessment year.  
+0 # Last survey in the year before the assessment year.
 1 # Type of tuning (1 normal) (2 biomass+proportion)
 5 # Phase of correlation (5 or -1) where -1 means not estimated
 -1 # Logit phase (not use logit)
@@ -62,14 +62,14 @@ surveyresid.dat # not used, thought for bootstrap Does not have to exist
 surveyresid.dat # not used, thought for bootstrap Does not have to exist
 
 # SSBRectype etc.
-# Stock - recruit parameters initial values are on ordinary scale even thouth logs are estimated.  
+# Stock - recruit parameters initial values are on ordinary scale even thouth logs are estimated.
 5 # Type of relationship (1 BH, 2 Ricker 5 Hockey stick 6 geometric mean)
-220000 # Rmax (log Rmax is estimated) 
+220000 # Rmax (log Rmax is estimated)
 150 # SSB break, ssbmax or other parameter of relationship (not used with geom mean, log estimated)
 0.6 # CV log estimated
-0.1 # 1st order AR coeff (log estimated). 0 can not be used 
+0.1 # 1st order AR coeff (log estimated). 0 can not be used
 0.01 # Power in realationship between SSB and CV.  (Can not be 0 but low value means no relationship)
-0 # Productivity change (icod 85), 0 means no productivity changee (e^0) 
+0 # Productivity change (icod 85), 0 means no productivity changee (e^0)
 2 # Phase of estimating Rmax
 4 # Phase of estimating SSBbreak
 2 # Phase of estimating CV
@@ -78,10 +78,10 @@ surveyresid.dat # not used, thought for bootstrap Does not have to exist
 4 # Phase of estimating productivity
 # Migrations
 12 # number of migrations.  Read in the file stock parameters.dat
-codprognosis.dat #Prognosis file
+../Files/codprognosis.dat.opt #codprognosis.dat #Prognosis file
 ../Files/ProgWts.dat # Weight in prognosis, if the file does not exist average is used as specified in codprognosis.dat
 4 #Number of separable periods. Not used in the logit options. Specified in catchparameters.dat
-1985 # productivity change year links to parameter #6 in ssbparameters.  
+1985 # productivity change year links to parameter #6 in ssbparameters.
 ../Files/optim.dat.hockey  # bounds and phases on some parameters.
 
 
