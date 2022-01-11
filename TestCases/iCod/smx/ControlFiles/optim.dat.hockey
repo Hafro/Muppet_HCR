@@ -1,0 +1,18 @@
+#Upper value of SSBbre adjusted in Hockey from 10 to 8.7
+# Default values
+#logRmax  logSSBbr    logCV  logAcf   power   logprodchange
+10            4.6        -2   -3      -1      -1.0 #lower bounds
+15	      7.0        0.1   -0.35    1        1.0 #upper bound changed on acf
+-1.6  # SSB survey lb on cv
+-3 	     #default  min CV on normal surveys scaled by multipier
+2	     # surveylnqphase
+4	     # surveypowphase
+-1 -1	     # surveybiopowphase
+ 1   1       #surveytotalpowtype number or biomass.  
+
+1 	     # estselphase
+-1  	     # catchlogitphase
+-1 	     # catchlogitsize phase
+-1 	     # misreporting phase
+-1	     # Mmultiplier phase
+4	     # deltaQ1phase

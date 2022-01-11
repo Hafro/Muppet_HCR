@@ -1,0 +1,30 @@
+# Data for prognosis
+3      # 3=HCR proportion of biomass in the assessment year.
+0.1 	 # WeightCV
+0.7 	 # WeightCorr
+20 	# Number of years used in the average weights to compile refbio 0 means correct weights.
+0.25 	 # AssessmentCV
+0.5 	 # AssessmentCorr
+0.0 	 # Assessmentbias
+0.001    # ImplementationCV
+0.85    # ImplementationCorr
+0.0	# Implementationbias
+0.8    # CurrentAssessmentErrmultiplier
+1  # 0.8      # CurrentStockScaler
+0.4 	 # RecrCorr
+270 	 # Btrigger
+10     # MaxChange practicially noconstrained with this high value
+400 	 # Est Assyear ssb
+3       # Selection in prognosis mean of last 3 years.
+20 	 # Meanwtyears
+1	# IceFishYear
+0.0	# LastYearTacRatio (0.5 in icecod HCR)
+0	# DensDep  0 no densdep.
+1	# AgeModel
+-4	# HCRrefage -4 means catch weights.  4 would have been sW.
+0	# ProxyAge 0 means use SSB
+0.15 	 # HarvestRate
+0.75      # MaxHarvestRate #
+150    # Last TAC
+200       # Tac left Icelandic fishing years, including 3kt foreign
+0         # Next years Tac  0 means calculated.

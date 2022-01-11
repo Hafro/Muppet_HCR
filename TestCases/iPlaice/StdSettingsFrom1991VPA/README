@@ -1,0 +1,9 @@
+This is an VPA version of StdSettingsFrom1991
+
+That run is first run and then the files Foldest.dat and Noldest.dat are copied over and the model run.
+
+The only difference in icecod.dat.opt.final between this directory and the parent directory is 
+
+< 1  # 0 Forward, 1 Backward vpa
+---
+> 0  # 0 Forward, 1 Backward vpa

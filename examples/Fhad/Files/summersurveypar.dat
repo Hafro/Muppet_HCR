@@ -1,9 +1,0 @@
-0.5 # SurveyCorr
-0.6 #propM before survey
-0.6 #propF before survey
-0 # Survey weights given
-1 8  #Age range 
-0.5 0.3 0.224 0.189 0.158 0.191 0.235 0.35 #pattern in CV with age. Common multiplier estimated
-#Resolution used when survey abundance tuning is used.  High for youngest to reduce weight.  
- 5 5 5 5 5 5 5 5
-0 # Number of missing surveys

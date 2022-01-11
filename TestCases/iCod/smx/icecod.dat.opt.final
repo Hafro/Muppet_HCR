@@ -1,0 +1,101 @@
+0  # Not closed loop
+# run with
+#muppet -ind  icecod.dat.opt.final  -nox
+#muppet -ind icecod.dat.opt.final -nox -mcmc 100000 -mcsave 200 -mcscale
+
+../Files/catchandstockdata.dat # Data on the stock mean weight, maturity etc.
+../Files/totcatch.dat  #  Total catch where cno=-1 does not have to exist
+catchresiduals.dat  #  # Thought  for bootstrap, not used.
+
+0  # Initial condition from file  (1) or not.  program run with -ainp filename
+0  # 0 Forward, 1 Backward vpa
+
+1955 # First year
+2020 # Last opt year i.e last year before assyear   <=lastdatayear
+6 # Number of simulations years
+2020 # Last data year, last year with catch at age data
+1 # First age
+14 # last data age
+14 # Last age
+3 # First catch age
+3 # First ssb age
+0 # Plus group (> 0) or not 0
+0 # Delay from year born until first year observed.
+3 # Number of oldest age groups with same F (not w parametric sel
+-1 # Phase to estimate M oldest. -1 not estimated
+
+
+ControlFiles/stockparameters.dat # natm and more
+ControlFiles/catchparameters.dat # sep period and something more
+ControlFiles/likelihoodparameters.dat # Weight of likelihood components etc.
+ControlFiles/outputparameters.dat # Fbar range output biomasses etc
+
+2 # nsurveys
+# Survey 1 March survey
+1985 #surveyfirstyear
+1 #surveylastyear 
+1 #surveyfirstage
+14 #surveylastage
+10 #surveyfirstagewithfullcatchability
+10 #surveyfirstagewithconstantpower
+10 #surveyfirstagewithconstantcatchability
+1 #surveytimefromlastyear (If 1 survey is conducted in the assessment year)
+#     0 last survey the year before the asssessment year.
+1 #surveytype
+1 #surveycorrtype
+5 #surveycorrphase (5 or -1) where -1 means not estimated
+-1 #surveylogitphase (not use logit)
+0 #usesurveyCV 0 means not do it.
+0 #spawningsurvey  0 means not spawning survey.  
+ControlFiles/marchsurveypar.dat #survey-parameter file
+../Files/marchsurveydata.dat #survey-data file 
+surveyresid.dat # #survey-residual file, thought for bootstrap Does not have to exist
+
+# Survey 2 October survey
+1996 #surveyfirstyear
+0 #surveylastyear 
+3 #surveyfirstage
+13 #surveylastage
+10 #surveyfirstagewithfullcatchability
+10 #surveyfirstagewithconstantpower
+10 #surveyfirstagewithconstantcatchability
+0 #surveytimefromlastyear (If 1 survey is conducted in the assessment year)
+#     0 last survey the year before the asssessment year.
+1 #surveytype
+1 #surveycorrtype
+5 #surveycorrphase (5 or -1) where -1 means not estimated
+-1 #surveylogitphase (not use logit)
+0 #usesurveyCV 0 means not do it.
+0 #spawningsurvey  0 means not spawning survey.  
+ControlFiles/octsurveypar.dat #survey-parameter file
+../Files/octsurveydata314.dat #survey-data file 
+surveyresid.dat # #survey-residual file, thought for bootstrap Does not have to exist
+
+
+
+# SSBRectype etc.
+# Stock - recruit parameters initial values are on ordinary scale even thouth logs are estimated.
+5 # Type of relationship (1 BH, 2 Ricker 5 Hockey stick 6 geometric mean)
+220000 # Rmax (log Rmax is estimated)
+120 # SSB break, ssbmax or other parameter of relationship (not used with geom mean, log estimated)
+0.2 # CV log estimated
+0.1 # 1st order AR coeff (log estimated). 0 can not be used
+0.01 # Power in realationship between SSB and CV.  (Can not be 0 but low value means no relationship)
+0 # Productivity change (icod 85), 0 means no productivity changee (e^0)
+2 # Phase of estimating Rmax
+-1 # Phase of estimating SSBbreak
+2 # Phase of estimating CV
+-1 # Phase of estimating autocorrelation
+-1 # Phase of estimating change of Recr CV with spawning stock
+4 # Phase of estimating productivity
+# Migrations
+12 # number of migrations.  Read in the file stock parameters.dat
+../Files/codprognosis.dat.biorule.assyear #Prognosis file
+../Files/ProgWts.dat # Weight in prognosis, if the file does not exist average is used as specified in codprognosis.dat
+4 #Number of separable periods. Not used in the logit options. Specified in catchparameters.dat
+1985 # productivity change year links to parameter #6 in ssbparameters.
+0  # Number of tag series
+0  # VariableM   (not variable) 
+ControlFiles/optim.dat.hockey   #OptimDatafilename bounds and phases on some parameters.
+
+

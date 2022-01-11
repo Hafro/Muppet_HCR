@@ -1,0 +1,10 @@
+#Natural mortality
+0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1
+1   #Mmultiplier
+# PopofM before spawning
+ 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 
+# PropofF before spawning
+ 0 0 0 0 0 0 0 0 0 0 0 0 0
+300 # Basis for ssb 
+0.04  # Min relssb used when cv in recruitment depends on ssb
+1.5 # Max relssb used when cv in recruitment depends on ssb

@@ -1,24 +1,32 @@
-// Some of the haddock functions have "had" in the middle of the name.  Could perhaps be made more generic. 
+// Changed February 2nd to repair assessmenterr minimum.  
+// Some of the haddock functions have "had" in the middle of the name.  Could perhaps be made more generic.
+
+// Regarding closed loop this program needs to be generalised.  Rule 8 needs to be more transparent.   
+
+// 19 feb 2021 set manually phase on surveylogit variables (temporarily).  
+
+// june 2021 change biopow to totalpow.  
 
 DATA_SECTION
-
   int debug_input_flag
   !! debug_input_flag=1;
   !! ofstream ofs("input.log");
+  init_int ClosedLoop;  // 1 means closed loop.  Limited output.  
+  !! ofs << ClosedLoop << " #ClosedLoop" << endl; 
   init_adstring catchfilename;  // cno, cwt, mat, cwt etc.  
-  !! ofs << "catchfilename " << catchfilename << endl;
+  !! ofs << catchfilename <<  " #catchfilename" << endl;
   // This is a file with total catch in 1000 tonnes for year where CNO is not
   // available (-1) in catch and stock data file.  CWT, SWT and Mat have to
   // be given for those years but are of course some averages.  File with 2
   // columns year totcatch 
   init_adstring totalcatchfilename;  // not used any name
-  !! ofs << "totalcatchfilename " << totalcatchfilename << endl;
+  !! ofs << totalcatchfilename  << " #totalcatchfilename" << endl;
   init_adstring catchresidualfilename;  // not used any name
-  !! ofs << "catchresidualfilename " << catchresidualfilename << endl;
+  !! ofs << catchresidualfilename  <<  " #catchresidualfilename" << endl;
   init_int INITCOND;  // 1 if starting pin file.  
-  !! ofs << "INITCOND " << INITCOND << endl;
+  !! ofs << INITCOND << " #INITCOND" << endl;
   init_int BackWards;  // Catch at age (0) or VPA (1) model.  
-  !! ofs << "BackWards " << BackWards << endl;
+  !! ofs << BackWards  << " #BackWards" << endl;
 
 
 // Survey data can be used up to lastoptyear+1
@@ -28,7 +36,7 @@ DATA_SECTION
   init_int lastdatayear;  // Last year with catch in numbers data.  
 
   init_int firstage     // First age
-  init_int lastdataage  // 
+  init_int lastdataage  // Last age in data.  
   init_int lastage        // Last age model makes a plus group out of lastage-lastdataage
   init_int firstcatchage  // First age group in catch
   init_int minssbage;  // First age in SSB
@@ -40,8 +48,9 @@ DATA_SECTION
 			  // most often set to 0.  
   init_int  nfixedselages; //Number of oldest age groups with same F
   init_int estMlastagephase;  //if > 0 M of last age is estimated.  
-  !! ofs << "firstyear " << firstyear << "lastoptyear " << lastoptyear << "nsimuyears " << nsimuyears; 
-  !! ofs << "lastdatayear " << lastdatayear  << endl;
+  !! ofs << firstyear << " #firstyear " << endl <<  lastoptyear << " #lastoptyear";
+  !! ofs <<  endl << nsimuyears << " #nsimuyears" << endl ; 
+  !! ofs << lastdatayear << " #lastdatayear"  << endl;
   
   int noptyears;
   int nyears;  // number of years used in the optimiztion
@@ -51,27 +60,35 @@ DATA_SECTION
   !!noptyears = lastoptyear - firstyear + 1; 
   !!nyears = noptyears + nsimuyears;
 
-  !! ofs  << " firstage " << firstage << " lastdatage " << lastdataage << " lastage " << lastage << " firstcatchage " << firstcatchage << " plusgroup " << plusgroup;
-  !! if(plusgroup != 0 || plusgroup != 1) ofs << "Plusgroup must be 0 or 1" << endl;
-  !! ofs << " recrdatadelay " << recrdatadelay <<  " nfixedselages " << nfixedselages <<  " estMlastagephase " << estMlastagephase << endl;
+  !! ofs  << firstage << " #firstage" << endl  << lastdataage << " #lastdataage";
+  !! ofs  << endl  << lastage << " #lastage" << endl;
+  !! ofs << firstcatchage  << " #firstcatchage" << endl;
+  !! ofs << minssbage  << " #minssbage" << endl;
+  !! ofs << plusgroup  << " #plusgroup" << endl;
+  !! ofs << recrdatadelay << " #recrdatadelay" <<  endl;
+  !! ofs << nfixedselages << " #nfixedselages" << endl;
+  !! ofs <<  estMlastagephase  << " #estMlastagephase" << endl;
 
   !!nages = lastage - firstage + 1;
 
 
   init_adstring stockparametersfilename; //M propM , propF before spawning and more
-  !! ofs << "stockparametersfilename " << stockparametersfilename << endl;  
+  !! ofs << stockparametersfilename << " #stockparametersfilename" << endl;  
   init_adstring catchparametersfilename; // File describing when selection pattern changes
-  !! ofs << "catchparametersfilename " << catchparametersfilename << endl;  
+  !! ofs << catchparametersfilename << " #catchparametersfilename" << endl;  
   init_adstring likelihoodparametersfilename;
-  !! ofs << "likelihoodparametersfilename " << likelihoodparametersfilename << endl;  // wt on likelihood par etc.  
+  !! ofs << likelihoodparametersfilename << " #likelihoodparametersfilename" << endl;  // wt on likelihood par etc.  
   init_adstring outputparametersfilename;  //Age range on fbar etc.  
-  !! ofs << "outputparametersfilename " << outputparametersfilename << endl;  
-
-
+  !! ofs << outputparametersfilename << " #outputparametersfilename" << endl;  
 
   init_int nsurveys; // Number of surveys
-  !! ofs << "nsurveys " << nsurveys << endl;
+  !! ofs << nsurveys << " #nsurveys" << endl;
 
+  !!surveyparfiles.allocate(1,nsurveys);
+  !!surveydatafiles.allocate(1,nsurveys);
+  !!closedloopsurveydatafiles.allocate(1,nsurveys);
+  !!surveyresidfiles.allocate(1,nsurveys);
+  
   ivector surveyfirstyear(1,nsurveys);
   ivector surveylastyear(1,nsurveys);
   ivector surveyfirstage(1,nsurveys);
@@ -80,30 +97,60 @@ DATA_SECTION
   ivector surveyfirstagewithfullcatchability(1,nsurveys);
   ivector surveytimefromlastyear(1,nsurveys);
   ivector surveytype(1,nsurveys);  // 1 ordinary, 2 biomass+proportions 4 ssb survey
-  ivector surveyweightsgiven(1,nsurveys);
+  ivector surveyweightsgiven(1,nsurveys); // Mean weight at age in the survey
+  ivector usesurveyCV(1,nsurveys); // Use estimated survey CV
+
   ivector surveycorrphase(1,nsurveys);  //-1 if correlation is not estimated
   ivector surveylogitphase(1,nsurveys); // indicator  > 0 survey q logit else per age group.  
+  ivector surveycorrtype(1,nsurveys);  // Allow for more tnah one survey correlation.
+  ivector surveyfirstagewithconstantpower(1,nsurveys); // The power does not change after this age.
+  ivector spawningsurvey(1,nsurveys);  // is the survey only targeting spawning fish.  
 
 
  // Now we come to a little tricky part where the input in AD-model builder is rather 
 // limiting.  Have to read from *global_datafile  Three datafiles for each survey.  
   !!int i,j;
-  !!ivector tmpsurveydata(1,10);
-  !!adstring tmpsurveyfilename;  // Have to pass this to main program through file.
-  !!ofstream surveyfile("SURVEYFILES.DAT"); // The temporary file.  
+  !!ivector tmpsurveydata(1,14);
+//  !!adstring tmpsurveyfilename;  // Have to pass this to main program through file.
   !!for (i = 1; i<=nsurveys; i++) {
      !!*global_datafile  >> tmpsurveydata;
-     !! ofs << "survey nr" << i << " - " << tmpsurveydata << "  ";
+     !! ofs << "#survey nr - " << i << endl;
+     !! ofs <<  tmpsurveydata(1) << " #surveyfirstyear" << endl;
+     !! ofs <<  tmpsurveydata(2) << " #surveylastyear" << endl;
+     !! ofs <<  tmpsurveydata(3) << " #surveyfirstage" << endl;
+     !! ofs <<  tmpsurveydata(4) << " #surveylastage" << endl;
+     !! ofs <<  tmpsurveydata(5) << " #surveyfirstagewithfullcatchability" << endl;
+     !! ofs  <<  tmpsurveydata(6) << " #surveyfirstagewithconstantpower" << endl;
+     !! ofs <<  tmpsurveydata(7) << " #surveyfirstagewithconstantcatchability" << endl;
+     !! ofs <<  tmpsurveydata(8) << " #surveytimefromlastyear" << endl;
+     !! ofs <<  tmpsurveydata(9) << " #surveytype" << endl;
+     !! ofs <<  tmpsurveydata(10) << " # surveycorrtype" << endl;
+     !! ofs <<  tmpsurveydata(11) << " #surveycorrphase" << endl;
+     !! ofs <<  tmpsurveydata(12) << " #surveylogitphase" << endl;
+     !! ofs <<  tmpsurveydata(13) << " #usesurveyCV" << endl;
+     !! ofs <<  tmpsurveydata(14) << " #spawningsurvey" << endl;
+      
+      
+     
      !! surveyfirstyear(i) = tmpsurveydata(1);
-     !! surveylastyear(i) = tmpsurveydata(2);
+
+//   For convenience in HCR simulations tmpsurveydata can be linked to last year.  
+     !! if(tmpsurveydata(2) < 6 )surveylastyear(i) = tmpsurveydata(2)+lastoptyear;
+     !! if(tmpsurveydata(2)  >=6 )surveylastyear(i) = tmpsurveydata(2); 
+     
      !! surveyfirstage(i) = tmpsurveydata(3);
      !! surveylastage(i) = tmpsurveydata(4);
      !! surveyfirstagewithfullcatchability(i) = tmpsurveydata(5);
-     !! surveyfirstagewithconstantcatchability(i) = tmpsurveydata(6);
-     !! surveytimefromlastyear(i) = tmpsurveydata(7);
-     !! surveytype(i) = tmpsurveydata(8);
-     !! surveycorrphase(i) = tmpsurveydata(9);
-     !! surveylogitphase(i) = tmpsurveydata(10);
+     !! surveyfirstagewithconstantpower(i) = tmpsurveydata(6);
+     !! surveyfirstagewithconstantcatchability(i) = tmpsurveydata(7);
+     !! surveytimefromlastyear(i) = tmpsurveydata(8);
+     !! surveytype(i) = tmpsurveydata(9);
+     !! surveycorrtype(i) = tmpsurveydata(10);
+     !! surveycorrphase(i) = tmpsurveydata(11);
+     !! surveylogitphase(i) = tmpsurveydata(12);
+     !! usesurveyCV(i) = tmpsurveydata(13);
+     !! spawningsurvey(i) = tmpsurveydata(14);
+     
      !! if(surveylogitphase(i) > 0)  surveyfirstagewithfullcatchability(i) = surveyfirstage(i); // one q level estimated
      !! if(surveylogitphase(i) > 0)  surveyfirstagewithconstantcatchability(i) = surveyfirstage(i);
      !! if(surveyfirstyear(i) < firstyear) surveyfirstyear(i) = firstyear;
@@ -111,31 +158,30 @@ DATA_SECTION
      !!    surveylastyear(i) =  lastyear+ surveytimefromlastyear(i);
      !! if(surveyfirstage(i)  < firstage) surveyfirstage(i) = firstage;
      !! if(surveylastage(i) > lastage) surveylastage(i) = lastage;
-     !! if(surveyfirstagewithconstantcatchability(i) > lastage )
-     !!      surveyfirstagewithconstantcatchability(i) = lastage;
-     !! for (j = 1; j <= 3; j++) {
-       !!*global_datafile  >> tmpsurveyfilename;
-       !! ofs << tmpsurveyfilename << " "; 
-       !! surveyfile << tmpsurveyfilename << " ";
-     !! }
-     !! surveyfile << endl;
-     !! ofs << endl; 
+     !! if(surveyfirstagewithconstantcatchability(i) > surveylastage(i) +1)  // < condition not <= condition.  
+     !!      surveyfirstagewithconstantcatchability(i) = surveylastage(i)+1;
+     !! *global_datafile  >> surveyparfiles(i);
+     !! ofs << surveyparfiles(i) << " #survey-parameter file " << endl;
+     !! *global_datafile  >> surveydatafiles(i);
+     !! ofs << surveydatafiles(i) << " #survey-data file "<< endl;
+     !! *global_datafile  >> surveyresidfiles(i);
+     !! ofs << surveyresidfiles(i) << " #survey-residual file "<< endl;
    !!}
-   !!surveyfile.close();
    int minsurveyfirstage
-   int maxsurveyfirstagewithfullcatchability;
    int maxsurveyfirstagewithconstantcatchability;
+   int maxsurveyfirstagewithfullcatchability;
+   int maxsurveyfirstagewithconstantpower;
    !! minsurveyfirstage = min(surveyfirstage);
    !! maxsurveyfirstagewithfullcatchability = max(surveyfirstagewithfullcatchability);
    !! maxsurveyfirstagewithconstantcatchability = max(surveyfirstagewithconstantcatchability);
-
+   !! maxsurveyfirstagewithconstantpower = max(surveyfirstagewithconstantpower);
 
    int COUNTER;  // For random number generation
 
 //************************************************************************************************
 // Parameters for stock recruitment relationship PropofFbeforeSpawning and 
 // init_number PropofMbeforeSpawning should possibly be made agedependent ????
-// These parameters are input here as it is decided which parameters are to be estimated.  
+// These parameters are input here as it is decided which parameters are to be estimated.  sur
 
   init_int SSBRectype   // if 1 Beverton and Holt, 2  Ricker 6 constant
 // Parameters in SSBRecr function  1.  SSBmax   2. Rmax 3.  CV  4.  Correlation 
@@ -144,20 +190,21 @@ DATA_SECTION
   init_vector SSBRecParameters(1,6);
   init_vector SSBRecSwitches(1,6)  // Phase of  6 first of SSBRecParameters.  -1 not estimated. 
 
-  !!ofs << "SSBRectype " << SSBRectype << endl;
-  !!ofs  << " Rmax " << SSBRecParameters(1) << " SSBmax " << SSBRecParameters(2) ; 
-  !!ofs << " SSBReccv " << SSBRecParameters(3)  ;
-  !!ofs << " SSBReccorr " <<  SSBRecParameters(4) << " SSBRecpow" << SSBRecParameters(5)  << endl;
-  !!ofs << " Timetrendinrecruitment" <<  SSBRecParameters(6) << endl; // should really be called productivity change
+  !!ofs << SSBRectype << " #SSBRectype" << endl;
+  !!ofs  << SSBRecParameters(1) << " #Rmax" << endl;
+  !!ofs  << SSBRecParameters(2) << " #SSBmax" << endl;
+  !!ofs  << SSBRecParameters(3) << " #SSBReccv" << endl;
+  !!ofs  << SSBRecParameters(4) << " #SSBReccorr" << endl;
+  !!ofs  << SSBRecParameters(5) << " #SSBRecpow" << endl;
+  !!ofs  << SSBRecParameters(6) << " #TimetrendinrecruitmentSSBReccv" << endl; // Productivity change
+  !!ofs << SSBRecSwitches << " #SSBRecSwitches" << endl;
 
-  !!ofs << " SSBRecSwitches " << SSBRecSwitches << endl;
- 
  
 //***********************************************************************************************
 //Number of Migration events has to be input here as the number of events is dependent on them.  
 //The exact years and ages are in read with stock parameters.  
   init_int MigrationNumbers;
-  !! ofs << "MigrationNumbers " << MigrationNumbers << endl ;
+  !! ofs << MigrationNumbers << " #MigrationNumbers" << endl ;
 
 
 
@@ -171,13 +218,26 @@ DATA_SECTION
 // later rest of the prognosisdata might be input from file.  
 
   init_adstring PrognosisFilename;
-  !! ofs << "PrognosisFilename " << PrognosisFilename  << endl;
+  !! ofs << PrognosisFilename << " #PrognosisFilename"  << endl;
   init_adstring WeightAndMaturityDatafilename;     // Weights and more for prognosis
-  !!ofs << "WeightAndMaturityDatafilename" <<  WeightAndMaturityDatafilename << endl;   
+  !!ofs << WeightAndMaturityDatafilename <<  " #WeightAndMaturityDatafilename" << endl;   
   init_int  number_of_seperable_periods;
-  !!ofs <<  "number_of_seperable_periods " <<  number_of_seperable_periods << endl;
+  !!ofs <<  number_of_seperable_periods <<  " #number_of_seperable_periods" << endl;
   init_int prodchangeyear; // Year that productivity change SSBRecParameters(6) occurrs
-  !!ofs <<  "prodchangeyear " <<  prodchangeyear << endl;
+  !!ofs <<  prodchangeyear <<  " #prodchangeyear" << endl;
+  init_int Ntagseries;  // Number of tagtypes
+  !! ofs << Ntagseries << " #Ntagseries" << endl ;
+  !! if(Ntagseries > 0) {
+    init_int Ntagdata;   // Total number of tagging data points
+    !! ofs << Ntagdata << " #Ntagdata" << endl ;
+    init_int TagLikelyType;
+    !! ofs << TagLikelyType << " #TagLikelyType" << endl;
+    init_adstring Tagdatafilename;     // Weights and more for prognosis
+    !!ofs << Tagdatafilename <<  " #Tagdatafilename" << endl;
+  !! }
+  init_int variableM; // Should M by year and age be estimated and possibly multiplier on it.  
+  !!ofs <<  "variableM " <<  variableM << endl;
+
 
   // if misreporting is not estimated the value is 0 of logmisreporting except data are read from
   // a pin file.  Might be changed if different level of misreporting iis needed.  
@@ -186,7 +246,10 @@ DATA_SECTION
 // things should be moved here but we do not want those values to be hardwired in the code.  
 
  init_adstring OptimDatafilename;  
-  !!ofs << "OptimDatafilename " <<  OptimDatafilename << endl;  
+  !!ofs << OptimDatafilename <<  " #OptimDatafilename" << endl;
+
+// Question if we need to go further here.  What is below will hardly be changed in other runs.  
+
 // Addition because of problems with bounds especially lower bounds log scale
   !! ad_comm::change_datafile_name(OptimDatafilename);
   init_vector logSSBRecLowerbounds(1,6);
@@ -202,8 +265,11 @@ DATA_SECTION
   !!ofs << "surveylnqphase " << surveylnqphase << endl;
   init_int surveypowphase;
   !!ofs << "surveypowphase " << surveypowphase << endl;
-  init_ivector surveybiopowphase(1,nsurveys);
-  !!ofs << "surveybiopowphase " << surveybiopowphase << endl;
+  init_ivector surveytotalpowphase(1,nsurveys);
+  !!ofs << "surveytotalpowphase " << surveytotalpowphase << endl;
+  init_ivector surveytotalpowtype(1,nsurveys);  // If basing on total numbers or biomass 
+  !!ofs << "surveytotalpowtype" << surveytotalpowtype << endl;
+  
   init_int estselphase // selection for each agegroup - if logit model is used.  
   !!ofs << "estselphase " << estselphase << endl;
   init_int catchlogitphase // selection logit og age
@@ -212,9 +278,31 @@ DATA_SECTION
   !!ofs << "catchlogitsizephase " << catchlogitsizephase << endl;
   init_int misreportingphase; // Misreporting estimate -1 misreporting not estimated. Misreporting year fixed as 1999 see scaleCatches.  
   !!ofs <<  "misreportingphase " <<  misreportingphase << endl;
-
   init_int Mmultphase; // Should a multiplier on M be estimated.  
   !!ofs <<  "Mmultphase " <<  Mmultphase << endl;
+  init_int deltaQ1phase; // Multiplier on age 1 in survey 1.  
+  !!ofs <<  "deltaQ1phase " <<  deltaQ1phase << endl;
+  !! if(Ntagseries > 0) {
+    init_number  logtaglosslb;
+    !!ofs << "logtaglosslb " << logtaglosslb << endl ;
+    init_number  logtaglossub;
+    !!ofs << "logtaglossub " << logtaglossub << endl ;
+    init_int  logtaglossphase;
+    !!ofs << "logtaglossphase " << logtaglossphase << endl ;
+    init_int  firsttagyear;
+    !!ofs << "firsttagyear    " << firsttagyear    << endl ;
+    init_int  lasttagyear;
+    !!ofs << "lasttagyear    " << lasttagyear    << endl ;
+    init_int  firstrecapyear;
+    !!ofs << "firstrecapyear    " << firstrecapyear    << endl ;
+    init_int  lastrecapyear;
+    !!ofs << "lastrecapyear    " << lastrecapyear    << endl ;
+    init_int  firsttagage;
+    !!ofs << "firsttagage    " << firsttagage    << endl ;
+    init_int  lasttagage;
+    !!ofs << "lasttagage    " << lasttagage    << endl ;
+  !! }
+
 
   int LastMisReportingYear;
   number CatchRule;
@@ -238,13 +326,20 @@ DATA_SECTION
   int IceFishYear;  //Icelandic fishing year 1 or calendar year 0
   int DensDep;// Most often 0. 1 is Icelandic haddock other values can be used for other parameters.   
   int HCRrefAge;  // Biorule based on HCRrefAge +
-  int nweighterryears;  // number of years for compiling average weight errors.  
-  number HCRreflebreak; // Biomass is based on LE > HCRreflebreak (icehad).  
+  int nweighterryears;  // number of years for compiling average weight errors. 
+  
+  int HCRreflebreak; // Biomass is based on LE > HCRreflebreak (icehad).  
   int  HCRBproxyAge  // Biorule HCRBproxyAge + as Bproxy instead of SSB
   int AgeModel // If 1 used age based refbio, else size based.
+  int RandomTags;  // If 1 random tags are used.  
   number MaxHarvestRatio //Maximum harvest rate allowed used to not crash the stock when HCR calls for more.  
 
-  number HarvestRatio;
+  number HarvestRatio1;
+  number HarvestRatio2;  // For 2 level rule
+  number Btrigger2;
+  number Btrigger3;
+
+
   number CurrentTacInput;
   number TacLeftInput;  // Tac left in the beginning of the assessment year
   number NextYearsTacInput;  // If 0 Tac next year is not calculated.  
@@ -265,6 +360,13 @@ DATA_SECTION
   int CatchRobust;  //wide tail distributions
   int SurveyRobust; // not used very much
 
+  ivector TagYear(1,Ntagdata);
+  ivector RecaptYear(1,Ntagdata);
+  ivector YearClass(1,Ntagdata);
+  ivector Tagtype(1,Ntagdata);
+
+
+
 // Number of likelihood files.  Form of this part might be changed
   int likelihood_mcmc_lines;
   int migration_mcmc_lines;
@@ -278,6 +380,7 @@ DATA_SECTION
   int catch_mcmc_lines;
   int fishyearcatch_mcmc_lines;
   int assessmenterror_mcmc_lines;
+  int weighterror_mcmc_lines;
   int implementationerror_mcmc_lines;
 
   int refbio2_mcmc_lines;
@@ -304,9 +407,13 @@ DATA_SECTION
   int vpaphase1;
   int vpaphase2;
   int vpaphase3;
+  int tagphase;
+  !!if(Ntagseries  == 0) tagphase=-1;
+  !!if(Ntagseries > 0) tagphase=4; 
   // Look somewhat better at the phases. 
    !! if(BackWards == 0) {catagephase1 = 1; catagephase2 = 2;catagephase3 = 3;catagephase4 = 4; vpaphase1 = -1; vpaphase2= -1; vpaphase3 =-1;}
   !! if(BackWards == 1) {catagephase1 = -1; catagephase2 = -1;catagephase3 = -1;catagephase4 = -1; vpaphase1 = 1; vpaphase2= 2; vpaphase3=4;}
+  !! if(usesurveyCV(1) == 1) vpaphase3 = 3;  // only first survey
   int firstestage  // only used in the VPA runs in the estimated years.  
   !! firstestage = firstage;
   !! if(firstage == 0) firstestage = 1;
@@ -319,14 +426,15 @@ INITIALIZATION_SECTION
 
 PARAMETER_SECTION
 
-// Estimated variables;
+// Estimated variables; 
+ init_bounded_number logdeltaQ1March(-1,1,deltaQ1phase);  // Only for icelandic cod change in q of age 1 after 2002 in March survey. Could be generalised.   
  init_bounded_number logMisreportingRatio(-1,1,misreportingphase);
  init_bounded_number logFoldestmult(-1,1,-2); // Not estimate but option available in VPA runs
  init_bounded_number logMoldest(-3,-0.5,estMlastagephase);
  init_bounded_number logMmultiplier(-2,2,Mmultphase);
  init_bounded_vector lnMigrationAbundance(1,MigrationNumbers,1,13,catagephase1);
  init_bounded_number lnMeanRecr(4,20,catagephase1);
- init_bounded_dev_vector lnRecr(firstyear,lastoptyear+firstage-recrdatadelay,-6,6,catagephase2) ;// log of recruitment
+  init_bounded_dev_vector lnRecr(firstyear,lastoptyear+firstage-recrdatadelay,-6,6,catagephase2) ;// log of recruitment
  init_bounded_number lnMeanInitialpop(4,17,catagephase1);
  init_bounded_dev_vector lnInitialpop(firstage+1,lastage,-7,7,catagephase2);
  init_bounded_matrix EstimatedSelection(firstcatchage,lastage-nfixedselages,1,number_of_seperable_periods,-5,0.2,estselphase); // Same selection of last 4 age groups
@@ -347,25 +455,25 @@ PARAMETER_SECTION
  init_bounded_number logSigmaCmultiplier(-1,1,catagephase4); 
  init_bounded_number AbundanceMultiplier(-10,10,-6); // When targeting of common cohorts.
  init_bounded_number lnMeanEffort(-3,3,catagephase1);
- init_bounded_dev_vector lnEffort(firstyear,lastoptyear,-4,4,catagephase2);  // log of Fishing mortality of oldest fish i.e effort
+  init_bounded_dev_vector lnEffort(firstyear,lastoptyear,-4,4,catagephase2);  // log of Fishing mortality of oldest fish i.e effort
+
  init_bounded_number meanlogSurvivors(4,17,vpaphase1);
- // one fewer estimated survivors when plus group is 1.  
- init_bounded_dev_vector logSurvivors(firstestage,lastage-1-plusgroup,-6,6,vpaphase2);
+ init_bounded_dev_vector logSurvivors(firstestage,lastage-1,-6,6,vpaphase2);
 
   
 // Survey parameters  here some cleaning of values and bounds could be done.  More file control.
   vector Surveylikelihood(1,nsurveys);
   vector SurveylikelihoodWeights(1,nsurveys); // Likely weight on each survey
-  init_bounded_matrix SurveyPowerest(1,nsurveys,minsurveyfirstage,maxsurveyfirstagewithconstantcatchability,1,3,surveypowphase);
-  !!dvector surveybiopowlb(1,nsurveys); //0.02
-  !!dvector surveybiopowub(1,nsurveys); //0.85
-  !! for(int i = 1;i <= nsurveys; i++)  surveybiopowlb(i) = 0.5;
-  !! for(int i = 1;i <= nsurveys; i++) surveybiopowub(i) = 2;
-  init_bounded_number_vector surveybiopow(1,nsurveys,surveybiopowlb,surveybiopowub,surveybiopowphase);
+  init_bounded_matrix SurveyPowerest(1,nsurveys,minsurveyfirstage,maxsurveyfirstagewithconstantpower,0.8,3,surveypowphase);
+  !!dvector surveytotalpowlb(1,nsurveys); //0.02
+  !!dvector surveytotalpowub(1,nsurveys); //0.85
+  !! for(int i = 1;i <= nsurveys; i++)  surveytotalpowlb(i) = 0.5;
+  !! for(int i = 1;i <= nsurveys; i++) surveytotalpowub(i) = 2;
+  init_bounded_number_vector surveytotalpow(1,nsurveys,surveytotalpowlb,surveytotalpowub,surveytotalpowphase);
   init_bounded_vector SigmaSurveypar(1,nsurveys,-5,3,catagephase4);
-  init_bounded_matrix SurveylnQest(1,nsurveys,minsurveyfirstage,maxsurveyfirstagewithfullcatchability,-30,15,4); //4
-  init_bounded_vector surveylogitslope(1,nsurveys,0.1,3,4);  // should perhaps try to have the phase variable
-  init_bounded_vector surveylogitage50(1,nsurveys,-2,12,4);  
+  init_bounded_matrix SurveylnQest(1,nsurveys,minsurveyfirstage,maxsurveyfirstagewithfullcatchability,-35,15,surveylnqphase); //4
+  init_bounded_vector surveylogitslope(1,nsurveys,0.1,3,-1);  // should perhaps try to have the phase variable
+  init_bounded_vector surveylogitage50(1,nsurveys,-2,12,-1);  // set temprarily to -1  
   !!dvector scorrlb(1,nsurveys); //0.02
   !!dvector scorrub(1,nsurveys); //0.85
   !! for(int i = 1;i <= nsurveys; i++) scorrlb(i) =0.0005;
@@ -374,7 +482,8 @@ PARAMETER_SECTION
   !!scorrphase = ivector(surveycorrphase);
   init_bounded_number_vector Surveycorr(1,nsurveys,scorrlb,scorrub,scorrphase);
   init_bounded_matrix logSigmaSurvey(1,nsurveys,firstage,lastage,logminsurCV,1,vpaphase3); 
-  init_bounded_vector logSigmaSurveybio(1,nsurveys,logminssbsurveyCV,-0.7,5);  // Later make the pase variable. 
+  init_bounded_vector logSigmaSurveybio(1,nsurveys,logminssbsurveyCV,-0.7,-1);  // Later make the pase variable. SSB survey
+//  init_bounded_vector logSigmaSurveybio(1,nsurveys,logminssbsurveyCV,-0.7,5);  // Later make the pase variable. 
 
 // Parameters in SSB-recruitment.  
   !!ivector srphase(1,6);
@@ -397,6 +506,8 @@ PARAMETER_SECTION
   matrix StockWeightsData(firstyear,lastyear,firstage,lastage);
   matrix SSBWeightsData(firstyear,lastyear,firstage,lastage) ;
   matrix StockMaturityData(firstyear,lastyear,firstage,lastage);
+  matrix NatMData(firstyear,lastyear,firstage,lastage);
+
 
 // This set is the same as before but for stochastic simulations 
   matrix CatchWeights(firstyear,lastyear,firstage,lastage);
@@ -477,6 +588,7 @@ PARAMETER_SECTION
   matrix SurveylnQ(1,nsurveys,firstage,lastage);
   matrix SurveyPower(1,nsurveys,firstage,lastage);
   3darray ObsSurveyNr(1,nsurveys,firstyear,lastyear,firstage,lastage);
+  3darray ObsSurveyCV(1,nsurveys,firstyear,lastyear,firstage,lastage);
   3darray CalcSurveyNr(1,nsurveys,firstyear,lastyear,firstage,lastage);  
   3darray SurveyResiduals(1,nsurveys,firstyear,lastyear,firstage,lastage); 
   3darray SurveyWeights(1,nsurveys,firstyear,lastyear,firstage,lastage); 
@@ -496,7 +608,22 @@ PARAMETER_SECTION
   number Maxrelssb; 
 
 
+// Tagdata.
 
+   init_bounded_vector logTagmort(1,Ntagseries,-4,3,tagphase);
+   init_bounded_vector logTagdispersion(1,Ntagseries,-3,5,tagphase);
+   init_bounded_vector logTagloss(1,Ntagseries,logtaglosslb,logtaglossub,logtaglossphase);   
+   vector Ntagged(1,Ntagdata);
+   vector Nrec(1,Ntagdata);
+   vector Nscan(1,Ntagdata);
+   vector predRecap(1,Ntagdata);
+   vector Tagloglikeli(1,Ntagdata);       
+   matrix aggrpredRecap(firsttagyear,lasttagyear,firstrecapyear,lastrecapyear);
+   matrix aggrRecap(firsttagyear,lasttagyear,firstrecapyear,lastrecapyear);
+   matrix AggrTagloglikeli(firsttagyear,lasttagyear,firstrecapyear,lastrecapyear);
+   matrix NtaggedMatrix(firstyear,lastyear,firstage,lastage);  // To help in simulations.
+   matrix GenTagMatrix(1,100,1,7); // Matrix to write closed loop tagging data into
+   number TagValue
 // Numbers related to HCR and stochasticity.  
   number CurrentTac;
   number CurrentCatch;
@@ -504,7 +631,8 @@ PARAMETER_SECTION
   number Mmultiplier;
   vector AssessmentErr(lastoptyear+1,lastyear);
   vector ImplementationErr(lastoptyear+1,lastyear);
-  
+  vector  WeightError(lastoptyear+1,lastyear); // Added 12 aug 2020
+ 
   vector MeanSel(firstage,lastage);
  
   number CatchResolution; // Proportion 
@@ -517,16 +645,27 @@ PARAMETER_SECTION
   number LNMEANEFFORT;  // Temporary fix for likelihood component 9 (see evaluate_the_objective_function)
   objective_function_value LnLikely;
 
+  number StartWeightfactor;  // Starting value of weighterr.
+  number MaxAsserr; // Starting value of assessmenterr.  Has been 2,  
+
+// End with what can change with additional years deviations that ar filled with 0.
 
 
 
 
 GLOBALS_SECTION
+  #include <string>
   #include <admodel.h>
   // Might have to calculate progsel every year if it is function of size.  
 //Catchrule 1 TAC, 2 Tac in advisory year F there after, 3 IcodHCr
 //4 F all years, 5 F with reduction below Btrigger, 6 IcodHCR with 
 // reduction below Btrigger, 7 IcodHcr without stabilizer.
+  adstring_array surveyparfiles;  // Max 10 surveys.  
+  adstring_array surveydatafiles;
+  adstring_array closedloopsurveydatafiles;
+  adstring closedloopcatchfile;
+  adstring closedlooptagfile;
+  adstring_array surveyresidfiles;
   adstring outputprefix;
   adstring outputpostfix;
   ofstream all_mcmc;
@@ -535,6 +674,7 @@ GLOBALS_SECTION
   ofstream recruitment_mcmc;
   ofstream initpopulation_mcmc;
   ofstream assessmenterror_mcmc;
+  ofstream weighterror_mcmc;
   ofstream implementationerror_mcmc;  
   ofstream estimatedselection_mcmc;
   ofstream parameter_mcmc;
@@ -553,9 +693,12 @@ GLOBALS_SECTION
   ofstream ssb_mcmc;
   ofstream ssbwerr_mcmc;
   ofstream relssb_mcmc;
-
-
-
+  int TotalCounter = 0;
+  int ProgWtFile = 1;  // Starting condition is that this file exists.  
+  double  TmpTac;  // For closed loop
+  double  TmpTac1;  // For closed loop HCR 8  Tac remaining in the beginning of fishing year.  
+  int NumberOfTagvalues;  // Number of tagvalues generated in one year.
+  
 
 // this list of files could be reduced somehow.  
 
@@ -570,14 +713,20 @@ TOP_OF_MAIN_SECTION
 RUNTIME_SECTION 
   convergence_criteria .1, .01, .0001, .0000001
   maximum_function_evaluations 800000
- 
+
 
 PRELIMINARY_CALCS_SECTION
+// To keep track of file names.  Defined in data section but could not be made global there.
+
+
+ SurveyPower = 1; 
  AgeModel = 1; // default value if refbio is output in Frules totbio is given
  HCRrefAge = firstage; // default value 
  logSigmaSurveybio = logminssbsurveyCV+0.2;  // Matters for IC
  AssessmentErrorRat = 0.6; // Changed from 0.3
  COUNTER = 0;
+ AggrTagloglikeli = 0;
+ MaxAsserr = 2;
 // Some dummy values 
 // Parameters that are sometimes estimated.
   SurveylikelihoodWeights = 1;  //Default value.  Input later.  
@@ -590,17 +739,35 @@ PRELIMINARY_CALCS_SECTION
   ObsCatchInNumbers = 0;
   AssessmentErr = 0;  // Set in mceval_phase
   ImplementationErr = 0;  // Set in mceeval_phase
-  
-  int i;
+   int i;
   for(i = 1; i < nsurveys; i++) logSigmaSurvey(i) = logminsurCV+0.2;  
-  SurveyPower = 1; 
-  for(i = 1; i <= nsurveys; i++) SurveyPowerest(i) = 1; 
-  for(i = 1; i <= nsurveys; i++) surveybiopow(i) = 1; 
-
+  system("rm -f /tmp/temp");
+  system("basename "+catchfilename+"> /tmp/temp");
+  ifstream infile("/tmp/temp");
+  infile >> closedloopcatchfile;
+  infile.close();
+  for(i = 1; i <= nsurveys; i++){
+    system("rm -f /tmp/temp");
+    system("basename "+surveydatafiles(i)+"> /tmp/temp");
+    ifstream infile("/tmp/temp");
+    infile >> closedloopsurveydatafiles(i);
+    infile.close();
+  }
+  system("rm -f /tmp/temp");
+  if(RandomTags == 1) {
+    system("basename "+Tagdatafilename+"> /tmp/temp");
+    infile.open("/tmp/temp");
+    infile >> closedlooptagfile;
+    infile.close();
+  }
+ 
   if(INITCOND == 0) { // No pin file
+    for(i = 1; i <= nsurveys; i++) SurveyPowerest(i) = 1; 
+    for(i = 1; i <= nsurveys; i++) surveytotalpow(i) = 1;
     SigmaSurveypar = log(0.25);
-    logMisreportingRatio = 0;
-
+    logTagloss = logtaglosslb+0.1; 
+    logTagmort = log(2);
+    logTagdispersion = log(1);
     SurveylnQ = -2;
     Catchlogitslope = 1;
     surveylogitslope = 2;
@@ -635,31 +802,32 @@ PRELIMINARY_CALCS_SECTION
 
    cout << "ReadCatchParameters " << endl;
    ReadCatchParameters();
+   logMisreportingRatio = log(Misreporting(firstyear));  // Starting value if estimated.  
    cout << "ReadLikelihoodParameters " << endl;
    ReadLikelihoodParameters();
    cout << "ReadOutputParameters " << endl; 
    ReadOutputParameters();
    cout << " ReadPrognosis " << endl; 
-    ReadPrognosis();
+   ReadPrognosis();
    cout << " ReadSurveyInfo " << endl;
     for(i = 1; i <= nsurveys; i++) 
-   SurveyWeights(i) = StockWeights;  // Changed if weights are read from file.
-   adstring parameterfilename;
-   adstring datafilename; 
-   adstring residualfilename;
-   ifstream surveylistfile("SURVEYFILES.DAT");
+       SurveyWeights(i) = StockWeights;  // Changed if weights are read from file.
    ofstream surveylogfile("survey.log");
    for( i = 1; i <= nsurveys; i++) {
-      surveylistfile >>  parameterfilename;
-      surveylistfile >>  datafilename;
-      surveylistfile >>  residualfilename;
-       ReadSurveyInfo(parameterfilename,datafilename,residualfilename,i,surveylogfile);
+       ReadSurveyInfo(surveyparfiles(i),surveydatafiles(i),surveyresidfiles(i),i,surveylogfile);
    }
+   if(Ntagseries > 0)
+      ReadTagInfo(Tagdatafilename);
 //   WriteInputDataInMatrixForm();  // For user to look at.  
   for(i = firstyear; i <= lastdatayear ; i++) {
       CatchIn1000tons(i) = sum(elem_prod(CatchWeights(i),ObsCatchInNumbers(i)))/1.0e6;
       if(CatchIn1000tons(i) < 0) CatchIn1000tons(i) = TotCatchIn1000tons(i);
   }
+  // This will later be handled by file input.  
+  if(ProgWtFile == 0) StartWeightfactor = -0.25;  // Prognosis not from file
+  if(ProgWtFile == 1) StartWeightfactor = 0;  // Prognosis not from file
+  
+
 // Save the input values when misreporting is included.  
   CatchIn1000tonsInput = CatchIn1000tons;
   ObsCatchInNumbersInput= ObsCatchInNumbers;
@@ -675,6 +843,7 @@ PRELIMINARY_CALCS_SECTION
   catch_mcmc_lines = 0;
   fishyearcatch_mcmc_lines = 0;
   assessmenterror_mcmc_lines = 0;
+  weighterror_mcmc_lines = 0;  
   implementationerror_mcmc_lines = 0;
   refbio1_mcmc_lines = 0;
   refbio2_mcmc_lines = 0;
@@ -685,8 +854,19 @@ PRELIMINARY_CALCS_SECTION
   f_mcmc_lines = 0;
   ssb_mcmc_lines = 0;
   ssbwerr_mcmc_lines = 0;
-
   mcmc_iteration = 1;
+  if(CatchRule == 7 || CatchRule == 8){  // Closed loop mceval_phase is 0 here.  
+    ofstream outfile(outputprefix+"tmp/resultsbyyear"+outputpostfix); 
+
+
+// Recruitment is same value as first age but put on the year that the fish is born.
+   outfile << "year\tRefF\tCalcCatchIn1000tons\tCatchIn1000tons\tSpawningstock\tEggproduction\tCbioR\tRefBio1\tRefBio2\tPredictedRecruitment\tRecruitment\tN1st\tN3\tN6";
+    for(int i = 1; i <= nsurveys; i++) 
+      outfile << "\tCalcSurveyBiomass"<<i<<"\tObsSurveyBiomass"<<i;
+    outfile << "\tAssYear ";  // would like run number here but how to transfer.  
+    outfile << endl;  
+  }
+
 
 PROCEDURE_SECTION
   ScaleCatches();  
@@ -708,92 +888,127 @@ PROCEDURE_SECTION
      write_mcmc_all();
   }
 REPORT_SECTION
-   report << "LnLikelicomp" <<  LnLikelicomp << endl;
-   report << "Surveylikelihood " << Surveylikelihood << endl;
-   report << endl << "SigmaSurvey " << endl << SigmaSurvey << endl;
    int i,j;
-   ofstream outfile(outputprefix+"resultsbyyearandage"+outputpostfix);
-   outfile << "year\tage\tN\tZ\tStockWeights\tM\tF\tCalcCno\tCatchWeights\tSSBWeights\tStockMaturity\tObsCno\tCatchDiff";
-   for(i = 1; i <= nsurveys; i++) 
-      outfile << "\tCalcSurveyNr" << i <<"\tObsSurveyNr" << i <<"\tSurveyResiduals" << i;
-   outfile  << endl;
+   ofstream outfile;
+
+   if(ClosedLoop == 1 && last_phase()) {  // Activated when muppet is called from muppet.  
+     ofstream tmpoutfile1("tmpoutfile1");  //Just mimimum output
+     int yr;
+     for(yr = lastoptyear-2; yr <= lastoptyear+2; yr++)
+        tmpoutfile1 << yr << "\t" << Spawningstock(yr) << "\t" << RefF(yr) << "\t" << CalcCatchIn1000tons(yr) << "\t" << N(yr,firstage) << "\t" << FishingYearCatch(yr) << "\t" << RefBio2(yr) << endl;
+     tmpoutfile1.close();
 
 
-   int k;
-   for(i = firstyear ; i <= lastyear; i++) {
-     for(j = firstage; j <= lastage; j++) {
-        outfile << i << "\t" << j << "\t" << N(i,j) << "\t" << Z(i,j) << "\t" << StockWeights(i,j) << "\t" << natM(i,j) << "\t" ;
-       outfile << F(i,j) << "\t" << CalcCatchInNumbers(i,j) << "\t" << CatchWeights(i,j) << "\t" << SSBWeights(i,j) << "\t" <<  StockMaturity(i,j) << "\t";
+     outfile.open(outputprefix+"resultsbyyear"+outputpostfix,ios::app);
+     if(CatchRule == 3 || CatchRule == 4 || CatchRule == 31  ||
+     CatchRule == 32 || CatchRule == 33 || CatchRule == 34 ) {
+       for(int yr=firstyear; yr <= lastyear; yr++)
+         HCRrefbio(yr) = CalcHCRrefbio(yr,HCRrefAge,0,0,0);
+     }
+     for(i = firstyear; i <= lastyear; i++) {
+       outfile << i << "\t" <<  RefF(i) << "\t" <<  CalcCatchIn1000tons(i) << "\t" << CatchIn1000tons(i) << "\t" << Spawningstock(i) << "\t" << EggProduction(i) << "\t" << 
+       CbioR(i) << "\t" << RefBio1(i) << "\t" << RefBio2(i) << "\t" << PredictedRecruitment(i) << "\t" << Recruitment(i) << "\t" << N(i,firstage) << "\t" << N(i,3) << "\t" << N(i,6) ;
+       for(j = 1; j <= nsurveys; j++) 
+        outfile << "\t" << CalcSurveyBiomass(j,i) << "\t" << ObsSurveyBiomass(j,i);
+      outfile << "\t" << lastoptyear ;
+      outfile  << endl;
+     }
+
+     outfile.close(); 
+  }   
+
+
+  if(ClosedLoop == 0 && last_phase()) {
+     if(Ntagseries > 0) writeTags();
+     if(Ntagseries > 0 && TagLikelyType !=  2) {
+       report << "aggrpredRecap " << endl;
+       report << aggrpredRecap << endl;
+       report << "aggrRecap " << endl;
+       report << aggrRecap << endl;
+       report << endl <<  "AggrTagloglikeli " << endl;
+       report  <<  AggrTagloglikeli << endl;
+     }
+     report << "LnLikelicomp" <<  LnLikelicomp << endl;
+     report << "Surveylikelihood " << Surveylikelihood << endl;
+     report << endl << "SigmaSurvey " << endl << SigmaSurvey << endl;
+     outfile.open(outputprefix+"resultsbyyearandage"+outputpostfix);
+     outfile << "year\tage\tN\tZ\tStockWeights\tM\tF\tCalcCno\tCatchWeights\tSSBWeights\tStockMaturity\tObsCno\tCatchDiff";
+     for(i = 1; i <= nsurveys; i++) 
+        outfile << "\tCalcSurveyNr" << i <<"\tObsSurveyNr" << i <<"\tSurveyResiduals" << i;
+     outfile  << endl;
+
+
+     int k;
+     for(i = firstyear ; i <= lastyear; i++) {
+       for(j = firstage; j <= lastage; j++) {
+          outfile << i << "\t" << j << "\t" << N(i,j) << "\t" << Z(i,j) << "\t" << StockWeights(i,j) << "\t" << natM(i,j) << "\t" ;
+         outfile << F(i,j) << "\t" << CalcCatchInNumbers(i,j) << "\t" << CatchWeights(i,j) << "\t" << SSBWeights(i,j) << "\t" <<  StockMaturity(i,j) << "\t";
        outfile << ObsCatchInNumbers(i,j) << "\t" << CatchDiff(i,j);
        for(k = 1; k<= nsurveys; k++) 
          outfile << "\t" <<  CalcSurveyNr(k,i,j) << "\t" << ObsSurveyNr(k,i,j) << "\t" << SurveyResiduals(k,i,j) ;
        outfile << endl;
-    }
-   }
-   outfile.close() ;
+      }
+     }
+     outfile.close() ;
 
 
-   outfile.open(outputprefix+"resultsbyyear"+outputpostfix);
-   if(CatchRule == 3 || CatchRule == 4) {
-     for(int yr=firstyear; yr <= lastyear; yr++)
+     outfile.open(outputprefix+"resultsbyyear"+outputpostfix); 
+     if(CatchRule == 3 || CatchRule == 4 || CatchRule == 31  ||
+    CatchRule == 32 || CatchRule == 33 || CatchRule == 34 ) {
+       for(int yr=firstyear; yr <= lastyear; yr++)
        HCRrefbio(yr) = CalcHCRrefbio(yr,HCRrefAge,0,0,0);
-   }
+     }
 
 // Recruitment is same value as first age but put on the year that the fish is born.  
-  outfile << "year\tRefF\tCalcCatchIn1000tons\tCatchIn1000tons\tSpawningstock\tEggproduction\tCbioR\tRefBio1\tRefBio2\tPredictedRecruitment\tRecruitment\tN1st\tN3\tN6";
-  for(i = 1; i <= nsurveys; i++) 
-   outfile << "\tCalcSurveyBiomass"<<i<<"\tObsSurveyBiomass"<<i;
-  if(CatchRule == 3 || CatchRule == 4) 
-    outfile << "\tHCRrefbio" ;
-  if(IceFishYear == 1) outfile << "\tFishingYearCatch";
-  outfile << endl;
-  for(i = firstyear; i <= lastyear; i++) {
-    outfile << i << "\t" <<  RefF(i) << "\t" <<  CalcCatchIn1000tons(i) << "\t" << CatchIn1000tons(i) << "\t" << Spawningstock(i) << "\t" << EggProduction(i) << "\t" << 
-     CbioR(i) << "\t" << RefBio1(i) << "\t" << RefBio2(i) << "\t" << PredictedRecruitment(i) << "\t" << Recruitment(i) << "\t" << N(i,firstage) << "\t" << N(i,3) << "\t" << N(i,6) ;
-    for(j = 1; j <= nsurveys; j++) 
-      outfile << "\t" << CalcSurveyBiomass(j,i) << "\t" << ObsSurveyBiomass(j,i);
-    if(CatchRule == 3 || CatchRule == 4) 
-      outfile << "\t" << HCRrefbio(i) ;
-    if(IceFishYear == 1)
-      outfile << "\t" << FishingYearCatch(i);
-    outfile  << endl;
-  }
-
-  outfile.close(); 
-
-  outfile.open(outputprefix+"resultsbyage"+outputpostfix);
- 
-  outfile << "age\tmeansel\tprogsel\tSigmaC";
-  for(i = 1; i <= nsurveys; i++) 
-    outfile << "\tSigmaSurvey" << i << "\tSurveylnQ" << i << "\tSurveyPower" << i;
-  outfile << endl;
-
-  for(i = firstage; i <= lastage; i++) {
-    outfile << i << "\t" <<  meansel(i) << "\t" << progsel(i) << "\t" << SigmaC(i);
-    for(j = 1; j <= nsurveys; j++){ 
-       if(i >= surveyfirstage(j) | i <= surveylastage(j)) 
-         outfile << "\t" <<  SigmaSurvey(j,i) << "\t" << mfexp(SurveylnQ(j,i)) << "\t" << SurveyPower(j,i); 
-       else 
-         outfile << "\t-1\t-1\t-1"; 
-     }
+    outfile << "year\tRefF\tCalcCatchIn1000tons\tCatchIn1000tons\tSpawningstock\tEggproduction\tCbioR\tRefBio1\tRefBio2\tPredictedRecruitment\tRecruitment\tN1st\tN3\tN6";
+    for(i = 1; i <= nsurveys; i++) 
+      outfile << "\tCalcSurveyBiomass"<<i<<"\tObsSurveyBiomass"<<i;
     outfile << endl;
 
-  }
-  outfile.close();
+    for(i = firstyear; i <= lastyear; i++) {
+      outfile << i << "\t" <<  RefF(i) << "\t" <<  CalcCatchIn1000tons(i) << "\t" << CatchIn1000tons(i) << "\t" << Spawningstock(i) << "\t" << EggProduction(i) << "\t" << 
+       CbioR(i) << "\t" << RefBio1(i) << "\t" << RefBio2(i) << "\t" << PredictedRecruitment(i) << "\t" << Recruitment(i) << "\t" << N(i,firstage) << "\t" << N(i,3) << "\t" << N(i,6) ;
+      for(j = 1; j <= nsurveys; j++) 
+        outfile << "\t" << CalcSurveyBiomass(j,i) << "\t" << ObsSurveyBiomass(j,i); 
+      outfile  << endl;
+     }
+
+     outfile.close(); 
+
+     outfile.open(outputprefix+"resultsbyage"+outputpostfix);
+ 
+    outfile << "age\tmeansel\tprogsel\tSigmaC";
+    for(i = 1; i <= nsurveys; i++) 
+      outfile << "\tSigmaSurvey" << i << "\tSurveylnQ" << i << "\tSurveyPower" << i;
+    outfile << endl;
+
+    for(i = firstage; i <= lastage; i++) {
+      outfile << i << "\t" <<  meansel(i) << "\t" << progsel(i) << "\t" << SigmaC(i);
+      for(j = 1; j <= nsurveys; j++){ 
+         if(i >= surveyfirstage(j) | i <= surveylastage(j)) 
+           outfile << "\t" <<  SigmaSurvey(j,i) << "\t" << mfexp(SurveylnQ(j,i)) << "\t" << SurveyPower(j,i); 
+         else 
+           outfile << "\t-1\t-1\t-1"; 
+       }
+      outfile << endl;
+
+    }
+    outfile.close();
 
   
-  if(BackWards == 0) { // Print out F of oldest.  
-     ofstream Nfile("Noldest.dat");
-     dvar_matrix Noldest(firstyear,lastdatayear+1,lastage-1,lastage);
-     for(i = firstyear; i <=lastdatayear+1 ; i++) Noldest(i) = N(i)(lastage-1,lastage);
-     Nfile << Noldest ;
-     Nfile.close();
-     ofstream Ffile("Foldest.dat");
-      dvar_matrix Foldest(firstyear,lastdatayear+1);
-      for(i = firstyear; i <=lastdatayear+1 ; i++) Foldest(i) = F(i)(lastage-1,lastage);
-      Ffile << Foldest ;
-      Ffile.close();
-   }
+    if(BackWards == 0) { // Print out F of oldest.  
+       ofstream Nfile("Noldest.dat");
+       dvar_matrix Noldest(firstyear,lastdatayear+1,lastage-1,lastage);
+       for(i = firstyear; i <=lastdatayear+1 ; i++) Noldest(i) = N(i)(lastage-1,lastage);
+       Nfile << Noldest ;
+       Nfile.close();
+       ofstream Ffile("Foldest.dat");
+       dvar_matrix Foldest(firstyear,lastdatayear+1);
+       for(i = firstyear; i <=lastdatayear+1 ; i++) Foldest(i) = F(i)(lastage-1,lastage);
+       Ffile << Foldest ;
+       Ffile.close();
+     }
+   } // End of if ClosedLoop == 0
 
 
 // ****************************************************
@@ -801,6 +1016,7 @@ REPORT_SECTION
 // Look at plus group in terminal year.  
  
 FUNCTION void BackwardHistoricalSimulation()
+// Oldest age group taken from forward running model but 2 oldest if we have + group.  
   int i,year,age;
   int trend = 0;  // Trend or shift in certain year.  
   if(trend == 1) {
@@ -820,64 +1036,37 @@ FUNCTION void BackwardHistoricalSimulation()
  dvariable Nnew,Nold;
 // Question about using N from the separable model.  This code is only for plus group.  
   int HistoricalAssessment = 1;
-  dvariable FixNold = 0.1;  // Min left was 100 .  
   N = 0;
-
-  if(plusgroup == 0) {
-    for(age = firstestage; age < lastage; age++) 
-      N(lastoptyear+1,age) = mfexp(meanlogSurvivors+logSurvivors(age));
-    CalcNaturalMortality1(lastoptyear);
-    N(lastoptyear+1,lastage) = Noldestinp(lastoptyear+1,lastage);
-    for(year = lastoptyear; year >=  firstyear; year-- ) {
-      CalcNaturalMortality1(year);
-      N(year,lastage) = Noldestinp(year,lastage);
+  for(age = firstestage; age < lastage; age++) 
+    N(lastoptyear+1,age) = mfexp(meanlogSurvivors+logSurvivors(age));
+    
+  if(variableM == 0) CalcNaturalMortality1(lastoptyear);
+  if(variableM == 1) CalcNaturalMortality2(lastoptyear);
+  N(lastoptyear+1,lastage) = Noldestinp(lastoptyear+1,lastage);
+  if(plusgroup == 1) N(lastoptyear+1,lastage-1) = Noldestinp(lastoptyear+1,lastage-1);
+  for(year = lastoptyear; year >=  firstyear; year-- ) {
+    if(variableM == 0) CalcNaturalMortality1(year);
+    if(variableM == 1) CalcNaturalMortality2(year);
+    N(year,lastage) = Noldestinp(year,lastage);
+    if(plusgroup == 1) N(year,lastage-1) = Noldestinp(year,lastage-1);
+    if(plusgroup == 0) 
       for(age = firstcatchage; age <= lastage - 1; age++) 
         N(year,age) =  (N(year+1,age+1)*exp(natM(year,age)/2)+ObsCatchInNumbers(year,age))*exp(natM(year,age)/2);
-      for(age = firstage; age < firstcatchage; age++) 
-        N(year,age) = N(year+1,age+1)*exp(natM(year,age));
-    }
-  
-    for(year = firstyear; year <= lastoptyear; year++) {
-       for(age = firstage; age < lastage; age++) {
-         Z(year,age) = -log(N(year+1,age+1)/N(year,age));  
-         F(year,age) = Z(year,age) - natM(year,age);
-       }
-       F(year,lastage) = Foldestinp(year,lastage);
-       Z(year,lastage) = F(year,lastage) + natM(year,lastage);
-     }  // year loop
-   }  // if plusgroup.
-
-  if(plusgroup == 1) {  // use 2 oldest from the forward running model.  
-    for(age = firstestage; age < lastage-1; age++) 
-      N(lastoptyear+1,age) = mfexp(meanlogSurvivors+logSurvivors(age));
-    CalcNaturalMortality1(lastoptyear);
-    N(lastoptyear+1,lastage-1) = Noldestinp(lastoptyear+1,lastage-1);
-    N(lastoptyear+1,lastage) = Noldestinp(lastoptyear+1,lastage);
-    for(year = lastoptyear; year >=  firstyear; year-- ) {
-      CalcNaturalMortality1(year);
-      N(year,lastage) = Noldestinp(year,lastage);
-      N(year,lastage-1) = Noldestinp(year,lastage-1);
+    if(plusgroup == 1) 
       for(age = firstcatchage; age <= lastage - 2; age++) 
         N(year,age) =  (N(year+1,age+1)*exp(natM(year,age)/2)+ObsCatchInNumbers(year,age))*exp(natM(year,age)/2);
-      for(age = firstage; age < firstcatchage; age++) 
-        N(year,age) = N(year+1,age+1)*exp(natM(year,age));
-    }
-  
-    for(year = firstyear; year <= lastoptyear; year++) {
-       for(age = firstage; age < lastage-1; age++) {
-         Z(year,age) = -log(N(year+1,age+1)/N(year,age));  
-         F(year,age) = Z(year,age) - natM(year,age);
-       }
+    for(age = firstage; age < firstcatchage; age++) // do not need to specify + group here.  
+      N(year,age) = N(year+1,age+1)*exp(natM(year,age));
+  }
+  for(year = firstyear; year <= lastoptyear; year++) {
+     for(age = firstage; age < lastage; age++) {
+       Z(year,age) = -log(N(year+1,age+1)/N(year,age));  
+       F(year,age) = Z(year,age) - natM(year,age);
+     }
+     if(plusgroup == 1) {
        F(year,lastage) = Foldestinp(year,lastage);
        Z(year,lastage) = F(year,lastage) + natM(year,lastage);
-       F(year,lastage-1) = Foldestinp(year,lastage-1);
-       Z(year,lastage-1) = F(year,lastage-1) + natM(year,lastage-1);
-     }  // year loop
-   }  // if plusgroup.
-
-
-
-   for(year = lastoptyear; year >=  firstyear; year-- ) {
+     }
      CalcCatchInNumbers(year)=elem_prod(elem_div(F(year),Z(year)),elem_prod((1.-mfexp(-Z(year))),N(year)));
      CalcCatchIn1000tons(year) = sum(elem_prod(CalcCatchInNumbers(year),CatchWeights(year)))/1.0e6;
 //     CalcPredationNumbers(year)=elem_prod(elem_div(natM(year),Z(year)),elem_prod((1.-mfexp(-Z(year))),N(year)));
@@ -940,7 +1129,8 @@ FUNCTION void HistoricalSimulation()
    for(i = firstage+1; i <= lastage; i++) 
      N(firstyear,i) = mfexp(lnMeanInitialpop+lnInitialpop(i));
   for(year = firstyear; year <= lastoptyear ;year++){
-    CalcNaturalMortality1(year);
+    if(variableM == 0) CalcNaturalMortality1(year);
+    if(variableM == 1) CalcNaturalMortality2(year);
  
 // The user must now check that only one of the values catchlogitphase,
 // estselphase and catchlogitsizephase is larger than 0.  
@@ -982,7 +1172,6 @@ FUNCTION void HistoricalSimulation()
 // Calculate referenct biomass. nhat = 0 means calculated for real stock,
 // nhat = 1 calculated based on perturbed stock (Nhat)
 // Look at what uncertainty we have in weight prediction, W(yr-1) instead of W(yr) might be too rough for dens dep cases.  
-
 FUNCTION dvariable  CalcHCRrefbio(int yr,int refage,int proxy,int nhat,int nweighterryears)
    int tmpnweighterryears = 0;  // to treat the ends where we do not reach nweighterryears in the average
    dvariable tmpweighterr = 0;
@@ -1042,16 +1231,40 @@ FUNCTION void BioRatioHockeystick(int yr)
 // if SSB might also use Bproxy.  Currently only SSB is allowed as trigger in
 // size based models.
    HCRBproxy(yr) = CalcHCRrefbio(yr,HCRBproxyAge,1,0,nweighterryears);
+   dvariable estHCRproxy = mfexp(log(HCRBproxy(yr))+AssessmentErr(yr));
+   dvariable Hratio;
+   dvariable HarvestRatio;
+   dvariable LastYTacRat;
+   
    HCRrefbio(yr) = CalcHCRrefbio(yr,HCRrefAge,0,0,nweighterryears);
+   dvariable estHCRrefbio = mfexp(log(HCRrefbio(yr))+AssessmentErr(yr));
 
-   dvariable ratio = mfexp(log(HCRBproxy(yr))+AssessmentErr(yr))/Btrigger;
-   ratio = SmoothDamper(ratio,1.0,0.0);  // ratio max 1  do not need the smooth version.  
-   dvariable Hratio = ratio*HarvestRatio; 
-   dvariable LastYTacRat = LastYearsTacRatio*ratio; // Gradual  like saithe
+
+   if(CatchRule == 32) { //Hrellis rule not differentiable
+      if(estHCRrefbio > Btrigger3) HarvestRatio = HarvestRatio2;
+      else if(estHCRrefbio > Btrigger2) HarvestRatio = HarvestRatio1+(HarvestRatio2-HarvestRatio1)*
+      (estHCRrefbio-Btrigger2)/(Btrigger3-Btrigger2);
+      else HarvestRatio = HarvestRatio1;
+   }
+   else HarvestRatio = HarvestRatio1; 
+
+
+   dvariable ratio = estHCRproxy/Btrigger;
+   dvariable newratio =
+      1.0/(1+exp(-20.0*(ratio-1.0))); // relatively abrupt cod rule change differentiable.
+
+   ratio = SmoothDamper(ratio,1.0,0.0);  // ratio max 1  do not need the smooth version.
+   Hratio = ratio*HarvestRatio; 
+   dvariable refcatch = Hratio*estHCRrefbio;
+   if(CatchRule == 33) LastYTacRat = LastYearsTacRatio*ratio; // Gradual  like saithe differentiable
+   else LastYTacRat = LastYearsTacRatio*newratio;  //cod rule, turned off abruptly, not differentiable.
+   if(CatchRule == 31 && (refcatch > CurrentTac)) LastYTacRat = 0;   // This rule is never differentiable. Stabliiser only on way down.  
+   if(CatchRule == 34 && (refcatch < CurrentTac)) LastYTacRat = 0;   // This rule is never differentiable. Stabiliser only on way up.  
+
 
    dvariable AnnualCatch;  
    dvariable mincatch = 0.0;
-   dvariable refcatch = Hratio*mfexp(log(HCRrefbio(yr))+AssessmentErr(yr));
+   
    dvariable tmpCatch = (LastYTacRat*CurrentTac +  (1-LastYTacRat)*refcatch);
    dvariable Catch = tmpCatch*mfexp(ImplementationErr(yr));
    // small variations so implementation err is not included in the Tac stabiliser.
@@ -1064,7 +1277,7 @@ FUNCTION void BioRatioHockeystick(int yr)
       AnnualCatch =  TacLeft + Catch/3; 
       AnnualCatch = SmoothDamper(AnnualCatch,MaxHarvestRatio*HCRrefbio(yr),mincatch); 
       TacLeft = Catch*2/3;
-      FishingYearCatch(yr) = Catch;  // FishingYearCatch(2018) is 2018/2018
+      FishingYearCatch(yr) = Catch;  // FishingYearCatch(2018) is 2018/201
    }
    if(!IceFishYear)
        AnnualCatch = CurrentCatch ;
@@ -1076,6 +1289,8 @@ FUNCTION void BioRatioHockeystick(int yr)
 // robust.  This HCR should though not be used for optimization. 
    if(mceval_phase()) ProgF(yr) = FishmortFromCatchMCMC(AnnualCatch*1e6,N(yr),CatchWeights(yr),progsel,natM(yr));
    if(!mceval_phase()) ProgF(yr) = FishmortFromCatchOpt(AnnualCatch*1e6,N(yr),CatchWeights(yr),progsel,natM(yr));
+
+
 
 FUNCTION void SetWeightErrorsHad() // For the haddock model.  
 // Could est the starting point based on current value i.e negative
@@ -1131,7 +1346,6 @@ FUNCTION void SetWeightErrorsHad() // For the haddock model.
    selerr=selerr*selcv*ratio;
 
 
-
 FUNCTION void SetAssessmentErr()  // Implementation and assessmenterr 
   random_number_generator r(COUNTER+20000);  // To avoid correlation with recrerr
   dvariable ratio = sqrt(1-Assessmentcorr*Assessmentcorr);
@@ -1144,8 +1358,8 @@ FUNCTION void SetAssessmentErr()  // Implementation and assessmenterr
     AssessmentErr(i) = Assessmentcorr*AssessmentErr(i-1)+AssessmentErr(i);
   AssessmentErr=AssessmentErr*ratio;
   for(i = lastoptyear+1; i <= lastyear; i++){
-    if(AssessmentErr(i) > 2) AssessmentErr(i) = 2;  //Max asserr 
-    if(AssessmentErr(i) < -2) AssessmentErr(i) = -2;  //-2 or 21
+    if(AssessmentErr(i) > MaxAsserr) AssessmentErr(i) = MaxAsserr;  //Max asserr 
+    if(AssessmentErr(i) < -MaxAsserr) AssessmentErr(i) = -MaxAsserr;  //-2 or 21
   }
   AssessmentErr=AssessmentErr*Assessmentcv;
   AssessmentErr=AssessmentErr+Assessmentbias;  // Think about the start values if bias.
@@ -1163,26 +1377,28 @@ FUNCTION void SetAssessmentErr()  // Implementation and assessmenterr
     if(ImplementationErr(i) < -2) ImplementationErr(i) = -2;  //-2 or 2
   }
   ImplementationErr=ImplementationErr*Implementationcv;
-  ImplementationErr=ImplementationErr+Implementationbias;  // Think about the start values if bias.  
-
+  ImplementationErr=ImplementationErr+Implementationbias;  // Think about the start values if bias.
+  
 // Set Recruitment and assessment error 
-
-
 
 
 FUNCTION void Prognosis()
 
-
+  TotalCounter++;
+  if(mceval_phase() && (CatchRule==7 || CatchRule==8)) cout << "TotalCounter " << TotalCounter << endl;
   dvariable ratio;
   dvariable wfrat = 0; // convert weighted and unweighted F.  
 
   int lastprogyear; // To reduce computer time in early part of simulation
   if ( current_phase() < 4) 
-    lastprogyear = lastoptyear + 2; 
+    lastprogyear = lastoptyear + 2;
+  else if(mceval_phase() && (CatchRule == 7 || CatchRule == 8))  // Closed loop prognosis based on 3 years
+    lastprogyear = lastyear - 4;
   else 
     lastprogyear = lastyear;
+
   CurrentTac= CurrentTacInput; // For catch rule start value.
-  CurrentCatch = CurrentTacInput;  // Added not to get steabiliser in implementation error.  
+  CurrentCatch = CurrentTacInput;  // Added not to get steabiliser in implementation error.
   TacLeft = TacLeftInput;  // For catch rule start value.  
   int i;
 //  UpdateWeightsAndMaturity has to be called every year if 
@@ -1227,7 +1443,9 @@ FUNCTION void Prognosis()
   dvariable Catch;
   for(i = lastoptyear+1; i <= lastprogyear; i++) {
     if(mceval_phase() && DensDep == 1) UpdateWeightandMaturityHad(i); // not done in optimization
-    CalcNaturalMortality1(i); 
+    //variable M herring related stuff
+    if(variableM == 0) CalcNaturalMortality1(i);
+    if(variableM == 1) CalcNaturalMortality2(i);
     //CalcRefValues(i,i,0);  // can not be called here for some reason
     if(firstcatchage == 0){ // Have to do it here if 0group is caught.
        PredictSSB(i);  // Then SSB must be at the start of the year.
@@ -1237,7 +1455,7 @@ FUNCTION void Prognosis()
 
     // Specify TAC.  Short term prognosis only 
     if(CatchRule == 1 || i <= lastdatayear) {  
-        if(current_phase() < 4) // have to start with F for convergence
+        if(current_phase() < 4) // have to start with F for convergene
            ProgF(i) = 0.5;
         else {
           if(i > lastdatayear) 
@@ -1250,6 +1468,17 @@ FUNCTION void Prognosis()
         }
     }
 
+    // Closed loop. 7 Frule, 8 Icelandic codhcr
+
+    if((CatchRule == 7 || CatchRule == 8)   && mceval_phase()) {
+      if(i == (lastoptyear+1)) TmpTac = FutureForCatch(i);
+      ProgF(i) = FishmortFromCatchMCMC(TmpTac*1e6,N(i),CatchWeights(i),progsel,natM(i));
+    }
+//    if((CatchRule == 8)   && mceval_phase()) {
+//      if(i == (lastoptyear+1)) TmpTac = NextYearsTacInput;
+//      ProgF(i) = FishmortFromCatchMCMC((TacLeftInput + NextYearsTacInput*1/3)*1e6,N(i),CatchWeights(i),progsel,natM(i));
+//     }
+
 //  Fishing mortality but TAC for assessment year.  Usually used during optimization.   
     if(CatchRule == 2 & i > lastdatayear){
       if(i == (lastdatayear+1)) {// Tac in assessment year. 
@@ -1261,13 +1490,19 @@ FUNCTION void Prognosis()
 	 }	   
 	      
       }
-      else {      
+      else { //Added trigger option in this setup Aug 11 2020.  
+      	dvariable triggmult = 1.0;
+        if(Btrigger > 0.01){  // If Btrigger = 0, no Btrigger.  
+	   F(i) = FutureForCatch(i)*progsel;
+	   PredictSSB(i);
+	   triggmult = SmoothDamper(Spawningstock(i),1.0,0.0);  //Differentiable.  
+	}
         if(WeightedF == 1) {
 	    F(i) = FutureForCatch(i)*progsel;
             wfrat = CalcWeightedMeanF(F(i),N(i))/FutureForCatch(i);//+1e-8
-	    ProgF(i) = mfexp(log(FutureForCatch(i)/wfrat)+AssessmentErr(i));
+	    ProgF(i) = mfexp(log(FutureForCatch(i)/wfrat*triggmult)+AssessmentErr(i));
         }
-        else ProgF(i) = mfexp(log(FutureForCatch(i))+AssessmentErr(i));
+        else ProgF(i) = mfexp(log(FutureForCatch(i)*triggmult)+AssessmentErr(i));
       }
     }
 // End of catchrule 2  
@@ -1278,7 +1513,7 @@ FUNCTION void Prognosis()
     }
 
 //  Biomass rules.
-    if(CatchRule == 3 & i > lastdatayear)
+    if((CatchRule == 3 || CatchRule == 31  || CatchRule == 32  || CatchRule == 33 || CatchRule == 34 ) & i > lastdatayear)
       BioRatioHockeystick(i);
       
     if(CatchRule == 4 & i > lastdatayear)
@@ -1290,6 +1525,8 @@ FUNCTION void Prognosis()
       if(i < lastyear) SingleTriggerHCR(i) ;
       if(i == lastyear) ProgF(i) = FishmortFromCatchMCMC(CalcCatchIn1000tons(i)*1e6,N(i),CatchWeights(i),progsel,natM(i));
     }
+// Assessment in feedback loop means that the other part might be put earlier.  
+
     F(i) = ProgF(i)*progsel;
     Z(i) = F(i) + natM(i);
     if(firstcatchage > 0 & i > (lastoptyear+firstage-recrdatadelay) ) {
@@ -1298,7 +1535,7 @@ FUNCTION void Prognosis()
          Recruitment(i) = PredictedRecruitment(i);
   	 N(i,firstage) = PredictedRecruitment(i-firstage);
     }
-     if(firstcatchage > 0 & i <= (lastoptyear+firstage-recrdatadelay) ){
+    if(firstcatchage > 0 & i <= (lastoptyear+firstage-recrdatadelay) ){
 	 PredictSSB(i);
          PredictedRecruitment(i) = mfexp(log(PredictRecruitment(i))+recrerr(i)*SigmaSSBRec(i));
          Recruitment(i) = PredictedRecruitment(i);
@@ -1307,9 +1544,96 @@ FUNCTION void Prognosis()
     CalcCatchIn1000tons(i) = sum(elem_prod(CalcCatchInNumbers(i),CatchWeights(i)))/1.0e6;
     CalcNextYearsN(i);
     CalcRefValues(i,i,0); // called again as some values change with catch
-  } 
-  
+    
+    if((CatchRule == 7 || CatchRule == 8) && mceval_phase()) { // ClosedLoop
+// Need temporary copy of SSB and recr.      
+      dvariable tmpssb= 0;
+       for(int age = minssbage; age <= lastage; age++)
+         tmpssb += N(i,age)*SSBWeights(i,age)*StockMaturity(i,age)*
+         mfexp(-(natM(i-1,age)*PropofMbeforeSpawning(age)+F(i-1,age)*PropofFbeforeSpawning(age)));
+      tmpssb/= 1e6;
+      Spawningstock(i) = tmpssb; 
+      PredictedRecruitment(i) = mfexp(log(PredictRecruitment(i))+recrerr(i)*SigmaSSBRec(i));
+      N(i+firstage,firstage) = PredictedRecruitment(i);
+      if(i == (lastoptyear+1)){  // Start with the observed data.
+         system("cp tmp/muppet.pin.std tmp/muppet.pin"); // only needed for the pinfile option not used now.  AppendPinfile1
 
+         for(int j = 1; j <=  nsurveys; j++) 
+	    system("cp "+surveydatafiles(j)+" tmp/"+closedloopsurveydatafiles(j));
+         system("cp "+catchfilename+" tmp/"+closedloopcatchfile);
+	 if(RandomTags == 1) 
+            system("cp "+Tagdatafilename+" tmp/"+closedlooptagfile);
+     
+      }
+      if( i >= (lastoptyear+1)){
+         system("cd tmp");
+         for(int surnr = 1; surnr <=  nsurveys; surnr++) {
+       	  // surnr in an index for surveynr,  i for the year.  
+           adstring tmpfilenames;
+	   ofstream tmpoutfile("tmp/"+closedloopsurveydatafiles(surnr),ios::app);  //open datafile
+           if(surveytype(surnr) == 1 || surveytype(surnr) == 2) PredictSurveyAbundance1(surnr,i+surveytimefromlastyear(surnr));
+	   if(surveytype(surnr) == 4 ) SSB_Survey_abundance(surnr,i+surveytimefromlastyear(surnr));
+	   WriteSurveyData(surnr,i+surveytimefromlastyear(surnr),tmpoutfile);
+	   tmpoutfile.close();
+        }
+      }
+      
+      PredictCatchData1(i);
+      ofstream catchfile("tmp/"+closedloopcatchfile,ios::app);
+      for(int age = firstage ; age <= lastage; age++) {
+	 catchfile << i << "\t" << age << "\t" << ObsCatchInNumbers(i,age) <<
+	 "\t" << CatchWeights(i,age) << "\t" << StockWeights(i,age) << "\t" <<
+	 StockMaturity(i,age) << "\t" <<  SSBWeights(i,age) << endl;
+      }
+      catchfile.close();
+    
+
+      if(RandomTags == 1) {
+        GenerateTagData(i,5000);
+        GenerateTagRecap(i,0.3);
+      }
+      system("rm -f tmp/icecod.dat.opt");
+      //system("sed -e 's/aaaa/"+ str(i) +"/g' < tmp/icecod.dat.opt.orig > tmp/icecod.dat.opt");
+
+      system("sed -e 's/aaaa/"+ str(i) +"/g' -e 's/tttt/"+ str(NumberOfTagvalues) + "/g' < tmp/icecod.dat.opt.orig > tmp/icecod.dat.opt");
+      // Need to change muppet.par here to muppet.pin.std as muppet.par code change AppendPinfile1 and AppendPinfile are little different
+      adstring Rcmd1 = "AppendPinfile(file=\"tmp/muppet.pin.std\",yr1="
+      +str(lastoptyear)+",yr2="+str(i)+",outputfile=\"tmp/muppet.pin\")";  // Use starting all the time pad effortdev and recrdev with 0
+//      adstring Rcmd1 = "AppendPinfile1(file=\"tmp/muppet.par\",outputfile=\"tmp/muppet.pin\")";  // Use most recent 
+      adstring Rcmd2 = "source(\"appendPin.R\")";
+      adstring Rcmd ="echo '"+Rcmd2+";"+Rcmd1+"'|R --vanilla --no-save >/dev/null";
+      system(Rcmd);
+      
+//    Assume muppet is stored in the starting directory.       
+      system("cd tmp; muppet -nox -ind icecod.dat.opt -nohess > /dev/null");
+//    This needs to match what is done in the report section
+      dvector tmpvec1(1,7);
+      ifstream tmpinfile("tmp/tmpoutfile1"); // Remember directory tmp
+      cout << "Year " << i <<  "TmpTac" << TmpTac << endl;
+      for(int nr=1 ; nr <=5 ; nr++) {  // five years lastoptyear-2 : lastoptyear+2 written
+        for(int k = 1; k <= 7 ; k++){  
+          tmpinfile >> tmpvec1(k);
+	}
+        if(tmpvec1(1) == (i+2) && (CatchRule == 7 )) // Get the correct TAC. Frule
+	  TmpTac = double(tmpvec1(4));
+        if(tmpvec1(1) == (i+1) && CatchRule == 8) { // Get the correct TAC. Ice HCR modified to calendar years and really set up as F rule except for the assessment year.
+          double tmprat = double(tmpvec1(2))/Btrigger;
+	  if(tmprat >= 1) TmpTac
+           = double(tmpvec1(4))*LastYearsTacRatio+(1-LastYearsTacRatio)*FutureForCatch(lastoptyear+2)*double(tmpvec1(7)); // Need to put Harvest rate instead
+                                                                                                      // of FutureForCatch that  is really harvestrate.
+	  else TmpTac =  FutureForCatch(lastoptyear+2)*tmprat*double(tmpvec1(7));// no stabiliser below btrigger.
+        }
+	  
+      }
+      cout << "TmpTac" << TmpTac ;
+      system("rm -f tmp/codprognosis.dat");
+      if(CatchRule == 7 || CatchRule == 8) system("sed -e 's/aaaa/"+ str(TmpTac) +"/g' < tmp/codprognosis.dat.orig > tmp/codprognosis.dat");
+//      if(CatchRule == 8) system("sed -e 's/aaaa/"+ str(TmpTac) +  "/g' -e 's/bbbb/"+ str(TmpTac1) +"/g' < tmp/codprognosis.dat.orig > tmp/codprognosis.dat");
+      
+      
+    }
+  }  
+  
 // ******************************************************************
 // Objective function; 
 // This function calls a set of routines that do the job.  
@@ -1351,7 +1675,8 @@ FUNCTION void evaluate_the_objective_function()
       }
   }
 
-  LnLikelicomp(8) = 0; 
+  if(Ntagseries > 0 && current_phase() > 3)
+     LnLikelicomp(8) = TagLoglikeli(); 
 
 
 //
@@ -1429,13 +1754,82 @@ FUNCTION dvariable Catch_loglikeliNocorr()
  return value;
 
 
+FUNCTION void writeTags()
+   int i;
+   int Tage;
+   int Rage;
+   ofstream tagoutfile("tags.out");
+   tagoutfile << "TagYear\tRyear\tTimeout\tTage\tYearClass\tRage\tNtagged\tNscan\tpredRecap\tNrec\tTagloglikeli" << endl;
+   for(i = 1; i <= Ntagdata ; i++) {
+     Tage = TagYear(i) - YearClass(i);
+     Rage = RecaptYear(i) - YearClass(i);
+     tagoutfile << TagYear(i) << "\t" << RecaptYear(i)  << "\t"
+     << RecaptYear(i)-TagYear(i) << "\t" << Tage << "\t"
+     << YearClass(i)  << "\t" << Rage << "\t" << Ntagged(i) <<
+     "\t" << Nscan(i) << "\t" << predRecap(i) << "\t" << Nrec(i) << "\t" <<  Tagloglikeli(i) << endl;
+   }
+   tagoutfile.close();
+
+FUNCTION dvariable TagLoglikeli()
+ dvariable value = 0;
+ int i = 0;
+ int j = 0;
+ int Tage;
+ int Rage;
+ Tagloglikeli = 0;
+ aggrpredRecap = 0;
+ for(i = 1; i < Ntagdata ; i++) {
+   Tage = TagYear(i)-YearClass(i);
+   if(Tage >= firsttagage && Tage <= lasttagage){
+     predRecap(i) = Ntagged(i)*Nscan(i)/N(int(TagYear(i)),Tage)*mfexp(-mfexp(logTagmort(int(Tagtype(i)))))*mfexp(-mfexp(logTagloss(int(Tagtype(i))))*(RecaptYear(i)-TagYear(i)));
+     if(int(TagYear(i)) >= firsttagyear && int(TagYear(i)) <= lasttagyear &&
+        int(RecaptYear(i)) >= firstrecapyear &&
+        int(RecaptYear(i)) <= lastrecapyear)
+        aggrpredRecap(int(TagYear(i)),int(RecaptYear(i))) += predRecap(i);
+    }
+  }
+  if(TagLikelyType == 1){  // By age likelihood
+    for(i = 1; i < Ntagdata ; i++) {
+      Tage = TagYear(i)-YearClass(i);
+      if(predRecap(i) > 0 && Tage >= firsttagage && Tage <= lasttagage &&
+      int(TagYear(i)) >= firsttagyear && int(TagYear(i)) <= lasttagyear &&
+        int(RecaptYear(i)) >= firstrecapyear &&
+        int(RecaptYear(i)) <= lastrecapyear) 
+        Tagloglikeli(i) = -dNbinom(Nrec(i),predRecap(i),
+	      mfexp(logTagdispersion(int(Tagtype(i)))));
+    }
+    value = sum(Tagloglikeli);
+ }
+ if(TagLikelyType == 2){
+    for(i = firsttagyear; i <= lasttagyear; i++)
+      for(j = firstrecapyear; j <= lastrecapyear ; j++)
+        if(j  > i) {
+            AggrTagloglikeli(i,j)= dnorm1(log(aggrRecap(i,j))-log(aggrpredRecap(i,j)),mfexp(logTagdispersion(int(Tagtype(1)))));
+	}
+      value = sum(AggrTagloglikeli);
+ }
+
+ if(TagLikelyType == 3){
+    for(i = firsttagyear; i <= lasttagyear; i++)
+      for(j = firstrecapyear; j <= lastrecapyear ; j++)
+        if(j  > i) {
+         AggrTagloglikeli(i,j)= -dNbinom(aggrRecap(i,j),aggrpredRecap(i,j),mfexp(logTagdispersion(int(Tagtype(1)))));  // dispersion can not be set to i
+	}
+      value = sum(AggrTagloglikeli);
+ }
+ return(value);
+// end of taglikeli
+
+
+
+
 
 // ***************************************************************************
 // Predicts survey abundance by a power model an possibly year effect.  
 FUNCTION void PredictSurveyAbundance1(int surveynr)
 
 // Survey indices Look if surveylastyear > nyrs Add time of year that survey takes place.
-  int finalyear =  min(lastoptyear+surveytimefromlastyear(surveynr),surveylastyear(surveynr));
+  int finalyear =  min(lastoptyear+surveytimefromlastyear(surveynr),surveylastyear(surveynr)); 
   dvariable value = 0;
    SurveyPower(surveynr)(surveyfirstage(surveynr),surveylastage(surveynr)) = 1;  // Changed for youngest fish.  
   int i;
@@ -1446,7 +1840,7 @@ FUNCTION void PredictSurveyAbundance1(int surveynr)
 // if survey is not available at the time of assessment. The division 
 // by  surveylastyear-surveyfirstyear+1 is not exact if there are missing 
 // years in between but gives good enough results as initial guess.  
-    //int INITCOND = 0;  // Laga�i 29 des 2015
+    //int INITCOND = 0;  // Lagaði 29 des 2015
     if(!active(SurveylnQest ) && INITCOND == 0 ) {  
       for(j = surveyfirstage(surveynr); j <= surveylastage(surveynr); j++){
         SurveylnQ(surveynr,j) = 0; 
@@ -1467,16 +1861,22 @@ FUNCTION void PredictSurveyAbundance1(int surveynr)
      SurveylnQ(surveynr,j) = SurveylnQest(surveynr,j);
    for( j  = surveyfirstagewithfullcatchability(surveynr); j <= surveylastage(surveynr); j++)
      SurveylnQ(surveynr,j) = SurveylnQest(surveynr,surveyfirstagewithfullcatchability(surveynr));
-   for(j = surveyfirstage(surveynr); j <  surveyfirstagewithconstantcatchability(surveynr); j++)
+   for(j = surveyfirstage(surveynr); j <=  surveyfirstagewithconstantpower(surveynr); j++)
     SurveyPower(surveynr,j) = SurveyPowerest(surveynr,j);
+   for(j = surveyfirstagewithconstantpower(surveynr); j <  surveyfirstagewithconstantcatchability(surveynr); j++)
+    SurveyPower(surveynr,j) = SurveyPowerest(surveynr,surveyfirstagewithconstantpower(surveynr));
 
   }
+
+
   dvariable pZ;
   for( i = surveyfirstyear(surveynr); i <= finalyear; i++) {
     for(j = surveyfirstage(surveynr); j <= surveylastage(surveynr); j++) {
       pZ = SurveyPropOfF(surveynr)*F(i,j)+SurveyPropOfM(surveynr)*natM(i,j);
       CalcSurveyNr(surveynr,i,j) = mfexp(log(N(i,j)*mfexp(-pZ))*SurveyPower(surveynr,j)+SurveylnQ(surveynr,j)
       +SurveylnYeareffect(surveynr,i));
+      if(surveynr == 1 && j == 1 && i > 2002) // Specific icelandic cod needs to be generalized.  
+        CalcSurveyNr(surveynr,i,j) *= mfexp(logdeltaQ1March);
     }
   }
   // Here biomass might be put on the total power that option might be available in some version (Faroes).  
@@ -1490,11 +1890,14 @@ FUNCTION void PredictSurveyAbundance1(int surveynr)
        CalcSurveyBiomassProportion(surveynr,i,j) = CalcSurveyNr(surveynr,i,j)*SurveyWeights(surveynr,i,j)/CalcSurveyBiomass(surveynr,i);
   }
 
-// Correct for power on biomass.  
-   if(active(surveybiopow(surveynr)) && surveybiopowphase(surveynr) > 0) {
+// Correct for power on biomass.  ATH ef það er fest.  
+   if(active(surveytotalpow(surveynr)) && surveytotalpowphase(surveynr) > 0) {
     dvariable scaler;
     for(i = surveyfirstyear(surveynr); i <= finalyear ; i++) {
-      scaler = pow(CalcSurveyBiomass(surveynr,i),surveybiopow(surveynr))/CalcSurveyBiomass(surveynr,i);
+      if(surveytotalpowtype(surveynr) == 1) 
+        scaler = pow(CalcSurveyTotnr(surveynr,i),surveytotalpow(surveynr))/CalcSurveyTotnr(surveynr,i); // power on number
+      if(surveytotalpowtype(surveynr) == 2) 
+        scaler = pow(CalcSurveyBiomass(surveynr,i),surveytotalpow(surveynr))/CalcSurveyBiomass(surveynr,i); // power on biomass
       CalcSurveyBiomass(surveynr,i) *= scaler;
       for(j =  surveyfirstage(surveynr); j <= surveylastage(surveynr); j++) 
          CalcSurveyNr(surveynr,i,j) *= scaler;
@@ -1505,6 +1908,7 @@ FUNCTION void PredictSurveyAbundance1(int surveynr)
 FUNCTION  dvariable Survey_loglikeli1(int surveynr)
   PredictSurveyAbundance1(surveynr); 
   dvar_matrix Scorrmat(1,surveylastage(surveynr)-surveyfirstage(surveynr)+1,1,surveylastage(surveynr)-surveyfirstage(surveynr)+1);
+  dvar_matrix Scorrmattmp(1,surveylastage(surveynr)-surveyfirstage(surveynr)+1,1,surveylastage(surveynr)-surveyfirstage(surveynr)+1);
   dvar_vector SurveyDiff(1,surveylastage(surveynr)-surveyfirstage(surveynr)+1);
   dvariable SurveylnDet;  
 // Quickfix that might have to be corrected later as we might not want survey corr  for recruitment survey.  
@@ -1516,22 +1920,27 @@ FUNCTION  dvariable Survey_loglikeli1(int surveynr)
   int k; 
   int finalyear =  min(lastoptyear+surveytimefromlastyear(surveynr),surveylastyear(surveynr));
   for(i = surveyfirstage(surveynr); i <= surveylastage(surveynr); i++) 
-    if(active(logSigmaSurvey)) 
+    if(active(logSigmaSurvey))
        SigmaSurvey(surveynr,i) = mfexp(logSigmaSurvey(surveynr,i)); // VPA
     else 
        SigmaSurvey(surveynr,i) = SigmaSurveyInp(surveynr,i)*mfexp(SigmaSurveypar(surveynr));
-
-  for(j = 1; j <= surveylastage(surveynr)-surveyfirstage(surveynr)+1; j++) {  
-     Scorrmat(j,j) = 1.0*square(SigmaSurvey(surveynr,j+surveyfirstage(surveynr)-1));
+  for(j = 1; j <= surveylastage(surveynr)-surveyfirstage(surveynr)+1; j++) {
+     Scorrmattmp(j,j) = 1.0;
      for(k = 1 ; k < j; k++) {
-       Scorrmat(j,k) = pow(Scorr,j-k)*SigmaSurvey(surveynr,j+surveyfirstage(surveynr)-1)*SigmaSurvey(surveynr,k+surveyfirstage(surveynr)-1);
-       Scorrmat(k,j) = Scorrmat(j,k);
+       Scorrmattmp(j,k) = pow(Scorr,dist(j,k,surveycorrtype(surveynr)));
+       Scorrmattmp(k,j) = Scorrmat(j,k);
      }
   }
-
-  SurveylnDet = log(det(Scorrmat));
-  Scorrmat = inv(Scorrmat);
-  if(SurveyRobust == 0) {
+  if(usesurveyCV(surveynr) == 0 && SurveyRobust == 0) {
+    for(j = 1; j <= surveylastage(surveynr)-surveyfirstage(surveynr)+1; j++) {  
+       Scorrmat(j,j) = 1.0*square(SigmaSurvey(surveynr,j+surveyfirstage(surveynr)-1));
+       for(k = 1 ; k < j; k++) {
+         Scorrmat(j,k) = Scorrmattmp(j,k)*SigmaSurvey(surveynr,j+surveyfirstage(surveynr)-1)*SigmaSurvey(surveynr,k+surveyfirstage(surveynr)-1);
+         Scorrmat(k,j)= Scorrmat(j,k); 
+       }
+    }
+    SurveylnDet = log(det(Scorrmat));
+    Scorrmat = inv(Scorrmat);
     for( i = surveyfirstyear(surveynr); i <=  finalyear; i++) {
       for(j = surveyfirstage(surveynr); j <= surveylastage(surveynr); j++) {
         if(ObsSurveyNr(surveynr,i,j) != -1) {
@@ -1543,6 +1952,32 @@ FUNCTION  dvariable Survey_loglikeli1(int surveynr)
       value  += 0.5*(SurveylnDet)+0.5*SurveyDiff*Scorrmat*SurveyDiff;
     }
   }
+  if(usesurveyCV(surveynr)==1 && SurveyRobust == 0) {
+    dvar_vector tmpSurvey(surveyfirstage(surveynr),surveylastage(surveynr));
+    for( i = surveyfirstyear(surveynr); i <=  finalyear; i++) {
+      for(j = surveyfirstage(surveynr); j <= surveylastage(surveynr); j++)
+        tmpSurvey(j) =  sqrt(square(SigmaSurvey(surveynr,j))+square(ObsSurveyCV(surveynr,i,j)));
+      for(j = 1; j <= surveylastage(surveynr)-surveyfirstage(surveynr)+1; j++) {  
+         Scorrmat(j,j) = 1.0*square(tmpSurvey(j+surveyfirstage(surveynr)-1));
+         for(k = 1 ; k < j; k++) {
+           Scorrmat(j,k) = Scorrmattmp(j,k)*tmpSurvey(j+surveyfirstage(surveynr)-1)*tmpSurvey(k+surveyfirstage(surveynr)-1);
+           Scorrmat(k,j)= Scorrmat(j,k); 
+         }
+      }
+      SurveylnDet = log(det(Scorrmat));
+      Scorrmat = inv(Scorrmat);
+
+      for(j = surveyfirstage(surveynr); j <= surveylastage(surveynr); j++) {
+        if(ObsSurveyNr(surveynr,i,j) != -1) {
+          SurveyResiduals(surveynr,i,j) = log( (ObsSurveyNr(surveynr,i,j)+SurveyResolution(surveynr,j))/
+	  (CalcSurveyNr(surveynr,i,j)+SurveyResolution(surveynr,j)) );
+	  SurveyDiff(j-surveyfirstage(surveynr)+1) =  SurveyResiduals(surveynr,i,j);
+        }
+      }
+      value  += 0.5*(SurveylnDet)+0.5*SurveyDiff*Scorrmat*SurveyDiff;
+    }
+  }
+
   if(SurveyRobust == 1) {  // multivariate version not ready.  
     dvariable diff2;
     dvariable v_hat;
@@ -1570,7 +2005,7 @@ FUNCTION  dvariable Survey_loglikeli1(int surveynr)
 // Tuning with total biomass and proportion of biomass.  Not finished
 
 //FUNCTION dvar_vector Survey_loglikeli2(int surveynr)
-FUNCTION dvar_vector  Survey_loglikeli2(int surveynr)
+FUNCTION dvar_vector  Survey_loglikeli2(int surveynr) // Ath með surveytotalpow 
   PredictSurveyAbundance1(surveynr); 
   dvar_matrix Scorrmat(1,surveylastage(surveynr)-surveyfirstage(surveynr)+1,1,surveylastage(surveynr)-surveyfirstage(surveynr)+1);
   dvar_vector SurveyDiff(1,surveylastage(surveynr)-surveyfirstage(surveynr)+1);
@@ -1621,11 +2056,31 @@ FUNCTION dvar_vector  Survey_loglikeli2(int surveynr)
   return value;
  
  
-// Tuning with SSB biomass.  
+// Tuning with SSB biomass.  hardwire every 3rd time.   
+
+FUNCTION void SSB_Survey_abundance(int surveynr,int year)
+   if(surveytimefromlastyear(surveynr) > 0){   // SSB not available 1 year ahead.  
+     dvariable tmpssb= 0;
+     for(int age = minssbage; age <= lastage; age++)
+       tmpssb += N(year,age)*SSBWeights(year,age)*StockMaturity(year,age)*
+       mfexp(-(natM(year-1,age)*PropofMbeforeSpawning(age)+F(year-1,age)*PropofFbeforeSpawning(age)));
+     tmpssb/= 1e6;
+     Spawningstock(year) = tmpssb; 
+   }
+
+  int i = year; 
+  SurveylnQ(surveynr,minsurveyfirstage) =  SurveylnQest(surveynr,minsurveyfirstage);
+  CalcSurveyBiomass(surveynr,i) = mfexp(SurveylnQ(surveynr,minsurveyfirstage))*Spawningstock(i);
+  random_number_generator r(COUNTER+surveynr*5+year);  //Need to look at this for repeatibility.
+  dvariable tmperr = randn(r)*mfexp(logSigmaSurveybio(surveynr));
+  ObsSurveyBiomass(surveynr,i) =  CalcSurveyBiomass(surveynr,i)*mfexp(tmperr);
+  if(i % 3 != 0) ObsSurveyBiomass(surveynr,i) = -1;  // Every 3rd year.  
+  
 
 FUNCTION dvariable SSB_Survey_loglikeli(int surveynr) 
 //  dvariable surveybiosigma = 0.16;
   dvariable surveybiosigma = mfexp(logSigmaSurveybio(surveynr));
+  
   dvariable value = 0;
   dvariable residual;
   int i; 
@@ -1643,6 +2098,7 @@ FUNCTION dvariable SSB_Survey_loglikeli(int surveynr)
  
   return value;
  
+
 
 FUNCTION dvariable SSB_Recruitment_loglikeli();
 
@@ -1732,7 +2188,7 @@ FUNCTION dvariable PredictRecruitment(int year)
 // Segmented regression
    if(SSBRectype == 5) {
      value = Rmax*mfexp(-TimeDrift(year))*Spawningstock(year)/SSBmax;
-     value = SmoothDamper(value,Rmax*mfexp(-TimeDrift(year)),0);
+     value = SmoothDamperCod(value,Rmax*mfexp(-TimeDrift(year)),0);
    }   
 
    
@@ -1873,8 +2329,9 @@ FUNCTION void ReadCatchandStockData()
   }
   else {
     int yr;
-    while( !totinfile.eof()){
+    for( int i = 1; i < largenumber; i++) { // changed 6/1/2022 compiler problrm
       totinfile >> yr;
+      if(totinfile.eof()) break;
       if(yr >= firstyear && yr <= lastoptyear)
         totinfile >> TotCatchIn1000tons(yr);
     }
@@ -1891,11 +2348,14 @@ FUNCTION void ReadCatchandStockData()
   int i;
   int year;
   int age;
+  int ncol = 7;  // Number of columns in the 
+  if(variableM == 1) ncol= 8;
   dvariable ratio;
-  dvector tmpvec(1,7);
+  dvector tmpvec(1,ncol);
   for(i = 1; i < largenumber; i++) {
      infile >> tmpvec;
-     if(infile.eof()) break;
+     if(tmpvec(1)== 0 || tmpvec(1) == 9999) break;
+     // used infile.eof() but that does not work in admb now.  
      year = int(tmpvec(1));
      age = int(tmpvec(2));
 // Weights and maturity are changed from negative values (missing values) to 
@@ -1906,16 +2366,19 @@ FUNCTION void ReadCatchandStockData()
         StockWeightsData(year,age) = tmpvec(5);
         StockMaturityData(year,age) = tmpvec(6);
         SSBWeightsData(year,age) = tmpvec(7);
+	if(ncol == 8)  NatMData(year,age) = tmpvec(ncol);
         if(CatchWeightsData(year,age) < 0) CatchWeightsData(year,age) = 0;
         if(StockWeightsData(year,age) < 0) StockWeightsData(year,age) = 0;
         if(SSBWeightsData(year,age) < 0) SSBWeightsData(year,age) = 0;
         if(StockMaturityData(year,age) < 0) StockMaturityData(year,age) = 0;
+	if(ncol == 8) if(NatMData(year,age) < 0) NatMData(year,age) = 0;  // used in the herring model.  Questionable
+
 
      }
  // Add data if plus group. CNO used as proxy for stock in numbers in weighting data (( aga 
      if((year>= firstyear) & (year<= lastyear) & (age >=  lastage) & (plusgroup == 1)  & (lastdataage > lastage) ) {
         if(ObsCatchInNumbers(year,lastage) == -1) ObsCatchInNumbers(year,lastage) = 0; // -1 is missing
-	ratio = ObsCatchInNumbers(year,lastage)/(ObsCatchInNumbers(year,lastage)+tmpvec(3)+1e-9);
+	ratio = ObsCatchInNumbers(year,lastage)/(ObsCatchInNumbers(year,lastage)+tmpvec(3));
         ObsCatchInNumbers(year,lastage) += tmpvec(3);
  	CatchWeightsData(year,lastage) = CatchWeightsData(year,lastage)*ratio+tmpvec(4)*(1.0-ratio);
  	StockWeightsData(year,lastage) = StockWeightsData(year,lastage)*ratio+tmpvec(5)*(1.0-ratio);
@@ -1937,12 +2400,14 @@ FUNCTION void ReadCatchParameters()
     ofstream outfile("catchparameters.log");
     int i;
     int j;
-    dvector changeyears(1,number_of_seperable_periods+1);
+    ivector changeyears(1,number_of_seperable_periods+1);
     changeyears(1) = firstyear;
     changeyears(number_of_seperable_periods+1)= lastyear;
     if(number_of_seperable_periods > 1){
       outfile << "changeyears ";
       infile >> changeyears(2,number_of_seperable_periods);
+      for(i = 2; i <= number_of_seperable_periods; i++)
+        if(changeyears(i) <= 0) changeyears(i) = changeyears(i) + lastoptyear; //added mars 2020.  
       outfile << changeyears(2,number_of_seperable_periods);
     }
     // set separable periods.  
@@ -1954,9 +2419,11 @@ FUNCTION void ReadCatchParameters()
       }
     }
 //   cout << "parcolnr " << parcolnr << endl;
-   if(misreportingphase > 0){  // If misreporting is estimated select when it quits
+   if(misreportingphase > -10){  // If misreporting is estimated select when it quits -10 always read the value.  
      infile >> LastMisReportingYear;
      outfile << " LastMisReportingYear  " <<  LastMisReportingYear << endl;
+     infile >> Misreporting(firstyear);
+     outfile << " Misreportingratio  " <<  Misreporting(firstyear) << endl;
    }
      
    if(BackWards ){
@@ -2081,6 +2548,37 @@ FUNCTION void SetPredValues()
   for(i = lastoptyear-5; i <= lastyear; i++) PredN(i) = N(i,firstage);
   Survivors = N(lastoptyear+1);
 
+// Function that reads taginformation
+
+FUNCTION void ReadTagInfo(adstring Tagdatafilename)
+  ofstream taglogfile("tags.log");
+  int ncol = 7;
+  dvector tmpvec(1,ncol);
+  dvariable ratio;
+  taglogfile << "TagData " << endl;
+  cifstream datainfile(Tagdatafilename);
+  aggrRecap = 0;
+  int i;
+  for( i = 1; i < largenumber; i++) {
+     datainfile >> tmpvec;
+     if(datainfile.eof()) break;
+     TagYear(i) = int(tmpvec(1));
+     RecaptYear(i) = int(tmpvec(2));
+     YearClass(i) = int(tmpvec(3));
+     Nscan(i) = tmpvec(4);
+     Ntagged(i) = tmpvec(5);
+     if((TagYear(i)-YearClass(i))  <= lastage && TagYear(i) >= firstyear)
+       NtaggedMatrix(TagYear(i),TagYear(i)-YearClass(i))=Ntagged(i);
+     Nrec(i) = tmpvec(6);
+     Tagtype(i) = tmpvec(7);
+     if(int(TagYear(i)) >= firsttagyear && int(TagYear(i)) <= lasttagyear &&
+       int(RecaptYear(i)) >= firstrecapyear &&
+       int(RecaptYear(i)) <= lastrecapyear)
+          aggrRecap(int(TagYear(i)),int(RecaptYear(i))) += Nrec(i);
+     taglogfile << tmpvec << endl;
+   }
+   datainfile.close();
+   NumberOfTagvalues = Ntagdata;
 
 // ***************************************************************
 // Function that reads information about a survey  
@@ -2104,8 +2602,8 @@ FUNCTION void ReadSurveyInfo(adstring parameterfilename,adstring datafilename, a
   parameterinfile >> surveyweightsgiven(surveynumber);
   surveylogfile << "Surveycorr " <<   Surveycorr(surveynumber);
   surveylogfile << "SurveyPropOfM " <<   SurveyPropOfM(surveynumber);
-  surveylogfile << "SurveyPropOfF " <<   SurveyPropOfF(surveynumber);
-  surveylogfile << "surveyweightsgiven " << surveyweightsgiven(surveynumber)  << endl;
+  surveylogfile << "SurveyPropOfF " <<   SurveyPropOfF(surveynumber) << endl; // should perhaps be by age
+  surveylogfile << "surveyweightsgiven " << surveyweightsgiven(surveynumber);
   
   parameterinfile >> tmpminage;
   parameterinfile >> tmpmaxage;
@@ -2137,11 +2635,7 @@ FUNCTION void ReadSurveyInfo(adstring parameterfilename,adstring datafilename, a
   cout << " start datafile" << endl;
 
 // ath plus group in survey;
-  int ncol;
-  if(surveyweightsgiven(surveynumber) == 0) 
-     ncol = 3;
-  else 
-     ncol = 4;
+  int ncol = 3 + surveyweightsgiven(surveynumber) +usesurveyCV(surveynumber);  // 3-5 columns.  
   dvector tmpvec(1,ncol);
   dvariable ratio;
   surveylogfile << "SurveyData " << endl;
@@ -2153,9 +2647,14 @@ FUNCTION void ReadSurveyInfo(adstring parameterfilename,adstring datafilename, a
      age = int(tmpvec(2));
      if(year >= firstyear & year <= lastyear & age >= firstage &  ((age <= lastage & plusgroup == 0) | (age < lastage & plusgroup == 1))) {
     	ObsSurveyNr(surveynumber,year,age)  = tmpvec(3);
-	if(surveyweightsgiven(surveynumber) != 0) SurveyWeights(surveynumber,year,age) = tmpvec(4);
+	if(usesurveyCV(surveynumber) == 1) ObsSurveyCV(surveynumber,year,age)  = tmpvec(4);
+	if(surveyweightsgiven(surveynumber) ==1 && (ncol==4))
+	   SurveyWeights(surveynumber,year,age) = tmpvec(4);
+	if(surveyweightsgiven(surveynumber) ==1 && (ncol==5))
+	   SurveyWeights(surveynumber,year,age) = tmpvec(5);  //read after ObsSurveyCV
         surveylogfile << tmpvec << endl;
      }
+     //if plus group in data, could think of plus group in survey not in catch data.  
      if(year >= firstyear & year <= lastyear &  age >= lastage & plusgroup == 1){
      	ratio = ObsSurveyNr(surveynumber,year,lastage)/(ObsSurveyNr(surveynumber,year,lastage)+tmpvec(3)+1e-6);
         ObsSurveyNr(surveynumber,year,lastage) += tmpvec(3);
@@ -2248,6 +2747,13 @@ FUNCTION void ReadPrognosis()
     outfile << "Recrcorr " << Recrcorr << endl;
     infile >> Btrigger; // SSB trigger in the assessment yar
     outfile << "Btrigger " << Btrigger << endl;
+    if(CatchRule == 32) {
+      infile >> Btrigger2; // Lower Refbio trigger in the assessment year to increase HarvestRate
+      outfile << "Btrigger2 " << Btrigger2 << endl;
+      infile >> Btrigger3; // Upper Refbio trigger in the assessment year to increase HarvestRate
+      outfile << "Btrigger3 " << Btrigger3 << endl;
+    }
+
     infile >> Maxchange; // Maxchange 
     outfile << "Maxchange " << Maxchange << endl;
     Maxchange += 1 ;
@@ -2267,8 +2773,11 @@ FUNCTION void ReadPrognosis()
     outfile << "LastYearsTacRatio " << LastYearsTacRatio << endl;
     infile >> DensDep;  // 0 for no density dependence, 1 for Icehad and more values available for other stocks.  
     outfile << "DensDep " << DensDep << endl;  
-    
-    if(CatchRule == 1  || CatchRule == 2 || CatchRule == 5 || CatchRule == 6 ) { // F or Catch read next ncatch years, fill the rest with last value
+    if(CatchRule == 7 || CatchRule == 8) {
+      infile >> RandomTags;
+      outfile << "RandomTags " << RandomTags << endl;
+    }
+    if(CatchRule == 1  || CatchRule == 2 || CatchRule == 5 || CatchRule == 6 || CatchRule == 7 || CatchRule == 8) { // F or Catch read next ncatch years, fill the rest with last value
         infile >> nCatchorFyrs;
         outfile << "nCatchorFyrs" << nCatchorFyrs << endl;
         if( nCatchorFyrs >  nsimuyears) cerr << "warning  nCathchorFyrs > nsimuyears)"; // Has to be the other way
@@ -2282,7 +2791,8 @@ FUNCTION void ReadPrognosis()
             FutureForCatch(i)=FutureForCatch(lastoptyear+nCatchorFyrs);  // Fill the rest) 
         }
     } 
-    if(CatchRule == 3 || CatchRule==4 ) {  // Biomass in assessment or advicory year
+    if(CatchRule == 3 || CatchRule==4 || CatchRule == 31  ||
+    CatchRule == 32 || CatchRule == 33  || CatchRule == 34 ) {  // Biomass in assessment or advicory year
       infile >> AgeModel; // If 1 then we use age else size;
       outfile << "AgeModel " << AgeModel << endl;
       if(AgeModel == 1) {
@@ -2295,8 +2805,13 @@ FUNCTION void ReadPrognosis()
         infile  >> HCRreflebreak;  // Will in the end need more parameters.  
 	outfile << "HCRreflebreak " << HCRreflebreak << endl;
       }	
-      infile >> HarvestRatio ; 
-      outfile << "HarvestRatio " << HarvestRatio << endl;
+      infile >> HarvestRatio1 ; 
+      outfile << "HarvestRatio1 " << HarvestRatio1 << endl;
+      if(CatchRule == 32) {
+        infile >> HarvestRatio2; // Harvest rate when stock is very large in Hrellis rule. 
+        outfile << "HarvestRatio2 " << HarvestRatio2 << endl;
+      }
+
       infile >> MaxHarvestRatio;  // Maximum that we allow in any year depends on the ratio between ref and total bio 0.6-1
       outfile << "MaxHarvestRatio " << MaxHarvestRatio << endl;
       infile >> CurrentTacInput ; 
@@ -2310,6 +2825,7 @@ FUNCTION void ReadPrognosis()
    infile.close();
    cifstream  Progwtandmatinfile(WeightAndMaturityDatafilename);
    if(Progwtandmatinfile.fail()){
+      ProgWtFile = 0;
       cout << "No WeightAndMaturityDatafilename or bad prognosisfile use mean of last ** data years" << endl ;
       int usedlastdatayear = min(lastdatayear,lastyear);
       for(i = usedlastdatayear -nweightandmaturityselyears+1 ; i <= usedlastdatayear; i++) {
@@ -2339,7 +2855,8 @@ FUNCTION void ReadPrognosis()
    dvector tmpvec(1,6);
    for(i = 1; i <= largenumber ; i++) {
       Progwtandmatinfile >> tmpvec;
-      if(Progwtandmatinfile.eof()) break;
+      if(tmpvec(1) == 0 || tmpvec(1) == 9999) break;  //eof does not work in 12.3
+//      if(Progwtandmatinfile.eof()) break;
       year = int(tmpvec(1));
       age = int(tmpvec(2));
       if(year >= lastdatayear & year <= lastyear & age >= firstage & age <= lastage) {
@@ -2416,9 +2933,7 @@ FUNCTION void UpdateWeightandMaturityHad(int year)
 
    SSBWeights(year) = StockWeights(year);  // Used in haddock
 //   StockMaturity(year) = 1.0/(1.0+mfexp(17.314-2.644*log(StockWeights(year)))); // Added fef 2013
-//   if(year > lastoptyear + 1) StockMaturity(year) = 1.0/(1.0+mfexp(12.642-1.933*log(StockWeights(year)))); // Added fef 2013
-   if(year > lastoptyear + 1) StockMaturity(year) = 1.0/(1.0+mfexp(18.94 -2.72*log(StockWeights(year)))); // Added fef 2013
-   
+   if(year > lastoptyear + 1) StockMaturity(year) = 1.0/(1.0+mfexp(12.642-1.933*log(StockWeights(year)))); // Added fef 2013
 
 
    if(year < lastyear) { // Add one more year
@@ -2455,23 +2970,30 @@ FUNCTION void UpdateWeightandMaturityHad(int year)
 
 FUNCTION void UpdateWeightsAndMaturity() 
 // Could est the starting point based on current value i.e negative
+// Has hardwired 0.07 here but that need to be changed it is the start
+// The idea was to be able to sed weighterr in the starting year to something
+// 12 August 2020.  This idea did not work (done incorrectly) so the original
+// code is here.  
 
-  random_number_generator r(COUNTER+10000);  // To avoid correlation
-  dvar_vector weighterr(lastoptyear+1,lastyear);
   dvariable ratio = sqrt(1-weightcorr*weightcorr);
+//  weighterr(lastoptyear+1) = 0.07/ratio/weightcv;
+  random_number_generator r(COUNTER+10000);  // To avoid correlation
+  dvar_vector weighterr(lastoptyear+1,lastyear); 
   int i;
   weighterr = 0; 
 // mceval_phase does not work
   if(mceval_phase()|| mceval_phase()) {
     for(i = lastoptyear+1; i <= lastyear; i++)
       weighterr(i) = randn(r);
-    weighterr(lastoptyear+1) = weighterr(lastoptyear+1)/ratio;
-    for(i = lastoptyear+2; i <= lastyear; i++)
+    weighterr(lastoptyear+1) = (weighterr(lastoptyear+1)*0.35+StartWeightfactor)/ratio; 
+ //   weighterr(lastoptyear+1) = 0.07/ratio/weightcv; //7 % over in first year.  
+   for(i = lastoptyear+2; i <= lastyear; i++)
       weighterr(i) = weightcorr*weighterr(i-1)+weighterr(i);
     weighterr=weighterr*weightcv*ratio;
+    WeightError = weighterr;  // put to global variable.  
   }
-  weighterr(lastoptyear+1)*=0.35;  // less weight in first and second prediction
-  weighterr(lastoptyear+2)*=0.7;
+//  weighterr(lastoptyear+1)*=0.35;  // less weigh in first and second prediction
+//  weighterr(lastoptyear+2)*=0.7;
   for(i = lastoptyear+1; i <= lastyear; i++)
       CatchWeights(i)(firstcatchage,lastage) = mfexp(log(CatchWeightsData(i)(firstcatchage,lastage))+weighterr(i));
   for(i = lastoptyear+2; i <= lastyear; i++){ //SSB and Stock weights available in Assessyear
@@ -2481,6 +3003,36 @@ FUNCTION void UpdateWeightsAndMaturity()
 // Function to set stochasticity on weights and possibly maturity .
 // Sets white noise on each age and year.  
 
+
+  dvariable matcorr = 0.70;
+  dvariable matcv = 0.45;
+  dvariable StartMatfactor = 0;
+  ratio = sqrt(1-matcorr*matcorr);
+  random_number_generator rmat(COUNTER+90000);  // To avoid correlation
+  dvar_vector materr(lastoptyear+1,lastyear); 
+  materr = 0; 
+// mceval_phase does not work
+  if(mceval_phase()|| mceval_phase()) {
+    for(i = lastoptyear+1; i <= lastyear; i++)
+       materr(i) = randn(rmat);
+    materr(lastoptyear+1) = (materr(lastoptyear+1)*0.35+StartMatfactor)/ratio; 
+   for(i = lastoptyear+2; i <= lastyear; i++)
+      materr(i) = matcorr*materr(i-1)+materr(i);
+    materr=materr*matcv*ratio;
+
+// Hardwied based on weighterr = 0.08, materr 0.32
+
+  int age;
+  dvariable tmpvalue;
+  for(i = lastoptyear+1; i <= lastyear; i++){
+     for(age = firstcatchage; age <= lastage ; age++) {
+         tmpvalue = logit(StockMaturityData(i,age))+materr(i) +weighterr(i)*4;
+         StockMaturity(i,age)  = 1/(1+mfexp(-tmpvalue));
+ //        tmpvalue = StockMaturityData(i,age);
+ //        StockMaturity(i,age)  = tmpvalue;
+     }
+   }
+  }
 
 FUNCTION void UpdateWeightsAndMaturityWhiteNoise() 
 // Could est the starting point based on current value i.e negative
@@ -2526,7 +3078,7 @@ FUNCTION  void CalcRefValues(int firstyr,int lastyr,int HistAssessment)
   
 
   for(i = firstyr; i <= lastyr; i++) {
-     N3(i) = N(i,firstage+2);  
+     N3(i) = N(i,3);  
      N1st(i) = N(i,firstage);  
      PredictSSB(i);
      if(RefBiominage(1) > 0) 
@@ -2543,12 +3095,11 @@ FUNCTION  void CalcRefValues(int firstyr,int lastyr,int HistAssessment)
         RefBio2(i) = sum(elem_prod(N(i)(-RefBiominage(2),lastage),
 	CatchWeights(i)(-RefBiominage(2),lastage)))/1.0e6;
 
-
 // Biomass with specified selection
     if(AgeCbioR == 1) {  // Age based CbioR middle of year
       CbioR(i) = 0; 
       for(j = firstage; j <= lastage; j++) 
-        CbioR(i)  = CbioR(i) + N(i,j)*CatchWeights(i,j)*MeanSel(j); //  removed Nov 20th 2019 *(1-mfexp(-Z(i,j)))/Z(i,j);
+        CbioR(i)  = CbioR(i) + N(i,j)*CatchWeights(i,j)*MeanSel(j)*(1-mfexp(-Z(i,j)))/Z(i,j);
      }
      if(AgeCbioR == 0) { // Length based CbioR
       CbioR(i)  = sum(elem_prod(N(i),elem_prod(StockWeights(i),wtsel(StockWeights(i),CbioRreflebreak))));
@@ -2606,6 +3157,20 @@ FUNCTION void PredictSSB(int year)
 
 FUNCTION dvariable CalcMeanF(dvar_vector Fm)
   return mean(Fm(Frefage1,Frefage2));
+
+// this need to be changed to get the parameter.   
+FUNCTION dvariable dist(int i, int j,int option )  // different correlations
+    dvariable dist1;  // to avoid warning.  
+    if(option == 1) dist1 = dvariable(abs(i-j));  // Old
+    if(option == 2){
+      if(i < 3 || j < 3) dist1 = dvariable(40);
+      else dist1 = (pow(i,0.25)-pow(j,0.25))/(pow(4,0.25)-pow(3,0.25));
+    }
+    if(option ==3 ) {
+      dist1 = (pow(i,0.25)-pow(j,0.25))/(pow(4,0.25)-pow(3,0.25));
+    }
+    return(dist1);
+
 
 FUNCTION dvariable CalcWeightedMeanF(dvar_vector Fm,dvar_vector N)
     return sum(elem_prod(Fm(Frefage1,Frefage2),N(Frefage1,Frefage2)))/
@@ -2987,7 +3552,7 @@ FUNCTION void write_mcmc()
 
 //23 Implementationerror
 
-  if(mcwriteswitch(23) == 1){
+  if(mcwriteswitch(23) == 2){  // Trick this is not active
     if(implementationerror_mcmc_lines == 0)
     {
       implementationerror_mcmc.open(outputprefix+"implementationerror.mcmc"+outputpostfix);
@@ -3000,6 +3565,24 @@ FUNCTION void write_mcmc()
     implementationerror_mcmc<<ImplementationErr.sub(ImplementationErr.indexmin()+1,ImplementationErr.indexmax())<<endl;
     implementationerror_mcmc_lines++;
   }
+
+
+//24 WeightError
+
+  if(mcwriteswitch(23) == 1){
+    if(weighterror_mcmc_lines == 0)
+    {
+      weighterror_mcmc.open(outputprefix+"weighterror.mcmc"+outputpostfix);
+      weighterror_mcmc<<"weighterr."<<weighterr.indexmin();
+      for(int t=weighterr.indexmin()+1; t<=weighterr.indexmax(); t++)
+        weighterror_mcmc<<" weighterr."<<t;
+      weighterror_mcmc<<endl;
+    }
+    weighterror_mcmc<<WeightError(WeightError.indexmin());
+    weighterror_mcmc<<WeightError.sub(WeightError.indexmin()+1,WeightError.indexmax())<<endl;
+    weighterror_mcmc_lines++;
+  }
+
 
 // Write out the matrices by weights.  
 FUNCTION void write_mcmc_all()
@@ -3041,6 +3624,8 @@ FUNCTION void write_mcmc_all()
 
 
 // For short term predictions when weight is not forcasted assumes pF = pM = 0;
+// Look further at the assumption pF=0, pM = 0, might be problematic  28 jún 2021
+// mfexp(-(natM(yr-1,age)*PropofMbeforeSpawning(age) + Fterm used in herring
 FUNCTION void PredictShorttermSSB(int year,int wmatYear)
    dvariable SSBRecCV = mfexp(estSSBRecParameters(3));
    dvariable SSBRecpow = estSSBRecParameters(5);
@@ -3090,7 +3675,7 @@ FUNCTION void SingleTriggerHCR(int year)
     SpawningstockWithErr(year+1) = Spawningstock(year+1);
     PredictedRecruitment(year+1) = PredictRecruitment(year+1); // Havent seen the yearclasses
     Nhat(year+1,firstage) = PredictedRecruitment(year+1-firstage);
-    CalcCatchInNumbers(year+1)=(elem_prod(elem_div(F(year+1),Z(year+1)),elem_prod((1.-mfexp(-Z(year+1))),Nhat(year+1))))*mfexp(ImplementationErr(year));
+    CalcCatchInNumbers(year+1)=elem_prod(elem_div(F(year+1),Z(year+1)),elem_prod((1.-mfexp(-Z(year+1))),Nhat(year+1)));
     CalcCatchIn1000tons(year+1) = sum(elem_prod(CalcCatchInNumbers(year+1),CatchWeights(year)))/1.0e6;
     // now the stabilisers enter the picture.  They are both on all the time but can be turned off by appropriate
     // settings of parameters MaxChange=100 or LastYearsTacRatio = 0
@@ -3106,7 +3691,6 @@ FUNCTION void SingleTriggerHCR(int year)
  ProgF(year) = FishmortFromCatchMCMC(CalcCatchIn1000tons(year)*1e6,N(year),CatchWeights(year),progsel,natM(year));
 
 
-
 FUNCTION void BioRatioHockeystickAdviceYear(int year)
 // Bases advice on stock biomass in the beginning of the year following assessment year.
 // Only set up for length based HCR and ICEfish year.  Can be changed but basing on
@@ -3116,6 +3700,7 @@ FUNCTION void BioRatioHockeystickAdviceYear(int year)
   dvariable Catch;
   dvariable tmpTac = CurrentTac;
   int age;
+  dvariable HarvestRatio = HarvestRatio1;
   dvariable Hratio;
   dvariable LastYTacRat;
   dvariable refcatch;
@@ -3190,7 +3775,6 @@ FUNCTION void BioRatioHockeystickAdviceYear(int year)
   ProgF(year) = FishmortFromCatchMCMC(AnnualCatch*1e6,N(year),CatchWeights(year),progsel,natM(year));
 
 
-
 // Bunch of small functions
 
 //*****************************************************************
@@ -3255,24 +3839,36 @@ FUNCTION void CalcFishingMortality3(int year)
    
    for(age = firstcatchage; age <= lastage; age++) 
       F(year,age) = mfexp(lnMeanEffort+lnEffort(year))*1/(1+mfexp(-Catchlogitslope*(age-Catchlogitage50)+proportion(age)*AbundanceMultiplier));                 
-
-
-   
-
-
+// Traditional
 FUNCTION void CalcNaturalMortality1(int year)
    int i;
    int j;
    dvariable age;
    for(j = firstage; j <= lastage; j++)
 	natM(year,j) = Mdata(j)*mfexp(logMmultiplier);
+   if(estMlastagephase > 0) natM(year,lastage) = mfexp(logMoldest); // Overwrites input data.  
+
+
+FUNCTION void CalcNaturalMortality2(int year)
+   int i;
+   int j;
+   dvariable age;
+   if(year <= lastdatayear) 
+     for(j = firstage; j <= lastage; j++)
+	natM(year,j) = Mdata(j) + (NatMData(year,j)-Mdata(j))*mfexp(logMmultiplier);  //multiplier on extra M.  Icht
+    if(year > lastdatayear) // Prognosis use last value
+     for(j = firstage; j <= lastage; j++)
+	natM(year,j) = NatMData(lastdatayear,j);
+
    if(estMlastagephase > 0) natM(year,lastage) = mfexp(logMoldest); 
+
+   
 
 
 //  Smooth Roof and Floor.  
-FUNCTION dvariable  SmoothDamper(dvariable x, dvariable Roof,dvariable Floor) 
-  dvariable deltax = 0.01;
+FUNCTION dvariable  SmoothDamper(dvariable x, dvariable Roof,dvariable Floor)
   if(Roof == Floor) return(x); 
+  dvariable deltax = 0.01;
   dvariable lb = 1.0 - deltax/2.0;
   dvariable ub = 1.0 + deltax/2.0;
   if(x <= lb* Roof && x >= ub*Floor) return x;
@@ -3286,6 +3882,31 @@ FUNCTION dvariable  SmoothDamper(dvariable x, dvariable Roof,dvariable Floor)
     dvariable  y = (x - lb*Floor);
     return Floor +0.5/deltax/Floor*y*y;
   }
+ return(x); // Must have this at the end, else we get warning.  
+
+
+//  Smooth Roof and Floor.  
+FUNCTION dvariable  SmoothDamperCod(dvariable x, dvariable Roof,dvariable Floor)
+  if(Roof == Floor) return(x); 
+  dvariable deltax = 0.5;  // Hardwired for cod where Rmax ~150 thous.  
+  dvariable lb = 1.0 - deltax/2.0;
+  dvariable ub = 1.0 + deltax/2.0;
+  if(x <= lb* Roof && x >= ub*Floor) return x;
+  if(x >= ub*Roof) return Roof;
+  if(x <= lb*Floor) return Floor;
+  if(x <= ub*Roof && x >= lb*Roof) {
+    dvariable y = (x - ub*Roof);
+    return Roof - 0.5/deltax/Roof*y*y;
+  }
+  if(x >= lb*Floor && x <= ub*Floor) {
+    dvariable  y = (x - lb*Floor);
+    return Floor +0.5/deltax/Floor*y*y;
+  }
+  return(x); // Must have this at the end, else we get warning.  
+
+
+
+
 
 // Proportion of biomass above lebreak
 FUNCTION dvar_vector wtsel(dvar_vector StockWts,dvariable lebreak)
@@ -3298,7 +3919,194 @@ FUNCTION dvariable AssYearSSB()
      mfexp(-(natM(lastoptyear,age)*PropofMbeforeSpawning(age)+F(lastoptyear,age)*PropofFbeforeSpawning(age)));
    tmpssb/= 1e6; 
    return tmpssb; 
+
+// Some version of the negative binomial distribution.  
+FUNCTION dvariable dNbinom(dvariable x,dvariable mu,dvariable k)
+ return(gammln(k+x)-gammln(k)-gammln(x+1)+k*log(k)-k*log(mu+k)+x*log(mu)-x*log(mu+k));
+
+FUNCTION dvariable dnorm1( const dvariable residual, dvariable std )
+ return(log(std)+0.5*residual*residual/(std*std));
+
+
+FUNCTION dvariable logit( const dvariable x)
+   dvariable eps = 1e-4;
+   dvariable mult  = (1.0 - eps)/(1.0 + eps);
+   dvariable x1 =  (x + eps)*mult;
+   return(log((x1)/(1-x1)));
  
 
 
+// ***************************************************************************
+// Predicts survey abundance by a power model an possibly year effect.
+// Used in closed loop simulations.  
+FUNCTION void PredictSurveyAbundance1(int surveynr,int year)
 
+  dvariable value = 0;
+//  SurveyPower(surveynr)(surveyfirstage(surveynr),surveylastage(surveynr)) = 1;  // Changed for youngest fish
+  int i = year;  //used i in the code earlier.  
+  int j;
+
+  for(j = surveyfirstage(surveynr); j <= surveylastage(surveynr); j++) 
+    if(active(logSigmaSurvey)) 
+       SigmaSurvey(surveynr,j) = mfexp(logSigmaSurvey(surveynr,i)); // VPA
+    else 
+       SigmaSurvey(surveynr,j) = SigmaSurveyInp(surveynr,j)*mfexp(SigmaSurveypar(surveynr));
+  for( j  = surveyfirstage(surveynr); j <= surveyfirstagewithfullcatchability(surveynr); j++)
+     SurveylnQ(surveynr,j) = SurveylnQest(surveynr,j);
+   for( j  = surveyfirstagewithfullcatchability(surveynr); j <= surveylastage(surveynr); j++)
+     SurveylnQ(surveynr,j) = SurveylnQest(surveynr,surveyfirstagewithfullcatchability(surveynr));
+   for(j = surveyfirstage(surveynr); j <  surveyfirstagewithconstantcatchability(surveynr); j++)
+    SurveyPower(surveynr,j) = SurveyPowerest(surveynr,j);
+  dvariable pZ;
+  for(j = surveyfirstage(surveynr); j <= surveylastage(surveynr); j++) {
+    pZ = SurveyPropOfF(surveynr)*F(i,j)+SurveyPropOfM(surveynr)*natM(i,j);
+    CalcSurveyNr(surveynr,i,j) = mfexp(log(N(i,j)*mfexp(-pZ))*SurveyPower(surveynr,j)+SurveylnQ(surveynr,j)+SurveylnYeareffect(surveynr,i));
+   if(surveynr == 1 && j == 1 && i > 2002) // Specific icelandic cod
+        CalcSurveyNr(surveynr,i,j) *= mfexp(logdeltaQ1March);
+
+  }
+  // Here biomass might be put on the total power that option might be available in some version (Faroes).  
+  CalcSurveyBiomass(surveynr,i) = sum(elem_prod(CalcSurveyNr(surveynr,i),SurveyWeights(surveynr,i)));
+  CalcSurveyTotnr(surveynr,i) = sum(CalcSurveyNr(surveynr,i));
+
+  for(j =  surveyfirstage(surveynr); j <= surveylastage(surveynr); j++) 
+       CalcSurveyBiomassProportion(surveynr,i,j) = CalcSurveyNr(surveynr,i,j)*SurveyWeights(surveynr,i,j)/CalcSurveyBiomass(surveynr,i);
+
+// Correct for power on biomass.  
+//   if(active(surveytotalpow(surveynr)) && surveytotalpowphase(surveynr) > 0) {
+  if(surveytotalpowphase(surveynr) > 0) {
+    dvariable scaler;
+    scaler = pow(CalcSurveyBiomass(surveynr,i),surveytotalpow(surveynr))/CalcSurveyBiomass(surveynr,i);
+    CalcSurveyBiomass(surveynr,i) *= scaler;
+    for(j =  surveyfirstage(surveynr); j <= surveylastage(surveynr); j++) 
+       CalcSurveyNr(surveynr,i,j) *= scaler;
+  }
+
+
+  random_number_generator r(COUNTER+surveynr*5+year);  //Need to look at this for repeatibility.
+  dvar_vector tmperr(surveyfirstage(surveynr),surveylastage(surveynr));
+  for(j =  surveyfirstage(surveynr) ; j <= surveylastage(surveynr) ; j++)
+     tmperr(j) = randn(r);
+      
+  if((surveyfirstage(surveynr) !=  surveylastage(surveynr)) || (Surveycorr(surveynr) > 0.02)) { // SurveyCorrmatrix
+    dvar_matrix Scorrmat(1,surveylastage(surveynr)-surveyfirstage(surveynr)+1,1,surveylastage(surveynr)-surveyfirstage(surveynr)+1);   int k; 
+    int n = surveylastage(surveynr)-surveyfirstage(surveynr)+1;
+    for(j = 1; j <= n; j++) {  
+      Scorrmat(j,j) = 1.0 ; //*square(SigmaSurvey(surveynr,j+surveyfirstage(surveynr)-1));
+      for(k = 1 ; k < j; k++) {
+        Scorrmat(j,k) = pow(Surveycorr(surveynr),dist(j,k,surveycorrtype(surveynr)));//*SigmaSurvey(surveynr,j+surveyfirstage(surveynr)-1)*SigmaSurvey(surveynr,k+surveyfirstage(surveynr)-1);
+        Scorrmat(k,j) = Scorrmat(j,k);
+      }
+    }
+
+    dvar_vector lamda(1,n);
+    lamda = eigenvalues(Scorrmat);
+    Scorrmat= eigenvectors(Scorrmat);
+    dvar_vector tmperr1(1,n);
+    tmperr1 = 0;
+    for(j = 1; j <= n; j++)
+      for(k = 1; k <= n; k++){ 
+         tmperr1(j) = tmperr1(j) + Scorrmat(j,k)*sqrt(lamda(k))*tmperr(k+surveyfirstage(surveynr)-1);
+      }
+    for(j = 1; j <= n ; j++) tmperr(j+surveyfirstage(surveynr)-1)  = tmperr1(j);
+  } // end of corrranw
+  for(j =  surveyfirstage(surveynr) ; j <= surveylastage(surveynr) ; j++){
+     ObsSurveyNr(surveynr,i,j) =  (CalcSurveyNr(surveynr,i,j)+SurveyResolution(surveynr,j))*
+     mfexp(tmperr(j)*SigmaSurvey(surveynr,j)) - SurveyResolution(surveynr,j);
+     if(ObsSurveyNr(surveynr,i,j) < 0.0) ObsSurveyNr(surveynr,i,j) = 0.0;
+  }
+
+     
+FUNCTION void WriteSurveyData(int surveynr,int year,ofstream & outfile)
+    int age;
+    if(surveytype(surveynr) == 1 || surveytype(surveynr) == 2) 
+      for(age = surveyfirstage(surveynr); age <= surveylastage(surveynr); age++)
+         outfile << year << "\t" << age << "\t" << ObsSurveyNr(surveynr,year,age) << endl;
+    if(surveytype(surveynr) == 4)
+       outfile << year << "\t" << "0" << "\t" << ObsSurveyBiomass(surveynr,year) << endl;
+     
+     
+FUNCTION void PredictCatchData1(int year)
+  ofstream catchfile("tmp/"+closedloopcatchfile,ios::app);
+  random_number_generator r(COUNTER+7*5+year);  //Need to look at this for repeatibility.  7 repaces surveynr in surveys.  
+  dvector  tmperr(firstage,lastage);
+  int age;
+  dvariable totcn,totcw,eps;
+  totcn = totcw = 0;
+  for(age =  firstage ; age <= lastage ;age++)
+     tmperr(age) = randn(r);
+  for(age =  firstcatchage ; age <= lastage ;age++) {
+     totcn += CalcCatchInNumbers(year,age);
+     totcw += CalcCatchInNumbers(year,age)*CatchWeights(year,age);
+  }
+  eps  = CatchResolution*totcn;
+  
+  for(age = firstcatchage;age <= lastage; age++) 
+    SigmaC(age) = SigmaCinp(age)*mfexp(logSigmaCmultiplier);
+  for(int age = firstcatchage ; age <= lastage; age++) {
+     ObsCatchInNumbers(year,age) = (CalcCatchInNumbers(year,age)+eps)*
+     mfexp(tmperr(age)*SigmaC(age)) - eps;
+     if( ObsCatchInNumbers(year,age) < 0.0)  ObsCatchInNumbers(year,age)= 0.0;
+  }  
+
+
+	      
+        
+
+
+     
+
+
+FUNCTION void GenerateTagData(int assYear,double taggednumber)
+  int ReleaseY = assYear-1;
+  dvariable totcn = 0;
+  int age;
+  for(age = firstcatchage; age < lastage; age++)
+       totcn = totcn +  ObsCatchInNumbers(ReleaseY,age);
+  for(age = firstcatchage; age < lastage; age++)
+       NtaggedMatrix(ReleaseY,age)  = ObsCatchInNumbers(ReleaseY,age)/totcn*taggednumber;
+
+
+
+FUNCTION void GenerateTagRecap(int assYear,double ratio) //double totScannednumbers)
+  random_number_generator r(COUNTER+8*5+assYear);  //Need to look at this for repeatibility.  8 replaces 7 in catch
+  dvariable obsrecap;
+  int year;
+  int tage;
+  int rage;
+  int age;
+  int recapYear = assYear;
+  dvariable totcn = 0;
+  dvariable predrecap;
+  int nr = 1;  // Index on numbered matrix in generated data.
+  dvar_vector scannednumbers(firstage,lastage);
+//  for(age = firstcatchage; age < lastage; age++)
+//       totcn = totcn + ObsCatchInNumbers(recapYear,age);  // question if calccatch
+  for(age = firstcatchage; age < lastage; age++)
+    scannednumbers(age)  = ObsCatchInNumbers(recapYear,age)*ratio;
+//       scannednumbers(age)  = ObsCatchInNumbers(recapYear,age)/totcn*totScannednumbers;
+       
+  for(year = recapYear - 6; year <= recapYear -1 ; year++){ 
+     for(tage = 2; tage <= (lastage-(recapYear - year+1)); tage++){
+        rage = tage+recapYear-year;
+	predrecap =  scannednumbers(rage)*NtaggedMatrix(year,tage)*mfexp(-mfexp(logTagmort(Ntagseries)))*mfexp(-mfexp(logTagloss(Ntagseries)))*(recapYear-year)/1.0e6;
+        obsrecap = randnegbinomial(value(predrecap) ,value(mfexp(logTagdispersion(Ntagseries))),r);
+	GenTagMatrix(nr,1) = year;
+	GenTagMatrix(nr,2) = recapYear;
+	GenTagMatrix(nr,3) = year - tage;
+	GenTagMatrix(nr,4) = scannednumbers(rage);
+	GenTagMatrix(nr,5) = NtaggedMatrix(year,tage);
+	GenTagMatrix(nr,6) = obsrecap;
+	GenTagMatrix(nr,7) = Ntagseries;  // Last type of tags.  
+	nr++;
+     }
+  }
+  NumberOfTagvalues += nr-1;
+
+  ofstream tagfile("tmp/"+closedlooptagfile,ios::app);
+  for(int i = 1; i < nr; i++){
+     for(int j = 1; j <= 6; j++) 
+        tagfile << GenTagMatrix(i,j) << "\t";
+     tagfile << GenTagMatrix(i,7) << endl;
+  }
+  tagfile.close();

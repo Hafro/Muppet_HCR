@@ -1,0 +1,11 @@
+0.4 # SurveyCorr
+0.2 #propM before survey
+0.2 #propF before survey
+0 #Survey weights given
+1 14 #Age range 
+0.413 0.156 0.207 0.224 0.189 0.158 0.191 0.235 0.270 0.28 0.33 0.38 0.43 0.5
+#resolution
+0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 #Resolution used when survey abundance tuning is used
+0 # Number of missing surveys
+
+

@@ -1,0 +1,77 @@
+0  # Not closed loop
+# run with
+#muppet -ind  icecod.dat.opt  -nox
+#muppet -ind icecod.dat.opt -nox -mcmc 100000 -mcsave 200 -mcscale
+
+../Files/catchandstockdata.dat # Data on the stock mean weight, maturity etc.
+../Files/filedoesnotexist.dat  #  Total catch where cno=-1 does not have to exist
+catchresiduals.dat  #  # Thought  for bootstrap, not used.
+
+0  # Initial condition from file  (1) or not.  program run with -ainp filename
+0  # 0 Forward, 1 Backward vpa
+
+1947 # First year  
+2020 # Last opt year i.e last year with catch at age data
+6    # Number of simulations years
+2020 # Last data year, last year with catch at age data
+1  # First age
+15 # last data age 
+15 # Last age
+2 # First catch age
+3 # First ssb age
+0 # Plus group (> 0) or not 0 
+0 # Delay from year born until first year observed.  
+4 # Number of oldest age groups with same F 
+-1 # Phase to estimate M oldest.  -1 not estimated
+
+ControlFiles/stockparameters.dat # natm and more
+ControlFiles/catchparameters.dat # sep period and something more.  
+ControlFiles/likelihoodparameters.dat # Weight of likelihood components etc.  
+ControlFiles/outputparameters.dat # Fbar range output biomasses etc
+
+# nsurveys
+1
+1987  ##surveyfirstyear
+0   #surveylastyear
+2 #surveyfirstage
+15  #surveylastage
+9 #surveyfirstagewithfullcatchability
+2 #surveyfirstagewithconstantpower
+2 #surveyfirstagewithconstantcatchability
+0 #surveytimefromlastyear (If 1 survey is conducted in the assessment year)
+#     0 last survey the year before the asssessment year.
+1  #surveytype (1 normal) (2 biomass+proportion)
+1 #surveycorrtype
+5  # Phase of correlation (5 or -1) where -1 means not estimated
+-1 # #surveylogitphase (not use logit)
+0 #usesurveyCV 0 means not do it.
+0 #spawningsurvey  0 means not spawning survey. 
+ControlFiles/survey1par.dat # Parameter file 
+../Files/survey1lokars.dat # Data file
+surveyresid.dat # residual file.  
+
+# SSBRectype etc.
+# Stock - recruit parameters initial values are on ordinary scale even thouth logs are estimated.
+5  # Type of relationship (1 BH, 2 Ricker 5 Hockey stick 6 geometric mean)
+6695351  # Rmax (log Rmax is estimated)
+200 # SSB break, ssbmax or or other parameter of relationship (not used with geom mean, log estimated)
+0.3  # CV log estimated
+0.02 #1st order AR coeff (log estimated). 0 can not be used
+0.3 # Power  in relationship between SSB and CV. (Can not be 0 but low value means no relationship)
+0 # Productivity change (icod 85), 0 means no productivity change (e^0)
+2 # Phase of estimating Rmax
+-1 # Phase of estimating SSBbreak
+4  # Phase of estimating CV
+-1 # Phase of estimating autocorrelation
+5 # Phase of estimating change of Recr CV with spawning stock
+-1 # Phase of estimating productivity
+# Migrations
+0 # No migration 
+# Prognosisfile
+../Files/iceherprognosis.dat.Frule # Prognosis file
+../Files/ProgWts.dat # Weight in prognosis, if the file does not exist average is used as specified in the prognosisfile 
+2 # Number of separable periods.  Not used in the logit options. Specified in catchparameters.dat
+2000 #Prodchangeyear does not matter as there is no productivity change
+0  # Number of tag series
+1  # VariableM   (not variable) 
+ControlFiles/optim.dat.hockey   #OptimDatafilename bounds and phases on some parameters.

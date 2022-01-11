@@ -1,8 +1,0 @@
-0.3 # Surveycorr
-0.6 #propM
-0.6 #propF
-0 # Survey weights given
-1 12  #Age range
-3.2 2.9 2.6 2.3 2 1.5 1 1 1 1.5 2 2 # Pattern in CV with age
-200 400 100 100 100 100 100 100 100 100 100 100 # Resolution
-

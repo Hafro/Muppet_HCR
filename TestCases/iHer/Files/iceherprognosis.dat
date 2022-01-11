@@ -1,0 +1,16 @@
+ # Data for prognosis
+2     # Brule
+0.1    # CV in weights
+0.7     # weightcorr
+0.25 	 # Assessmentcv
+0.7 	 # Assessmentcorr
+0.15 	 # Assessmentbias
+0.3 	 # Recrcorr
+273 	 # Btrigger
+2	 # Maxchange
+290     # EstimatedAssYearSSB 
+3       # Selection in prognosis mean of last 3 years.
+20       # Mean weight in prognosis mean of last 20 years.
+2
+40	# Catch 2021
+0.22 	 # Fishing mortality

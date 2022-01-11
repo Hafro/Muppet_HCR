@@ -1,0 +1,7 @@
+git add *
+git add Model/*
+git add Rscripts/*
+git add TestCases/*
+git add docs/*
+git commit -am 'Major change jan 2022 '
+git push
