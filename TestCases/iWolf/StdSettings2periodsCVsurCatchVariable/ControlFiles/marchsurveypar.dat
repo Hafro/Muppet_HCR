@@ -1,0 +1,11 @@
+0.4 # SurveyCorr
+0.25 #propM before survey
+0.25 #propF before survey
+0 #Survey weights given
+2 21 #Age range 
+0.407 0.272 0.236 0.198 0.179 0.163 0.172 0.19 0.206 0.24 0.254 0.203 0.263 0.265 0.391 0.309 0.574 0.705 0.802 0.758
+#resolution
+0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01
+0 # Number of missing surveys
+
+

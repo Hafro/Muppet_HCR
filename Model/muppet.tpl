@@ -21,8 +21,10 @@ DATA_SECTION
   // columns year totcatch 
   init_adstring totalcatchfilename;  // not used any name
   !! ofs << totalcatchfilename  << " #totalcatchfilename" << endl;
-  init_adstring catchresidualfilename;  // not used any name
-  !! ofs << catchresidualfilename  <<  " #catchresidualfilename" << endl;
+  init_adstring stockname;  // not used any name
+  !! ofs << stockname  <<  " #stockname" << endl;
+//  init_adstring catchresidualfilename;  // not used any name
+//  !! ofs << catchresidualfilename  <<  " #catchresidualfilename" << endl;
   init_int INITCOND;  // 1 if starting pin file.  
   !! ofs << INITCOND << " #INITCOND" << endl;
   init_int BackWards;  // Catch at age (0) or VPA (1) model.  
@@ -88,6 +90,8 @@ DATA_SECTION
   !!surveydatafiles.allocate(1,nsurveys);
   !!closedloopsurveydatafiles.allocate(1,nsurveys);
   !!surveyresidfiles.allocate(1,nsurveys);
+  !!surveyname.allocate(1,nsurveys);
+ 
   
   ivector surveyfirstyear(1,nsurveys);
   ivector surveylastyear(1,nsurveys);
@@ -113,8 +117,11 @@ DATA_SECTION
   !!ivector tmpsurveydata(1,14);
 //  !!adstring tmpsurveyfilename;  // Have to pass this to main program through file.
   !!for (i = 1; i<=nsurveys; i++) {
+     !! *global_datafile  >> surveyname(i);
+
      !!*global_datafile  >> tmpsurveydata;
      !! ofs << "#survey nr - " << i << endl;
+     !! ofs << surveyname(i) << " #surveyname "<< endl;
      !! ofs <<  tmpsurveydata(1) << " #surveyfirstyear" << endl;
      !! ofs <<  tmpsurveydata(2) << " #surveylastyear" << endl;
      !! ofs <<  tmpsurveydata(3) << " #surveyfirstage" << endl;
@@ -280,8 +287,8 @@ DATA_SECTION
   !!ofs <<  "misreportingphase " <<  misreportingphase << endl;
   init_int Mmultphase; // Should a multiplier on M be estimated.  
   !!ofs <<  "Mmultphase " <<  Mmultphase << endl;
-  init_int deltaQ1phase; // Multiplier on age 1 in survey 1.  
-  !!ofs <<  "deltaQ1phase " <<  deltaQ1phase << endl;
+  init_int surveyQchangephase; // Multiplier on age 1 in survey 1.  
+  !!ofs <<  "surveyQchangephase " <<  surveyQchangephase << endl;
   !! if(Ntagseries > 0) {
     init_number  logtaglosslb;
     !!ofs << "logtaglosslb " << logtaglosslb << endl ;
@@ -427,7 +434,7 @@ INITIALIZATION_SECTION
 PARAMETER_SECTION
 
 // Estimated variables; 
- init_bounded_number logdeltaQ1March(-1,1,deltaQ1phase);  // Only for icelandic cod change in q of age 1 after 2002 in March survey. Could be generalised.   
+ init_bounded_number logSurveyQchange(-1,1,surveyQchangephase);  // Only for icelandic cod change in q of age 1 after 2002 in March survey. Could be generalised.   
  init_bounded_number logMisreportingRatio(-1,1,misreportingphase);
  init_bounded_number logFoldestmult(-1,1,-2); // Not estimate but option available in VPA runs
  init_bounded_number logMoldest(-3,-0.5,estMlastagephase);
@@ -666,6 +673,7 @@ GLOBALS_SECTION
   adstring closedloopcatchfile;
   adstring closedlooptagfile;
   adstring_array surveyresidfiles;
+  adstring_array surveyname;
   adstring outputprefix;
   adstring outputpostfix;
   ofstream all_mcmc;
@@ -718,7 +726,7 @@ RUNTIME_SECTION
 PRELIMINARY_CALCS_SECTION
 // To keep track of file names.  Defined in data section but could not be made global there.
 
-
+ logSurveyQchange = 0;
  SurveyPower = 1; 
  AgeModel = 1; // default value if refbio is output in Frules totbio is given
  HCRrefAge = firstage; // default value 
@@ -1273,10 +1281,16 @@ FUNCTION void BioRatioHockeystick(int yr)
    Catch = SmoothDamper(Catch,MaxHarvestRatio*HCRrefbio(yr),mincatch);
    tmpCatch = SmoothDamper(tmpCatch,MaxHarvestRatio*HCRrefbio(yr),mincatch);
    
-   if(IceFishYear) {
+   if(IceFishYear && !(stockname == "iceher")) { // Not herring
       AnnualCatch =  TacLeft + Catch/3; 
       AnnualCatch = SmoothDamper(AnnualCatch,MaxHarvestRatio*HCRrefbio(yr),mincatch); 
       TacLeft = Catch*2/3;
+      FishingYearCatch(yr) = Catch;  // FishingYearCatch(2018) is 2018/201
+   }
+   if(IceFishYear && stockname == "iher") {  // Herring all catch taken in the assessment year.  
+      AnnualCatch =  Catch; 
+      AnnualCatch = SmoothDamper(AnnualCatch,MaxHarvestRatio*HCRrefbio(yr),mincatch); 
+      TacLeft = 0;
       FishingYearCatch(yr) = Catch;  // FishingYearCatch(2018) is 2018/201
    }
    if(!IceFishYear)
@@ -1875,8 +1889,8 @@ FUNCTION void PredictSurveyAbundance1(int surveynr)
       pZ = SurveyPropOfF(surveynr)*F(i,j)+SurveyPropOfM(surveynr)*natM(i,j);
       CalcSurveyNr(surveynr,i,j) = mfexp(log(N(i,j)*mfexp(-pZ))*SurveyPower(surveynr,j)+SurveylnQ(surveynr,j)
       +SurveylnYeareffect(surveynr,i));
-      if(surveynr == 1 && j == 1 && i > 2002) // Specific icelandic cod needs to be generalized.  
-        CalcSurveyNr(surveynr,i,j) *= mfexp(logdeltaQ1March);
+      if(surveyname(surveynr) == "icesmb"  && j == 1 && i > 2002 && stockname=="icecod") // Specific icelandic cod needs to be generalized.  
+        CalcSurveyNr(surveynr,i,j) *= mfexp(logSurveyQchange);
     }
   }
   // Here biomass might be put on the total power that option might be available in some version (Faroes).  
@@ -2589,9 +2603,10 @@ FUNCTION void ReadSurveyInfo(adstring parameterfilename,adstring datafilename, a
   int i;
   int year;
   int age;
+  
   surveylogfile << endl << "Survey number " << surveynumber << endl; 
   cifstream parameterinfile(parameterfilename);
-  
+  surveylogfile << surveyname(surveynumber) << "#survey name" << endl;
   int tmpminage;
   int tmpmaxage;
   dvariable tmpnumber;
@@ -2848,11 +2863,14 @@ FUNCTION void ReadPrognosis()
 	 CatchWeightsData(i) = ProgCatchWeights;
          StockWeightsData(i) = ProgStockWeights;
          SSBWeightsData(i) = ProgSSBWeights;
+	 if(variableM==1) NatMData(i) = NatMData(usedlastdatayear); 
       }
       return;
    }
    outfile << "StockAndMaturityData log " << endl;
-   dvector tmpvec(1,6);
+   int ncol = 6;
+   if(variableM == 1) ncol = 7;  // Also read M 
+   dvector tmpvec(1,ncol);
    for(i = 1; i <= largenumber ; i++) {
       Progwtandmatinfile >> tmpvec;
       if(tmpvec(1) == 0 || tmpvec(1) == 9999) break;  //eof does not work in 12.3
@@ -2864,6 +2882,7 @@ FUNCTION void ReadPrognosis()
           StockWeights(year,age) = StockWeightsData(year,age) = tmpvec(4);
           StockMaturity(year,age) = StockMaturityData(year,age) = tmpvec(5);
           SSBWeights(year,age) = SSBWeightsData(year,age) = tmpvec(6);
+	  if(variableM == 1)  NatMData(year,age) = tmpvec(7);
      }
      outfile << tmpvec << endl;  
    }
@@ -2873,7 +2892,8 @@ FUNCTION void ReadPrognosis()
           CatchWeights(year) = CatchWeightsData(year) = CatchWeightsData(i);
           StockWeights(year) = StockWeightsData(year) = StockWeightsData(i);
           StockMaturity(year) = StockMaturityData(year) = StockMaturityData(i);
-          SSBWeights(year) = SSBWeightsData(year) = SSBWeightsData(i); 
+          SSBWeights(year) = SSBWeightsData(year) = SSBWeightsData(i);
+	  if(variableM) NatMData(year) = NatMData(i); 
       }
    }
    Progwtandmatinfile.close();
@@ -3646,7 +3666,8 @@ FUNCTION void SingleTriggerHCR(int year)
   if(year == (lastoptyear+1)) CalcCatchIn1000tons(year) = FutureForCatch(year);
     // Simulate the assessment year.  
   for(int age = firstage+1; age <= lastage ; age++) Nhat(year,age)=mfexp(log(N(year,age))+AssessmentErr(year));
-  CalcNaturalMortality1(year); 
+  if(variableM == 0) CalcNaturalMortality1(year);
+  if(variableM == 1) CalcNaturalMortality2(year);  
   ProgF(year) = FishmortFromCatchMCMC(CalcCatchIn1000tons(year)*1e6,Nhat(year),CatchWeights(year),progsel,natM(year));
 
   F(year) = ProgF(year)*progsel; 
@@ -3660,7 +3681,8 @@ FUNCTION void SingleTriggerHCR(int year)
     for(age = firstage ; age < lastage ; age++) 
       Nhat(year+1,age+1)  = Nhat(year,age)*mfexp(-Z(year,age));
     Nhat(year+1,lastage) += Nhat(year,lastage)*mfexp(-Z(year,lastage));
-    CalcNaturalMortality1(year+1); 
+    if(variableM == 0) CalcNaturalMortality1(year+1); 
+    if(variableM == 1) CalcNaturalMortality2(year+1); 
     PredictShorttermSSB(year+1,year);
     dvariable rat = Spawningstock(year+1)/Btrigger;
     ProgF(year+1) = FutureForCatch(year+1)*rat;
@@ -3853,13 +3875,8 @@ FUNCTION void CalcNaturalMortality2(int year)
    int i;
    int j;
    dvariable age;
-   if(year <= lastdatayear) 
-     for(j = firstage; j <= lastage; j++)
-	natM(year,j) = Mdata(j) + (NatMData(year,j)-Mdata(j))*mfexp(logMmultiplier);  //multiplier on extra M.  Icht
-    if(year > lastdatayear) // Prognosis use last value
-     for(j = firstage; j <= lastage; j++)
-	natM(year,j) = NatMData(lastdatayear,j);
-
+   for(j = firstage; j <= lastage; j++)
+     natM(year,j) = Mdata(j) + (NatMData(year,j)-Mdata(j))*mfexp(logMmultiplier);  //multiplier on extra M
    if(estMlastagephase > 0) natM(year,lastage) = mfexp(logMoldest); 
 
    
@@ -3961,9 +3978,8 @@ FUNCTION void PredictSurveyAbundance1(int surveynr,int year)
   for(j = surveyfirstage(surveynr); j <= surveylastage(surveynr); j++) {
     pZ = SurveyPropOfF(surveynr)*F(i,j)+SurveyPropOfM(surveynr)*natM(i,j);
     CalcSurveyNr(surveynr,i,j) = mfexp(log(N(i,j)*mfexp(-pZ))*SurveyPower(surveynr,j)+SurveylnQ(surveynr,j)+SurveylnYeareffect(surveynr,i));
-   if(surveynr == 1 && j == 1 && i > 2002) // Specific icelandic cod
-        CalcSurveyNr(surveynr,i,j) *= mfexp(logdeltaQ1March);
-
+      if(surveyname(surveynr) == "icesmb"  && j == 1 && i > 2002 && stockname=="icecod")
+     CalcSurveyNr(surveynr,i,j) *= mfexp(logSurveyQchange);  // Only for icelandic cod change in q of age 1 after 2002 in March survey. Could be generalised
   }
   // Here biomass might be put on the total power that option might be available in some version (Faroes).  
   CalcSurveyBiomass(surveynr,i) = sum(elem_prod(CalcSurveyNr(surveynr,i),SurveyWeights(surveynr,i)));

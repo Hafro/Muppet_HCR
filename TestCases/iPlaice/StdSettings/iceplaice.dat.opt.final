@@ -1,15 +1,15 @@
 0  # Not closed loop
 # run with
-#muppet -ind  icecod.dat.opt  -nox
-#muppet -ind icecod.dat.opt -nox -mcmc 100000 -mcsave 200 -mcscale
+#muppet -ind  iceplaice.dat.opt.final  -nox
+#muppet -ind iceplaice.dat.opt.final -nox -mcmc 100000 -mcsave 200 -mcscale
 
 ../Files/catchandstockdata.dat # Data on the stock mean weight, maturity etc.
 ../Files/totcatch.dat  #  Total catch where cno=-1 does not have to exist
-catchresiduals.dat  #  # Thought  for bootstrap, not used.
+iceplaice
+#catchresiduals.dat  #  # Thought  for bootstrap, not used.
 
 0  # Initial condition from file  (1) or not.  program run with -ainp filename
 0  # 0 Forward, 1 Backward vpa
-
 1985 # First year
 2021 	 # Last opt year
 6 # Number of simulations years
@@ -32,6 +32,7 @@ ControlFiles/outputparameters.dat # Fbar range output biomasses etc
 
 1 # nsurveys
 # Survey 1 March survey
+icesmb
 1987 #surveyfirstyear
 1 #surveylastyear 
 3 #surveyfirstage

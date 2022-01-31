@@ -1,15 +1,15 @@
 0  # Not closed loop
 # run with
-#muppet -ind  icecod.dat.opt  -nox
-#muppet -ind icecod.dat.opt -nox -mcmc 100000 -mcsave 200 -mcscale
+#muppet -ind  iceher.dat.opt.final  -nox
+#muppet -ind iceher.dat.opt.final -nox -mcmc 100000 -mcsave 200 -mcscale
 
 ../Files/catchandstockdata.dat # Data on the stock mean weight, maturity etc.
-../Files/filedoesnotexist.dat  #  Total catch where cno=-1 does not have to exist
-catchresiduals.dat  #  # Thought  for bootstrap, not used.
+ControlFiles/filedoesnotexist.dat  #  Total catch where cno=-1 does not have to exist
+iceher
+#catchresiduals.dat  #  # Thought  for bootstrap, not used.
 
 0  # Initial condition from file  (1) or not.  program run with -ainp filename
 0  # 0 Forward, 1 Backward vpa
-
 1947 # First year  
 2020 # Last opt year i.e last year with catch at age data
 6    # Number of simulations years
@@ -31,6 +31,7 @@ ControlFiles/outputparameters.dat # Fbar range output biomasses etc
 
 # nsurveys
 1
+icehersur # Name of herring survey
 1987  ##surveyfirstyear
 0   #surveylastyear
 2 #surveyfirstage
@@ -68,7 +69,7 @@ surveyresid.dat # residual file.
 # Migrations
 0 # No migration 
 # Prognosisfile
-../Files/iceherprognosis.dat.Frule # Prognosis file
+../Files/iceherprognosis.dat.hcr # Prognosis file
 ../Files/ProgWts.dat # Weight in prognosis, if the file does not exist average is used as specified in the prognosisfile 
 2 # Number of separable periods.  Not used in the logit options. Specified in catchparameters.dat
 2000 #Prodchangeyear does not matter as there is no productivity change

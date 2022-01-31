@@ -1,0 +1,13 @@
+# Natural mortality
+#Natural mortality
+0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1
+
+1   # Mmultiplier 
+# PropofM and PropofF before spawning
+ 0.8 0.8 0.8 0.8 0.8 0.8 0.8 0.8 0.8 0.8 0.8 0.8 0.8 0.8 0.8 0.8 0.8 0.8 0.8 0.8 0.8
+ 0.8 0.8 0.8 0.8 0.8 0.8 0.8 0.8 0.8 0.8 0.8 0.8 0.8 0.8 0.8 0.8 0.8 0.8 0.8 0.8 0.8
+15 # Basis for rel ssb 
+0.3  # Min rel ssb used when cv in recruitment depends on ssb
+1.7 # Max rel ssb used when cv in recruitment depends on ssb
+
+

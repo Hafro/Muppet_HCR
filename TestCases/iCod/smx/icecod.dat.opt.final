@@ -5,7 +5,8 @@
 
 ../Files/catchandstockdata.dat # Data on the stock mean weight, maturity etc.
 ../Files/totcatch.dat  #  Total catch where cno=-1 does not have to exist
-catchresiduals.dat  #  # Thought  for bootstrap, not used.
+icecod  # Stock name
+#catchresiduals.dat  #  # Thought  for bootstrap, not used.
 
 0  # Initial condition from file  (1) or not.  program run with -ainp filename
 0  # 0 Forward, 1 Backward vpa
@@ -32,6 +33,7 @@ ControlFiles/outputparameters.dat # Fbar range output biomasses etc
 
 2 # nsurveys
 # Survey 1 March survey
+icesmb #Name of survey 
 1985 #surveyfirstyear
 1 #surveylastyear 
 1 #surveyfirstage
@@ -52,6 +54,7 @@ ControlFiles/marchsurveypar.dat #survey-parameter file
 surveyresid.dat # #survey-residual file, thought for bootstrap Does not have to exist
 
 # Survey 2 October survey
+icesmh #name of survey
 1996 #surveyfirstyear
 0 #surveylastyear 
 3 #surveyfirstage
