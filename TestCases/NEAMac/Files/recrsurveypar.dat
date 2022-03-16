@@ -1,0 +1,8 @@
+# Parameters for the recr index
+0.02 # Surveycorr does not matter, just one number.  
+0.5 #propM prop of M before survey 
+0.5 #PropF Prop of F before survey 
+0 # Survey weight not given 
+0 0   #Age range
+1 #CV
+0.1 # Resolution

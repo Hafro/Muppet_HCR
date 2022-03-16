@@ -1,0 +1,15 @@
+#SigmaCInp scaled by a parameter
+#0.8 0.6  0.4 0.3 0.2 0.2 0.2 0.2 0.2 0.3 0.4 0.5 0.6 # Used in HCR simulations
+0.8 0.3 0.28 0.25 0.25 0.2 0.2 0.2 0.2 0.25 0.3 0.35 0.35 # used in 2018 ass
+# CatchResolution should maybe set as  lower percent if robust
+0.005
+#Sigmatotalcatch
+0.1
+# CatchRobust - SurveyRobust surveyrobust might have to be a vector
+0 0 
+# Likelihood weights.  SSB_recruitment likelihood downweighted (#3)
+# as is typical in assessment.
+# 3 is SSB_recruitment 
+# 8 is taglikely
+1 1 0.5 1 1 1 1 1 0 1  # Probaly set weight on catch small and SSB-rec larger
+1 1 1   # Weight of the surveys.  SSB, Pel, Recindex

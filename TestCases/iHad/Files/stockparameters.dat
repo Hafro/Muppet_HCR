@@ -1,0 +1,12 @@
+# Natural mortality
+#Natural mortality
+0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.3 0.4
+1  # Mmultiplier
+# PropofM and PropofF before spawning list all age groups
+0.3 0.3 0.3 0.3 0.3 0.3 0.3 0.3 0.3 0.3 0.3 0.3
+0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4
+90 # Basis for rel ssb 
+0.3  # Min rel ssb used when cv in recruitment depends on ssb
+1.7 # Max rel ssb used when cv in recruitment depends on ssb
+
+

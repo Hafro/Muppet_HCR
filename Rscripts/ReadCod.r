@@ -1,3 +1,5 @@
+# For HCR simulations.  
+
 moddir <- "../Model"
 source(paste(moddir,"Read.r",sep="/"))
 basedir <- ".."

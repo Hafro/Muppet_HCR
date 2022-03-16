@@ -1,0 +1,110 @@
+0  # Closed loop i.e not closed loop
+../Files/catchandstockdata.dat  # Data on the stock mean weight, maturity etc.
+totcatch.dat # Total catch per year does not have to exist except catch at age is missing for some years.  
+neamackerel # stock name 
+#catchresiduals.dat  # For bootstrap, not used.  
+1  #  Initial condition from file (1) or not.  program run with -ainp filename
+0 # Backwards   
+
+1980 # First year  
+2020 # Last opt year i.e last year with catch at age data
+6  # Number of simulations years
+2020 # Last data year, last year with catch at age data
+0  # First age
+12 # last data age 
+12 # Last age
+1 # First catch age
+1 # First ssb age
+1 # Plus group (> 0) or not 0 
+0 # Delay from year born until first year observed.  
+4 # Number of oldest age groups with same F 
+-1 # Phase to estimate M oldest.  
+
+../Files/stockparameters.dat # natm and more
+../Files/catchparameters.dat.2periods # sep period and something more.  
+../Files/likelihoodparameters.dat # Weight of likelihood components etc.  
+../Files/outputparameters.dat # Fbar range etc.  
+# nsurveys
+3
+maceggsurvey
+1992 # First year
+2020 # Last year
+0 # First age 
+0 # Last age dummy for ssb survey like most other par
+0 # surveyfirstagewithfullcatchability
+0 # surveyfirstagewithconstantpower
+0 # surveyfirstagewithconstantcatchability
+1 # surveytimefromlastyear (If 1 survey is conducted in the assessment year)
+#     0 last survey the year before the asssessment year.
+1  #surveytype (1 normal) (2 biomass+proportion)
+1 #surveycorrtype
+-1  # Phase of correlation (5 or -1) where -1 means not estimated
+-1 # #surveylogitphase (not use logit)
+0 #usesurveyCV 0 means not do it.
+1 #spawningsurvey  0 means not spawning survey. 
+./Files/ssbsurveypar.dat # Parameter file 
+../Files/ssbsurvey.dat # Data file 
+surveyresid.dat # residual file.  not used
+
+# Pelagic survey first name of survey.  
+iessnss
+2010  # First year
+1 # Last year  year after last year of catch data
+3 # First age 
+11 # Last age
+7 #surveyfirstagewithfullcatchability
+3 #surveyfirstagewithconstantpower
+3 #surveyfirstagewithconstantcatchability
+0 #surveytimefromlastyear (If 1 survey is conducted in the assessment year)
+#     0 last survey the year before the asssessment year.
+1  #surveytype (1 normal) (2 biomass+proportion)
+1 #surveycorrtype
+5  # Phase of correlation (5 or -1) where -1 means not estimated
+-1 # #surveylogitphase (not use logit)
+0 #usesurveyCV 0 means not do it.
+0 #spawningsurvey  0 means not spawning survey. 
+../Files/pelsurveypar.dat # Parameter file 
+../Files/pelsurvey.dat  # Data file 
+surveyresid.dat # does not exist but is an option thought for bootstrap
+
+# recr survey
+macrecrindex
+1998  # First year
+0 # Last year   
+0 # First age 
+0 # Last age
+0 #surveyfirstagewithfullcatchability
+0 #surveyfirstagewithconstantpower
+0 #surveyfirstagewithconstantcatchability
+0 #surveytimefromlastyear (If 1 survey is conducted in the assessment year)
+#     0 last survey the year before the asssessment year.
+1  #surveytype (1 normal) (2 biomass+proportion)
+1 #surveycorrtype
+-1  # Phase of correlation (5 or -1) where -1 means not estimated
+-1 # #surveylogitphase (not use logit)
+0 #usesurveyCV 0 means not do it.
+0 #spawningsurvey  0 means not spawning survey.
+../Files/recrsurveypar.dat # Parameter file 
+../Files/recrsurvey.dat  # Data file 
+surveyresid.dat # does not exist but is an option thought for bootstrap
+6  # Type of relationship Geometric mean 
+4971100  # Rmax
+2000 # SSB break, ssbmax or other parameter of relatinoship
+0.3  # CV
+0.1 # Autocorrelation not use in ass
+0.01 # Power
+0 # Trend in trecruitment
+2 -1 3 -1 -1 -1 #Phases of optimisation of the variables.   Minus means not estmated.  Changing estimation of cv from 2 - 3 helps sometime.  
+# Migrations
+0 # No migration 
+# Prognosisfile
+../Files/mackerelprognosis.dat.opt  #Prognosis 
+../Files/progwts.dat # Predicted weight and mat
+2 # Number of separable periods.  
+2000 # Prodchangeyear
+1 # Number of Tag data series
+753  # Number of Tag data points
+1   # Tag loglikely
+../Files/RFID-Tagfile.txt #Tag data file
+0  # VariableM   (not variable if 0, variable if 1 ) 
+optim.dat.hockey

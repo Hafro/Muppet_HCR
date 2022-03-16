@@ -1,0 +1,17 @@
+# Data for prognosis
+10    # F + triiger  
+0.08    # CV in weights
+0.7     # weightcorr
+0.28 	 # Assessmentcv
+0.7 	 # Assessmentcorr
+0.8    # CurrentAssessmentErrmultiplier
+1      # CurrentStockScaler
+0.5 	 # Recrcorr
+40 	 # Btrigger
+3	 # Maxchange
+4000     # EstimatedAssYearSSB 
+3        # Selection in prognosis mean of last 3 years.
+5       # Mean weight in prognosis mean of last N years.
+2       # Number of years
+800	# Catch 2020
+0.22 	 # Fishing mortality

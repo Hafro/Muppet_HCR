@@ -1,0 +1,10 @@
+0.5 # SurveyCorr
+0.2 #propM before survey
+0.2 #propF before survey
+0 # Survey weights given
+1 10 #Age range 
+0.335784 0.337252 0.273987 0.264007 0.256767 0.345298 0.327136 0.344655 0.345801 0.307099 	 #pattern in CV with age. Common multiplier estimated
+ 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 #Resolution used when survey abundance tuning is used
+0 # Number of missing surveys
+
+

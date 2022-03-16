@@ -1,0 +1,8 @@
+# Parameters for the ssbsurvey
+0.02 # Surveycorr does not matter, just one number.  
+0.001 #0.2 #propM prop of M before survey 
+0.001 #0.2 #PropF Prop of F before survey 
+0 # Survey weight not given 
+2 2   #Age range
+1 #CV
+15 # Resolution

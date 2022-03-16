@@ -298,12 +298,16 @@ DATA_SECTION
     !!ofs << "logtaglossphase " << logtaglossphase << endl ;
     init_int  firsttagyear;
     !!ofs << "firsttagyear    " << firsttagyear    << endl ;
-    init_int  lasttagyear;
-    !!ofs << "lasttagyear    " << lasttagyear    << endl ;
+    int lasttagyear;
+    int lastrecapyear;
+    init_int  lasttagyearinput;
+    !!ofs << "lasttagyearinput    " << lasttagyearinput    << endl ;
     init_int  firstrecapyear;
     !!ofs << "firstrecapyear    " << firstrecapyear    << endl ;
-    init_int  lastrecapyear;
-    !!ofs << "lastrecapyear    " << lastrecapyear    << endl ;
+    init_int  lastrecapyearinput;
+    !!ofs << "lastrecapyearinput    " << lastrecapyearinput    << endl ;
+    !!if(lasttagyearinput < 1900) lasttagyear= lasttagyearinput + lastoptyear;
+    !!if(lastrecapyearinput < 1900) lastrecapyear= lastrecapyearinput + lastoptyear;
     init_int  firsttagage;
     !!ofs << "firsttagage    " << firsttagage    << endl ;
     init_int  lasttagage;
@@ -886,7 +890,7 @@ PROCEDURE_SECTION
 //     if(printPhase) cout << "current " << current_phase() << endl;
   }
   COUNTER = COUNTER + 1;
-  // SetPredValues();  // Set various sdreport objects from bw.tpl NPEL2007
+  SetPredValues();  // Set various sdreport objects from bw.tpl NPEL2007
   Prognosis();
   evaluate_the_objective_function();
 //  cout  << "LnLikelicomp" <<  LnLikelicomp << endl;
@@ -1149,7 +1153,7 @@ FUNCTION void HistoricalSimulation()
     if(catchlogitsizephase > 0)
        CalcFishingMortality1c(year);
 
-     
+        
 
 
     Z(year) = F(year) + natM(year) ;
@@ -1163,6 +1167,7 @@ FUNCTION void HistoricalSimulation()
     CalcCatchIn1000tons(year) = sum(elem_prod(CalcCatchInNumbers(year),CatchWeights(year)))/1.0e6;
     CalcNextYearsN(year);
    }
+
 // Calculate reference biomasses, mean selection, selection last 5 years etc.  
 // The switch Historical Assessment is to have meansel and progsel calculated first.  
  
@@ -1173,7 +1178,6 @@ FUNCTION void HistoricalSimulation()
           Recruitment(year) = PredictedRecruitment(year);
       }
     }
-
     
 // *****************************************************
 
@@ -1670,20 +1674,22 @@ FUNCTION void evaluate_the_objective_function()
 	-log(CalcCatchIn1000tons(firstyear,lastoptyear))))/
 	 (2.*square(sigmatotalcatch))+ noptyears*log(sigmatotalcatch);
   }
-
   LnLikelicomp(3) = SSB_Recruitment_loglikeli(); 
+
   for(i = 1; i <= nsurveys; i++) {
-      if(surveytype(i) == 1 ) {
-        Surveylikelihood(i) = Survey_loglikeli1(i); // Store by survey
-        LnLikelicomp(4) +=  Surveylikelihood(i)*SurveylikelihoodWeights(i);
+      if(spawningsurvey(i) == 0) { //Not spawning survey.
+        if(surveytype(i) == 1 ) {
+          Surveylikelihood(i) = Survey_loglikeli1(i); // Store by survey
+          LnLikelicomp(4) +=  Surveylikelihood(i)*SurveylikelihoodWeights(i);
+        }
+        if(surveytype(i) == 2 ) {
+          tmpsurveylikelihood = Survey_loglikeli2(i); 
+          Surveylikelihood(i)  = sum(tmpsurveylikelihood);
+	  LnLikelicomp(5) +=  tmpsurveylikelihood(1)*SurveylikelihoodWeights(i);  // Biomass
+	  LnLikelicomp(6) +=  tmpsurveylikelihood(2)*SurveylikelihoodWeights(i);  // Proportions
+	}
       }
-      if(surveytype(i) == 2 ) {
-        tmpsurveylikelihood = Survey_loglikeli2(i); 
-        Surveylikelihood(i)  = sum(tmpsurveylikelihood);
-	LnLikelicomp(5) +=  tmpsurveylikelihood(1)*SurveylikelihoodWeights(i);  // Biomass
-	LnLikelicomp(6) +=  tmpsurveylikelihood(2)*SurveylikelihoodWeights(i);  // Proportions 
-      }
-      if(surveytype(i) == 4) {
+      if(spawningsurvey(i) == 1) { //spawning survey.  
          Surveylikelihood(i) = SSB_Survey_loglikeli(i);	
 	 LnLikelicomp(4) +=  Surveylikelihood(i)*SurveylikelihoodWeights(i); // Breyta?
       }
@@ -2350,19 +2356,22 @@ FUNCTION void ReadCatchandStockData()
         totinfile >> TotCatchIn1000tons(yr);
     }
   }
+// -1 in Catch in numbers is allowed as missing values but then the weights and maturity have to be correct so the calculations of
+// those values for plus group can not be mixed with this.  
   totinfile.close();
-
+  ObsCatchInNumbers = 1e-12 ; //very low number
   cifstream infile(catchfilename);
   if(infile.fail()) {
         cout << "File " << catchfilename << 
 	"does not exist or something is wrong with it" << endl;
          exit(1);
    }
+   
   ofstream outfile("catchfile.log");
   int i;
   int year;
   int age;
-  int ncol = 7;  // Number of columns in the 
+  int ncol = 7;  // Number of columns in the file
   if(variableM == 1) ncol= 8;
   dvariable ratio;
   dvector tmpvec(1,ncol);
@@ -2389,9 +2398,9 @@ FUNCTION void ReadCatchandStockData()
 
 
      }
- // Add data if plus group. CNO used as proxy for stock in numbers in weighting data (( aga 
-     if((year>= firstyear) & (year<= lastyear) & (age >=  lastage) & (plusgroup == 1)  & (lastdataage > lastage) ) {
-        if(ObsCatchInNumbers(year,lastage) == -1) ObsCatchInNumbers(year,lastage) = 0; // -1 is missing
+ // Add data if plus group. CNO used as proxy for stock in numbers in weighting data (( 
+     if((year>= firstyear) & (year<= lastyear) & (age >=  lastage) & (plusgroup == 1)  & (age <= lastdataage) & (lastdataage > lastage) ) {
+//        if(ObsCatchInNumbers(year,lastage) == -1) ObsCatchInNumbers(year,lastage) = 01e-8; // -1 is missing This condition should not be here.  
 	ratio = ObsCatchInNumbers(year,lastage)/(ObsCatchInNumbers(year,lastage)+tmpvec(3));
         ObsCatchInNumbers(year,lastage) += tmpvec(3);
  	CatchWeightsData(year,lastage) = CatchWeightsData(year,lastage)*ratio+tmpvec(4)*(1.0-ratio);
@@ -2575,7 +2584,7 @@ FUNCTION void ReadTagInfo(adstring Tagdatafilename)
   int i;
   for( i = 1; i < largenumber; i++) {
      datainfile >> tmpvec;
-     if(datainfile.eof()) break;
+     if(tmpvec(1)== 0 || tmpvec(1) == 9999) break; //eof not sufficient
      TagYear(i) = int(tmpvec(1));
      RecaptYear(i) = int(tmpvec(2));
      YearClass(i) = int(tmpvec(3));

@@ -1,0 +1,15 @@
+#SigmaCInp note this starts at age 1. 
+1 1 0.181  0.144  0.122  0.110  0.105  0.106  0.13  0.15 0.2  0.4 0.8 
+# CatchReslution should maybe set as  lower percent if robust
+0.005
+#Sigmatotalcatch
+0.1
+# CatchRobust - SurveyRobust surveyrobust might have to be a vector
+0 0 
+# Likelihood weights 10 but here the first 4 components are used. 
+# numbers might change
+1 1 1 1 1 1 1 1 0 1
+#1 catch in numbers 2 catch in tonnes 3 SSB-recruitment  4 Survey likelihood
+# 5-6 alt survey likelihood.  # rest not used.  SSB-rec might be weighted
+# down in assessment.  
+0.001	1 	 # Weight on surveys.

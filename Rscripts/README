@@ -1,0 +1,6 @@
+Most of those scripts are thought to be run from the place where
+stockname.dat.opt.final is stored.  The PATH in the file might have to
+be revised depending on where they are run from for example
+
+source("../../../Rscripts/readSepar.r")
+

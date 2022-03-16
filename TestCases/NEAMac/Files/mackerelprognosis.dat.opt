@@ -1,0 +1,25 @@
+# Data for prognosis
+2      # 2 F multiplier
+0.15    # WeightCV
+0.7     # WeightCorr
+3 	# Number of years used in the average weights to compile refbio 0 means correct weights.
+0.25    # AssessmentCV
+0.6    # AssessmentCorr
+0.0	# Assessmentbias
+0.1    # ImplementationCV
+0.85    # ImplementationCorr
+0.0	# Implementationbias
+0.8    # CurrentAssessmentErrmultiplier
+1      # CurrentStockScaler
+0.5     # RecrCorr
+40       # Btrigger
+3        # MaxChange practicially noconstrained with this high value  
+4500     # Est Assyear ssb
+3       # Selection in prognosis mean of last 3 years.
+5       # Meanwtyears 
+0	# IceFishYear
+0	# LastYearTacRatio (0.5 in icecod HCR)
+0	# DensDep  0 no densdep.  
+2        # Number of years
+1199    # Catch 2020
+0.22     # FishingMortality after 2020
