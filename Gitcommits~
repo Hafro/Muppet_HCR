@@ -1,6 +1,0 @@
-git add HCR/*
-git add HCR/Model/*
-git add HCR/Rscripts/*
-git add HCR/TestCases/*
-git commit -am 'Major change jan 2022 '
-git push
