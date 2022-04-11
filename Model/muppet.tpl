@@ -248,7 +248,6 @@ DATA_SECTION
 
   // if misreporting is not estimated the value is 0 of logmisreporting except data are read from
   // a pin file.  Might be changed if different level of misreporting iis needed.  
-
 // Here we have reading of different phases and upper and lower bounds.  Gradually more and more
 // things should be moved here but we do not want those values to be hardwired in the code.  
 
@@ -729,7 +728,7 @@ RUNTIME_SECTION
 
 PRELIMINARY_CALCS_SECTION
 // To keep track of file names.  Defined in data section but could not be made global there.
-
+ Misreporting = 1;  // No misreportins.  
  logSurveyQchange = 0;
  SurveyPower = 1; 
  AgeModel = 1; // default value if refbio is output in Frules totbio is given
@@ -966,7 +965,7 @@ REPORT_SECTION
 
      outfile.open(outputprefix+"resultsbyyear"+outputpostfix); 
      if(CatchRule == 3 || CatchRule == 4 || CatchRule == 31  ||
-    CatchRule == 32 || CatchRule == 33 || CatchRule == 34 ) {
+     CatchRule == 32 || CatchRule == 33 || CatchRule == 34 ) {
        for(int yr=firstyear; yr <= lastyear; yr++)
        HCRrefbio(yr) = CalcHCRrefbio(yr,HCRrefAge,0,0,0);
      }
@@ -975,16 +974,25 @@ REPORT_SECTION
     outfile << "year\tRefF\tCalcCatchIn1000tons\tCatchIn1000tons\tSpawningstock\tEggproduction\tCbioR\tRefBio1\tRefBio2\tPredictedRecruitment\tRecruitment\tN1st\tN3\tN6";
     for(i = 1; i <= nsurveys; i++) 
       outfile << "\tCalcSurveyBiomass"<<i<<"\tObsSurveyBiomass"<<i;
-    outfile << endl;
+    if(CatchRule == 3 || CatchRule == 4 || CatchRule == 31  ||
+      CatchRule == 32 || CatchRule == 33 || CatchRule == 34 )
+        outfile << "\tHCRrefbio";
+    if(IceFishYear)
+       outfile << "\tFishingYearCatch";
+    outfile << "\t" << endl;
 
     for(i = firstyear; i <= lastyear; i++) {
       outfile << i << "\t" <<  RefF(i) << "\t" <<  CalcCatchIn1000tons(i) << "\t" << CatchIn1000tons(i) << "\t" << Spawningstock(i) << "\t" << EggProduction(i) << "\t" << 
        CbioR(i) << "\t" << RefBio1(i) << "\t" << RefBio2(i) << "\t" << PredictedRecruitment(i) << "\t" << Recruitment(i) << "\t" << N(i,firstage) << "\t" << N(i,3) << "\t" << N(i,6) ;
       for(j = 1; j <= nsurveys; j++) 
         outfile << "\t" << CalcSurveyBiomass(j,i) << "\t" << ObsSurveyBiomass(j,i); 
-      outfile  << endl;
+     if(CatchRule == 3 || CatchRule == 4 || CatchRule == 31  ||
+     CatchRule == 32 || CatchRule == 33 || CatchRule == 34 )
+       outfile << "\t" << HCRrefbio(i);
+     if(IceFishYear)
+       outfile << "\t" << FishingYearCatch(i);
+     outfile  << endl;
      }
-
      outfile.close(); 
 
      outfile.open(outputprefix+"resultsbyage"+outputpostfix);
