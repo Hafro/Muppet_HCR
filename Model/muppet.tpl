@@ -979,7 +979,7 @@ REPORT_SECTION
         outfile << "\tHCRrefbio";
     if(IceFishYear)
        outfile << "\tFishingYearCatch";
-    outfile << "\t" << endl;
+//   outfile << "\t" << endl;
 
     for(i = firstyear; i <= lastyear; i++) {
       outfile << i << "\t" <<  RefF(i) << "\t" <<  CalcCatchIn1000tons(i) << "\t" << CatchIn1000tons(i) << "\t" << Spawningstock(i) << "\t" << EggProduction(i) << "\t" << 
@@ -1299,7 +1299,7 @@ FUNCTION void BioRatioHockeystick(int yr)
       TacLeft = Catch*2/3;
       FishingYearCatch(yr) = Catch;  // FishingYearCatch(2018) is 2018/201
    }
-   if(IceFishYear && stockname == "iher") {  // Herring all catch taken in the assessment year.  
+   if(IceFishYear && stockname == "iceher") {  // Herring all catch taken in the assessment year.  
       AnnualCatch =  Catch; 
       AnnualCatch = SmoothDamper(AnnualCatch,MaxHarvestRatio*HCRrefbio(yr),mincatch); 
       TacLeft = 0;

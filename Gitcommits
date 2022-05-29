@@ -3,7 +3,7 @@ git add Model/*
 git add Rscripts/*
 git add TestCases/*
 git add docs/*
-git commit -am 'Further changes March2022 '
+git commit -am '2 minor bugs corrected may 2022 '
 git remote set-url origin git@github.com:hafro/Muppet_HCR
 
 git push
