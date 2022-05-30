@@ -979,6 +979,7 @@ REPORT_SECTION
         outfile << "\tHCRrefbio";
     if(IceFishYear)
        outfile << "\tFishingYearCatch";
+       outfile << endl;
 //   outfile << "\t" << endl;
 
     for(i = firstyear; i <= lastyear; i++) {
