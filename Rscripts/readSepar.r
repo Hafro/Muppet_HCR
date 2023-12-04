@@ -2,7 +2,7 @@ library(stringr)
 library(tidyverse)
 
 read_separ1 <- function (path, run, rName = NA, mName = NA, calcSurBio = F, 
-                         ggFactor = T, Scale = 1000, assYear = NA, retroY = NA,fleetnames,calchr=1)
+                         ggFactor = F, Scale = 1000, assYear = NA, retroY = NA,fleetnames,calchr=1)
 {
     if(file.exists("muppet.par")){ # get AIC could look for as.numeric=T
         dat <- scan("muppet.par",what=character(),sep=" ",quiet=T)[1:12]
